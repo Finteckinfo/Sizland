@@ -4,6 +4,8 @@ import { NextPage } from "next/types";
 import React from "react";
 import { Typography } from "@/components/ui/typography";
 import Link from "next/link";
+import { GitFork, StarIcon } from "lucide-react";
+import { GitHubIcon } from "@/assets/icons/social";
 
 const HomePage: NextPage = () => {
   return (
@@ -17,11 +19,11 @@ const HomePage: NextPage = () => {
         Alright, everyone, welcome to the Sizland community!
       </Typography>
       <Link
-        href="https://github.com/new?template_name=next-web3-template&template_owner=CJskii"
-        target="_blank"
+        href="#"
         className="my-12"
       >
         <Button className="gap-2">
+          <GitFork />
           Get Started
         </Button>
       </Link>
