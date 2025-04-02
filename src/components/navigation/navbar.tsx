@@ -144,7 +144,7 @@ export const NaviLinks: React.FC = () => {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="">Products</NavigationMenuTrigger>
+          <NavigationMenuTrigger className="">Sections</NavigationMenuTrigger>
           <NavigationMenuContent className="flex">
             {productLinks.map((navLink, index) => (
               <ul
