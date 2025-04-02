@@ -37,42 +37,12 @@ interface NavLink {
 
 const productLinks: DropdownLinks[] = [
   {
-    label: "Products",
+    label: "Sections",
     paths: [
       {
-        href: "/product1",
-        label: "Product 1",
-        description: "Learn more about our first product offering.",
-      },
-      {
-        href: "/product2",
-        label: "Product 2",
-        description: "Explore the features of our second product.",
-      },
-      {
-        href: "/product3",
-        label: "Product 3",
-        description: "Get started with our third innovative product.",
-      },
-    ],
-  },
-  {
-    label: "Solutions",
-    paths: [
-      {
-        href: "/solution1",
-        label: "Solution 1",
-        description: "Discover our first solution for seamless operations.",
-      },
-      {
-        href: "/solution2",
-        label: "Solution 2",
-        description: "Unlock the power of our second seamless solution.",
-      },
-      {
-        href: "/solution3",
-        label: "Solution 3",
-        description: "Efficiently bridge the gap with our third solution.",
+        href: "#hero",
+        label: "Hero Section",
+        description: "Jump to the top hero section.",
       },
     ],
   },
@@ -94,6 +64,13 @@ export const Navbar: React.FC = () => {
     <div className="fixed z-50 flex w-full justify-between items-center border-b border-neutral-400/50 bg-white/50 p-4 backdrop-blur-xl dark:bg-black/50 md:px-16 md:py-4">
       <div className="flex-1 hidden md:block">
         <Link href="/" className="flex items-center justify-start">
+          <Image
+            src="/logo1.png"
+            alt="Sizland Logo"
+            width={40}
+            height={40}
+            className="h-10 w-auto object-contain mr-2"
+          />
           {/* 
           @
           @@
@@ -114,11 +91,11 @@ export const Navbar: React.FC = () => {
             className="hidden w-40 dark:block"
           /> */}
           <Typography variant="h3" className="font-bold">
-            Logo Placeholder
+            SIZLAND
           </Typography>
         </Link>
       </div>
-      <Link href={"/"} className="md:hidden">
+      <Link href={"/"} className="flex items-center justify-start md:hidden">
         {/* 
           @
           @@
@@ -135,8 +112,15 @@ export const Navbar: React.FC = () => {
           width={30}
           height={30}
         /> */}
+        <Image
+            src="/logo1.png"
+            alt="Sizland Logo"
+            width={40}
+            height={40}
+            className="h-10 w-auto object-contain mr-2"
+          />
         <Typography variant="h3" className="font-bold">
-          Logo Placeholder
+          SIZLAND
         </Typography>
       </Link>
       <div className="flex-1 justify-center hidden items-center gap-3 lg:flex">

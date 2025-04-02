@@ -68,8 +68,8 @@ const FooterContent: React.FC = () => {
     <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full p-4">
       {/* Company Info */}
       <div className="flex flex-col justify-center items-center text-muted-foreground">
-        <p>© 2024 CJski</p>
-        <Link href="/example">
+        <p>© {new Date().getFullYear()} BBS</p>
+        <Link href="#">
           <Typography variant={"extraSmall"}>View Examples</Typography>
         </Link>
       </div>
