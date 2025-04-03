@@ -1,6 +1,7 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "./button";
+import { Button1 } from "./button1";
 import Image from "next/image";
 
 export const ConnectWalletButton = () => {
@@ -35,13 +36,13 @@ export const ConnectWalletButton = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <Button
+                  <Button1
                     className="bg-gradient rounded-xl font-normal hover:opacity-90"
                     onClick={openConnectModal}
                     type="button"
                   >
                     Connect Wallet
-                  </Button>
+                  </Button1>
                 );
               }
               if (chain.unsupported) {
