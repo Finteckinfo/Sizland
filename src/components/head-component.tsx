@@ -33,7 +33,7 @@ export const HeadComponent: React.FC<HeadComponentProps> = ({
       <meta property="og:url" content="https://www.example.com/" />
       <meta property="og:image" content={image} />
       <meta property="og:description" content={description} />
-      <meta property="og:site_name" content="next-web3-template" />
+      <meta property="og:site_name" content="SIZLAND" />
       {/* Additional tags */}
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="theme-color" content="system" />{" "}
