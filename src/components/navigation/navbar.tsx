@@ -37,7 +37,7 @@ interface NavLink {
 
 const productLinks: DropdownLinks[] = [
   {
-    label: "Sections",
+    label: "Siz",
     paths: [
       {
         href: "#hero",
@@ -159,7 +159,7 @@ export const NaviLinks: React.FC = () => {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="">Sections</NavigationMenuTrigger>
+          <NavigationMenuTrigger className="">Siz</NavigationMenuTrigger>
           <NavigationMenuContent className="flex">
             {productLinks.map((navLink, index) => (
               <ul
