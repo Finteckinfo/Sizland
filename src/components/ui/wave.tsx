@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, CSSProperties } from "react";
+import React, { useRef, useEffect, useState, CSSProperties } from "react";
+import { useTheme } from "next-themes";
 
 class Grad {
   x: number;
@@ -143,6 +144,18 @@ interface WavesProps {
   className?: string;
 }
 
+const invertColor = (color: string) => {
+    if (color === "transparent") return "black"; // Handle transparent as black for light mode
+    const hex = color.startsWith("#") ? color : color; // Assuming hex color, handle others if needed
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    r = 255 - r;
+    g = 255 - g;
+    b = 255 - b;
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
 const Waves: React.FC<WavesProps> = ({
   lineColor = "black",
   backgroundColor = "transparent",
@@ -158,6 +171,8 @@ const Waves: React.FC<WavesProps> = ({
   style = {},
   className = "",
 }) => {
+  const [isDarkMode, setIsDarkMode] = useState(true); // State to track theme (dark by default)
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -166,7 +181,7 @@ const Waves: React.FC<WavesProps> = ({
     height: number;
     left: number;
     top: number;
-  }>({
+  }>( {
     width: 0,
     height: 0,
     left: 0,
@@ -227,6 +242,14 @@ const Waves: React.FC<WavesProps> = ({
     xGap,
     yGap,
   ]);
+
+  // Apply light mode styles if theme is light
+  const invertedLineColor = isDarkMode ? lineColor : invertColor(lineColor);
+  const invertedBackgroundColor = isDarkMode ? backgroundColor : invertColor(backgroundColor);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode); // Toggle theme
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -335,7 +358,7 @@ const Waves: React.FC<WavesProps> = ({
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
-      ctx.strokeStyle = configRef.current.lineColor;
+      ctx.strokeStyle = invertedLineColor; // Apply inverted color for light mode
       linesRef.current.forEach((points) => {
         let p1 = moved(points[0], false);
         ctx.moveTo(p1.x, p1.y);
@@ -420,21 +443,13 @@ const Waves: React.FC<WavesProps> = ({
   return (
     <div
       ref={containerRef}
-      style={{
-        backgroundColor,
-        ...style,
-      }}
-      className={`absolute top-0 left-0 w-full h-full overflow-hidden ${className}`}
+      className={`waves-container ${className}`}
+      style={{ width: "100%", height: "100%", ...style }}
     >
-      <div
-        className="absolute top-0 left-0 bg-[#160000] rounded-full w-[0.5rem] h-[0.5rem]"
-        style={{
-          transform:
-            "translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0)",
-          willChange: "transform",
-        }}
+      <canvas
+        ref={canvasRef}
+        style={{ position: "absolute", top: 0, left: 0 }}
       />
-      <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
 };
