@@ -17,6 +17,7 @@ import { config } from "../wagmi";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
+import Waves from "@/components/ui/wave"; // Import Waves
 
 const client = new QueryClient();
 
@@ -29,8 +30,6 @@ export const monsterrat = Montserrat({
   variable: "--font-montserrat",
   weight: "500",
 });
-
-// TODO: wagmi to change default theme based on the user's system preference
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -61,7 +60,24 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={monsterrat.className}>
+    <div className={`relative overflow-hidden ${monsterrat.className}`}>
+      {/* Background Waves */}
+      <div className="absolute inset-0 -z-10">
+        <Waves
+          lineColor="#fff"
+          backgroundColor="rgba(255, 255, 255, 0.2)"
+          waveSpeedX={0.02}
+          waveSpeedY={0.01}
+          waveAmpX={40}
+          waveAmpY={20}
+          friction={0.9}
+          tension={0.01}
+          maxCursorMove={120}
+          xGap={12}
+          yGap={36}
+        />
+      </div>
+
       <Navbar />
       {children}
       <Footer />
