@@ -21,6 +21,18 @@ import { Typography } from "../ui/typography";
 import { Separator } from "@radix-ui/react-separator";
 import React from "react";
 
+// Scroll to section function with offset
+const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, id: string) => {
+  e.preventDefault();
+  const section = document.querySelector(id) as HTMLElement;
+  if (section) {
+    window.scrollTo({
+      top: section.offsetTop - 70, // Adjust for the fixed navbar height
+      behavior: "smooth",
+    });
+  }
+};
+
 interface DropdownLinks {
   label: string;
   paths: {
@@ -86,54 +98,19 @@ export const Navbar: React.FC = () => {
             height={40}
             className="h-10 w-auto object-contain mr-2"
           />
-          {/* 
-          @
-          @@
-          @@@
-          @@@@ Replace Typography component with theme aware Image components  
-          @@@
-          @@
-          @
-          */}
-          {/* <Image
-            src={logoDark}
-            alt="dark mode logo"
-            className="block w-40 dark:hidden"
-          />
-          <Image
-            src={logoLight}
-            alt="light mode logo"
-            className="hidden w-40 dark:block"
-          /> */}
           <Typography variant="h3" className="font-bold">
             SIZLAND
           </Typography>
         </Link>
       </div>
       <Link href={"/"} className="flex items-center justify-start md:hidden">
-        {/* 
-          @
-          @@
-          @@@
-          @@@@ Replace Typography component with theme aware Image component for mobile view  
-          @@@
-          @@
-          @
-          */}
-        {/* <Image
-          src={logo}
-          alt="mobile logo icon"
-          className="block md:hidden"
-          width={30}
-          height={30}
-        /> */}
         <Image
-            src="/logo1.png"
-            alt="Sizland Logo"
-            width={40}
-            height={40}
-            className="h-10 w-auto object-contain mr-2"
-          />
+          src="/logo1.png"
+          alt="Sizland Logo"
+          width={40}
+          height={40}
+          className="h-10 w-auto object-contain mr-2"
+        />
         <Typography variant="h3" className="font-bold">
           SIZLAND
         </Typography>
@@ -171,7 +148,11 @@ export const NaviLinks: React.FC = () => {
                 </Typography>
                 {navLink.paths.map((path, index) => (
                   <React.Fragment key={path.label}>
-                    <ListItem title={path.label} href={path.href} className="">
+                    <ListItem
+                      title={path.label}
+                      href={path.href}
+                      onClick={(e) => scrollToSection(e, path.href)} // Add onClick handler for smooth scroll
+                    >
                       {path.description}
                     </ListItem>
                     {index !== navLink.paths.length - 1 && (
@@ -202,25 +183,37 @@ export const NaviLinks: React.FC = () => {
 };
 
 export const MobileNavLinks: React.FC = () => {
+  const scrollToSection = (e: React.MouseEvent<HTMLButtonElement>, sectionId: string) => {
+    e.preventDefault();
+    const section = document.querySelector(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       {otherLinks.map((navLink, index) => (
         <React.Fragment key={index}>
-          <Link href={navLink.href} passHref>
-            <Button className="w-full">{navLink.label}</Button>
-          </Link>
+          <Button
+            className="w-full"
+            onClick={() => window.location.href = navLink.href}
+          >
+            {navLink.label}
+          </Button>
         </React.Fragment>
       ))}
       {productLinks.map((navLink, index) => (
         <React.Fragment key={index}>
-          <Typography key={index} variant={"large"}>
-            {navLink.label}
-          </Typography>
+          <Typography variant={"large"}>{navLink.label}</Typography>
           {navLink.paths.map((path, index) => (
             <React.Fragment key={index}>
-              <Link href={path.href} passHref>
-                <Button className="w-full">{path.label}</Button>
-              </Link>
+              <Button
+                className="w-full"
+                onClick={(e) => scrollToSection(e, path.href)}
+              >
+                {path.label}
+              </Button>
             </React.Fragment>
           ))}
         </React.Fragment>
@@ -228,3 +221,5 @@ export const MobileNavLinks: React.FC = () => {
     </>
   );
 };
+
+
