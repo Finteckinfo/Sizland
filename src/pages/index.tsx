@@ -5,7 +5,7 @@ import { Hero } from "@/components/hero";  // Import the Hero component
 
 const HomePage: NextPage = () => {
   return (
-    <PageLayout title="Homepage" description="Welcome to next-web-template">
+    <PageLayout title="Homepage" description="Welcome to Sizland">
       <Hero />  {/* Use the Hero component */}
     </PageLayout>
   );
