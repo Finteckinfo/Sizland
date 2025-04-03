@@ -11,7 +11,7 @@ const Hero = () => {
         SIZLAND
       </Typography>
       <Typography variant="h2" className="mb-24">
-        Alright, everyone, welcome to the Sizland community!
+        Sizland, a decentralized ecosystem that gets you started!
       </Typography>
       <a
         href="https://linktr.ee/sizlandinvest"
