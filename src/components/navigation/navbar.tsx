@@ -41,13 +41,23 @@ const productLinks: DropdownLinks[] = [
     paths: [
       {
         href: "#hero",
-        label: "Hero Section",
-        description: "Jump to the top hero section.",
+        label: "Intro",
+        description: "Introduction to Sizland",
       },
       {
-        href: "#features",
-        label: "Features Section",
-        description: "Jump to the features section.",
+        href: "#roadmap",
+        label: "Roadmap",
+        description: "Sizland Roadmap",
+      },
+      {
+        href: "#about",
+        label: "About",
+        description: "About Sizland",
+      },
+      {
+        href: "#team",
+        label: "Team",
+        description: "Sizland Team",
       }
     ],
   },
@@ -55,12 +65,12 @@ const productLinks: DropdownLinks[] = [
 
 const otherLinks: NavLink[] = [
   {
-    label: "Documentation",
-    href: "/docs",
+    label: "Tokenomics",
+    href: "/tokenomics",
   },
   {
-    label: "Examples",
-    href: "/example",
+    label: "Partners",
+    href: "/partners",
   },
 ];
 
