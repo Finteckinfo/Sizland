@@ -19,7 +19,7 @@ const HomePage: NextPage = () => {
         Alright, everyone, welcome to the Sizland community!
       </Typography>
       <Link
-        href="#"
+        href="https://linktr.ee/sizlandinvest"
         className="my-12"
       >
         <Button className="gap-2">
