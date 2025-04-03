@@ -19,6 +19,7 @@ import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import Waves from "@/components/ui/wave"; // Import Waves
 import { useTheme } from "next-themes";
+import Features from "@/components/features";
 
 const client = new QueryClient();
 
@@ -88,6 +89,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <Navbar />
       {children}
+      <Features />
       <Footer />
     </div>
   );
