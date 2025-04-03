@@ -24,7 +24,7 @@ const HomePage: NextPage = () => {
       >
         <Button className="gap-2">
           <GitFork />
-          Get Started
+          Get Sizld
         </Button>
       </Link>
     </PageLayout>
