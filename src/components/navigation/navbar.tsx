@@ -183,7 +183,10 @@ export const NaviLinks: React.FC = () => {
 };
 
 export const MobileNavLinks: React.FC = () => {
-  const scrollToSection = (e: React.MouseEvent<HTMLButtonElement>, sectionId: string) => {
+  const scrollToSection = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    sectionId: string
+  ) => {
     e.preventDefault();
     const section = document.querySelector(sectionId);
     if (section) {
@@ -192,23 +195,24 @@ export const MobileNavLinks: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
       {otherLinks.map((navLink, index) => (
-        <React.Fragment key={index}>
-          <Link
+        <Link
           key={index}
           href={navLink.href}
           className="text-lg font-medium text-black dark:text-white hover:text-green-800 transition-colors duration-200"
         >
           {navLink.label}
         </Link>
-        </React.Fragment>
       ))}
+
       {productLinks.map((navLink, index) => (
-        <React.Fragment key={index}>
-          <Typography variant={"large"}>{navLink.label}</Typography>
-          {navLink.paths.map((path, index) => (
-            <React.Fragment key={index}>
+        <div key={index} className="w-full">
+          <Typography variant="large" className="mb-2 text-center">
+            {navLink.label}
+          </Typography>
+          <div className="flex flex-col items-center space-y-2">
+            {navLink.paths.map((path, index) => (
               <Link
                 key={index}
                 href={path.href}
@@ -216,11 +220,11 @@ export const MobileNavLinks: React.FC = () => {
               >
                 {path.label}
               </Link>
-            </React.Fragment>
-          ))}
-        </React.Fragment>
+            ))}
+          </div>
+        </div>
       ))}
-    </>
+    </div>
   );
 };
 
