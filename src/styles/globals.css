@@ -36,7 +36,7 @@ a {
   :root {
     /* CSS: .bg-gradient { background: var(--gradient) } */
     --gradient: linear-gradient(to top left, #000c40, #607d8b);
-    --background: 243 100% 98.26%;
+    --background: rgba(150, 196, 97,);
     --foreground: 243 10% 0.52%;
 
     --muted: 243 10% 91.3%;
@@ -75,7 +75,7 @@ a {
     /* CSS: .bg-gradient { background: var(--gradient) } */
     --gradient: linear-gradient(to top left, #2b5876, #4e4376);
 
-    --background: 217 30.55% 2.56%;
+    --background: rgba(29, 31, 72,);
     --foreground: 217 4.7% 96.6%;
 
     --muted: 217 23.5% 9.6%;
@@ -112,14 +112,24 @@ a {
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  :root {
+    --gradient: linear-gradient(to top left, #000c40, #607d8b);
+    --background: rgba(150, 196, 97, 0.2);
+    --foreground: hsl(243, 10%, 0.52%);
   }
+
+  .dark {
+    --background: rgba(29, 31, 72, 0.2);
+    --foreground: hsl(217, 4.7%, 96.6%);
+  }
+
+  /* Apply custom background and foreground */
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
 .bg-gradient {
-  @apply bg-gradient-to-b from-secondary to-primary;
+  background: var(--gradient);
 }

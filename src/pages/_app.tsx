@@ -67,11 +67,13 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* Background Waves */}
       <div className="absolute inset-0 -z-10">
         <Waves
-          key={theme} // Use the `theme` as the key to force re-render on theme change
-          lineColor={theme === "dark" ? "#fff" : "#000"} // White for dark mode, black for light mode
+          key={theme} // Force re-render on theme change using the theme as the key
+          lineColor={theme === "dark" ? "rgba(150, 196, 97, 0.2)" : "rgba(29, 31, 72, 0.2)"} // Green for dark mode, dark blue for light mode
           backgroundColor={
-            theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"
-          } // Slightly transparent white for dark, black for light
+            theme === "dark"
+              ? "rgba(29, 31, 72, 0.2)"
+              : "rgba(150, 196, 97, 0.2)"
+          } // Slightly transparent dark blue for dark mode, green for light mode
           waveSpeedX={0.02}
           waveSpeedY={0.01}
           waveAmpX={40}

@@ -453,5 +453,4 @@ const Waves: React.FC<WavesProps> = ({
     </div>
   );
 };
-
 export default Waves;
