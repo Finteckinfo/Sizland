@@ -56,7 +56,7 @@ export const HeaderSheet: React.FC = () => {
             className="hidden w-40 dark:block"
           /> */}
           <Typography variant="h3" className="font-bold">
-            Logo Placeholder
+            SIZLAND
           </Typography>
         </div>
         <div className="flex flex-col items-stretch gap-2">
