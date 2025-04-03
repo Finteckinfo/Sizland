@@ -18,6 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import Waves from "@/components/ui/wave"; // Import Waves
+import { useTheme } from "next-themes";
 
 const client = new QueryClient();
 
@@ -59,13 +60,17 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme(); // Use the `useTheme` hook to get the current theme
+
   return (
     <div className={`relative overflow-hidden ${monsterrat.className}`}>
       {/* Background Waves */}
       <div className="absolute inset-0 -z-10">
         <Waves
-          lineColor="#fff"
-          backgroundColor="rgba(255, 255, 255, 0.2)"
+          lineColor={theme === "dark" ? "#fff" : "#000"} // White for dark mode, black for light mode
+          backgroundColor={
+            theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"
+          } // Slightly transparent white for dark, black for light
           waveSpeedX={0.02}
           waveSpeedY={0.01}
           waveAmpX={40}
