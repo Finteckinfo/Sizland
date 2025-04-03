@@ -70,7 +70,7 @@ const FooterContent: React.FC = () => {
       <div className="flex flex-col justify-center items-center text-muted-foreground">
         <p>© {new Date().getFullYear()} BBS</p>
         <Link href="#">
-          <Typography variant={"extraSmall"}>View Examples</Typography>
+          <Typography variant={"extraSmall"}>All Rights Reserved</Typography>
         </Link>
       </div>
 

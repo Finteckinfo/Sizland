@@ -44,6 +44,11 @@ const productLinks: DropdownLinks[] = [
         label: "Hero Section",
         description: "Jump to the top hero section.",
       },
+      {
+        href: "#features",
+        label: "Features Section",
+        description: "Jump to the features section.",
+      }
     ],
   },
 ];
