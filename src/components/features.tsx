@@ -1,15 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PixelCard from "@/components/ui/pixelCard"; // Import PixelCard
 import featuresData from "@/types/featuresData.json"; // Import the JSON data
 import { useTheme } from "next-themes";
 
 const Features = () => {
   const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Use useEffect to set mounted to true after the component is mounted on the client-side
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent rendering if not mounted (to avoid hydration mismatch)
+  if (!mounted) return null;
 
   return (
-    <section
-      className={`py-24 ${theme === "dark" ? "bg-navy-blue" : "bg-white"}`}
-    >
+    <section className="relative py-24">
+      {/* Full-width background wrapper */}
+      <div
+        className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue" : "bg-white"}`}
+      />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 lg:mb-16 flex justify-center items-center flex-col gap-x-0 gap-y-6 lg:gap-y-0 lg:flex-row lg:justify-between max-md:max-w-lg max-md:mx-auto">
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
@@ -18,7 +29,7 @@ const Features = () => {
                 theme === "dark" ? "text-white" : "text-gray-900"
               } leading-[3.25rem] lg:mb-6 mx-auto max-w-max lg:max-w-md lg:mx-0`}
             >
-              Enjoy the finest features with our products
+              Enjoy the finest features with SIZLAND.
             </h2>
           </div>
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
@@ -59,9 +70,7 @@ const Features = () => {
 
         <div className="flex justify-center items-center gap-x-5 gap-y-8 lg:gap-y-0 flex-wrap md:flex-wrap lg:flex-nowrap lg:flex-row lg:justify-between lg:gap-x-8">
           {featuresData.map((feature, index) => {
-            // Switch between blue for dark mode and green for light mode
-            const variant =
-              theme === "dark" ? "blue" : "green"; // Apply green in light mode, blue in dark mode
+            const variant = theme === "dark" ? "blue" : "green"; // Apply green in light mode, blue in dark mode
 
             return (
               <PixelCard

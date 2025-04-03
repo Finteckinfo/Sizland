@@ -7,6 +7,7 @@ interface LayoutProps {
   justify?: "start" | "end" | "center" | "between" | "around" | "evenly";
   align?: "start" | "end" | "center" | "baseline" | "stretch";
   gap?: number;
+  background?: string; // Accept background as an optional prop
 }
 
 interface PageLayoutProps extends LayoutProps {
@@ -23,6 +24,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   justify = "start",
   align = "center",
   gap = 8,
+  background, // Destructure background from props
 }) => {
   return (
     <>
@@ -32,6 +34,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         justify={justify}
         align={align}
         gap={gap}
+        background={background} // Pass background to MainContainer
       >
         {children}
       </MainContainer>
@@ -39,12 +42,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   );
 };
 
-const MainContainer: React.FC<LayoutProps & { children: React.ReactNode }> = ({
+const MainContainer: React.FC<LayoutProps & { children: React.ReactNode; background?: string }> = ({
   children,
   flexDirection = "col",
   justify = "start",
   align = "center",
   gap = 8,
+  background, // Accept background as an optional prop
 }) => {
   const justifyClass = {
     start: "justify-start",
@@ -66,6 +70,7 @@ const MainContainer: React.FC<LayoutProps & { children: React.ReactNode }> = ({
   return (
     <main
       className={`min-h-[100vh] p-8 flex flex-${flexDirection} ${justifyClass} ${alignClass} gap-${gap} py-32`}
+      style={{ background: background }} // Apply the background style conditionally
     >
       {children}
     </main>
