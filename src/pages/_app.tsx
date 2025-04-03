@@ -71,8 +71,8 @@ function Layout({ children }: { children: React.ReactNode }) {
           lineColor={theme === "dark" ? "rgba(150, 196, 97, 0.2)" : "rgba(29, 31, 72, 0.2)"} // Green for dark mode, dark blue for light mode
           backgroundColor={
             theme === "dark"
-              ? "rgba(29, 31, 72, 0.2)"
-              : "rgba(150, 196, 97, 0.2)"
+              ? "rgba(29, 31, 72)"
+              : "rgba(150, 196, 97)"
           } // Slightly transparent dark blue for dark mode, green for light mode
           waveSpeedX={0.02}
           waveSpeedY={0.01}
