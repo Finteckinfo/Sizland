@@ -17,11 +17,11 @@ const Hero = () => {
                 Welcome to <span className="text-primary">Sizland</span>
               </h1>
               <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 sm:mt-6 font-inter">
-                Sizland is a decentralized ecosystem designed that lets you get started! 
+                Sizland is a decentralized ecosystem that lets you get started! 
               </p>
 
               <p className="mt-2 text-md text-gray-500 dark:text-gray-400 sm:mt-4 font-inter">
-                We provide essential services to help founders and startups launch and grow their business.
+                We provide essential services to help founders and startups launch and grow they're business.
               </p>
 
               <div className="mt-6 sm:mt-8">
