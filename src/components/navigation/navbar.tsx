@@ -203,28 +203,42 @@ export const NaviLinks: React.FC = () => {
 
 export const MobileNavLinks: React.FC = () => {
   return (
-    <>
+    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
       {otherLinks.map((navLink, index) => (
-        <React.Fragment key={index}>
-          <Link href={navLink.href} passHref>
-            <Button className="w-full">{navLink.label}</Button>
-          </Link>
-        </React.Fragment>
+        <Link
+          key={index}
+          href={navLink.href}
+          className="text-lg font-medium text-black dark:text-white hover:text-green-800 transition-colors duration-200"
+        >
+          {navLink.label}
+        </Link>
       ))}
+
       {productLinks.map((navLink, index) => (
-        <React.Fragment key={index}>
-          <Typography key={index} variant={"large"}>
+        <div key={index} className="pt-4 w-full">
+          <Typography variant="large" className="mb-2 text-center">
             {navLink.label}
           </Typography>
-          {navLink.paths.map((path, index) => (
-            <React.Fragment key={index}>
-              <Link href={path.href} passHref>
-                <Button className="w-full">{path.label}</Button>
+          <div className="flex flex-col items-center text-center space-y-2">
+            {navLink.paths.map((path, index) => (
+              <Link
+                key={index}
+                href={path.href}
+                className="text-base text-black dark:text-white hover:text-green-800 transition-colors duration-200"
+              >
+                {path.label}
               </Link>
-            </React.Fragment>
-          ))}
-        </React.Fragment>
+            ))}
+          </div>
+        </div>
       ))}
-    </>
+
+      {/* Centered Connect Wallet button */}
+      <div className="pt-6">
+        <ConnectWalletButton />
+      </div>
+    </div>
   );
 };
+
+
