@@ -18,15 +18,18 @@ const HomePage: NextPage = () => {
       <Typography variant="h2" className="text-center">
         Alright, everyone, welcome to the Sizland community!
       </Typography>
-      <Link
+      <a
         href="https://linktr.ee/sizlandinvest"
+        target="_blank"
+        rel="noopener noreferrer"
         className="my-12"
       >
         <Button className="gap-2">
           <GitFork />
           Get Sizld
         </Button>
-      </Link>
+      </a>
+
     </PageLayout>
   );
 };
