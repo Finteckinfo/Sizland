@@ -1,17 +1,17 @@
 [
     {
-      "title": "Easy Payment",
-      "description": "We provide various methods for you to carry out all transactions related to your finances.",
+      "title": "Unified Wallets",
+      "description": "We provide multi-chain support - Algorand, as well as other EVM compatible chains",
       "variant": "blue"
     },
     {
-      "title": "Safe Transaction",
-      "description": "Our platform uses top-notch security to ensure all your financial transactions are safe.",
+      "title": "Siz Token",
+      "description": "Our platform provisions utility with SIZ Token in the Sizland Community",
       "variant": "blue"
     },
     {
-      "title": "Fast Customer Service",
-      "description": "24/7 customer support to assist you with any issues or questions you have.",
+      "title": "DEX",
+      "description": "Exchanges on Sizland Ecosystem bring transparency in trading SIZ Token",
       "variant": "blue"
     }
   ]
