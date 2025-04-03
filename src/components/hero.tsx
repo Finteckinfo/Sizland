@@ -38,7 +38,7 @@ const Hero = () => {
             <div className="flex items-center justify-center mt-10 space-x-6 lg:justify-start sm:space-x-8">
               <div className="flex items-center">
                 <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
-                  2943
+                  0
                 </p>
                 <p className="ml-3 text-sm text-gray-900 dark:text-gray-300 font-pj">
                   Connected Wallets
@@ -65,7 +65,7 @@ const Hero = () => {
 
               <div className="flex items-center">
                 <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
-                  $1M+
+                  $0
                 </p>
                 <p className="ml-3 text-sm text-gray-900 dark:text-gray-300 font-pj">
                   Transactions Processed
