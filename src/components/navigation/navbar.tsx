@@ -195,12 +195,13 @@ export const MobileNavLinks: React.FC = () => {
     <>
       {otherLinks.map((navLink, index) => (
         <React.Fragment key={index}>
-          <Button
-            className="w-full"
-            onClick={() => window.location.href = navLink.href}
-          >
-            {navLink.label}
-          </Button>
+          <Link
+          key={index}
+          href={navLink.href}
+          className="text-lg font-medium text-black dark:text-white hover:text-green-800 transition-colors duration-200"
+        >
+          {navLink.label}
+        </Link>
         </React.Fragment>
       ))}
       {productLinks.map((navLink, index) => (
@@ -208,12 +209,13 @@ export const MobileNavLinks: React.FC = () => {
           <Typography variant={"large"}>{navLink.label}</Typography>
           {navLink.paths.map((path, index) => (
             <React.Fragment key={index}>
-              <Button
-                className="w-full"
-                onClick={(e) => scrollToSection(e, path.href)}
+              <Link
+                key={index}
+                href={path.href}
+                className="text-base text-black dark:text-white hover:text-green-800 transition-colors duration-200"
               >
                 {path.label}
-              </Button>
+              </Link>
             </React.Fragment>
           ))}
         </React.Fragment>
