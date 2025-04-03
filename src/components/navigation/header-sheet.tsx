@@ -27,7 +27,7 @@ export const HeaderSheet: React.FC = () => {
       <SheetTrigger asChild className="z-[500]">
         <MenuIcon className="rotate-90" />
       </SheetTrigger>
-      <SheetContent className=" border-neutral-600">
+      <SheetContent className="border-neutral-600 bg-white/80 dark:bg-black/80 backdrop-blur-xl">
         <VisuallyHidden>
           <SheetTitle>Mobile Menu</SheetTitle>
           <SheetDescription>
@@ -36,25 +36,6 @@ export const HeaderSheet: React.FC = () => {
         </VisuallyHidden>
 
         <div className="mb-6">
-          {/* 
-          @
-          @@
-          @@@
-          @@@@ Replace Typography component with theme aware Image component for mobile view  
-          @@@
-          @@
-          @
-          */}
-          {/* <Image
-            src={logoBlack}
-            alt="mobile logo dark"
-            className="block w-40 dark:hidden"
-          />
-          <Image
-            src={logoWhite}
-            alt="mobile logo light"
-            className="hidden w-40 dark:block"
-          /> */}
           <Typography variant="h3" className="font-bold">
             SIZLAND
           </Typography>
@@ -63,7 +44,7 @@ export const HeaderSheet: React.FC = () => {
           <ConnectWalletButton />
           <MobileNavLinks />
         </div>
-        <div className=" absolute bottom-4 left-4">
+        <div className="absolute bottom-4 left-4">
           <ThemeToggler />
         </div>
       </SheetContent>

@@ -22,7 +22,10 @@ import { Separator } from "@radix-ui/react-separator";
 import React from "react";
 
 // Scroll to section function with offset
-const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, id: string) => {
+const scrollToSection = (
+  e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  id: string
+) => {
   e.preventDefault();
   const section = document.querySelector(id) as HTMLElement;
   if (section) {
@@ -70,7 +73,7 @@ const productLinks: DropdownLinks[] = [
         href: "#team",
         label: "Team",
         description: "Sizland Team",
-      }
+      },
     ],
   },
 ];
@@ -195,7 +198,7 @@ export const MobileNavLinks: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
+    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2 ">
       {otherLinks.map((navLink, index) => (
         <Link
           key={index}
@@ -227,5 +230,3 @@ export const MobileNavLinks: React.FC = () => {
     </div>
   );
 };
-
-
