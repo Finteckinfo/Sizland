@@ -90,7 +90,7 @@
   }
 
   .dark {
-    --background: rgb(29, 31, 72); /* Removed the alpha value */
+    --background: rgb(0, 14, 80); /* Removed the alpha value */
     --foreground: hsl(217, 4.7%, 96.6%);
   }
 
@@ -144,7 +144,7 @@
 
 
 .bg-navy-blue {
-  background-color: rgb(29, 31, 72); /* Navy blue for dark mode */
+  background-color: rgb(0, 14, 80); /* Navy blue for dark mode */
 }
 
 .bg-light-green {
