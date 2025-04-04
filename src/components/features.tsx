@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from "react";
-import PixelCard from "@/components/ui/pixelCard"; // Import PixelCard
-import featuresData from "@/types/featuresData.json"; // Import the JSON data
+import PixelCard from "@/components/ui/pixelCard";
+import featuresData from "@/types/featuresData.json";
 import { useTheme } from "next-themes";
 
 const Features = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Use useEffect to set mounted to true after the component is mounted on the client-side
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Prevent rendering if not mounted (to avoid hydration mismatch)
   if (!mounted) return null;
 
   return (
     <section className="relative py-24">
-      {/* Full-width background wrapper */}
       <div
-        className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue" : "bg-white"}`}
+        className={`absolute inset-0 -z-10 ${
+          theme === "dark" ? "bg-navy-blue" : "bg-white"
+        }`}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
         <div className="mb-10 lg:mb-16 flex justify-center items-center flex-col gap-x-0 gap-y-6 lg:gap-y-0 lg:flex-row lg:justify-between max-md:max-w-lg max-md:mx-auto">
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
             <h2
@@ -48,7 +48,7 @@ const Features = () => {
                   : "text-indigo-600 hover:text-indigo-700"
               } lg:justify-start`}
             >
-              Button CTA
+              Features
               <svg
                 width="20"
                 height="20"
@@ -68,33 +68,36 @@ const Features = () => {
           </div>
         </div>
 
-        <div className="flex justify-center items-center gap-x-5 gap-y-8 lg:gap-y-0 flex-wrap md:flex-wrap lg:flex-nowrap lg:flex-row lg:justify-between lg:gap-x-8">
-          {featuresData.map((feature, index) => {
-            const variant = theme === "dark" ? "blue" : "green"; // Apply green in light mode, blue in dark mode
+        {/* Pixel Cards - Scrollable & Smaller */}
+        <div className="overflow-x-auto">
+          <div className="flex gap-3 w-max px-1">
+            {featuresData.map((feature, index) => {
+              const variant = theme === "dark" ? "blue" : "green";
 
-            return (
-              <PixelCard
-                key={index}
-                variant={variant} // Pass the correct variant
-                className="w-full max-w-sm"
-              >
-                <h3
-                  className={`text-xl font-semibold ${
-                    theme === "dark" ? "text-gray-900" : "text-white"
-                  }`}
+              return (
+                <PixelCard
+                  key={index}
+                  variant={variant}
+                  className="min-w-[160px] h-[180px] flex-shrink-0"
                 >
-                  {feature.title}
-                </h3>
-                <p
-                  className={`text-sm mt-2 ${
-                    theme === "dark" ? "text-gray-600" : "text-gray-300"
-                  }`}
-                >
-                  {feature.description}
-                </p>
-              </PixelCard>
-            );
-          })}
+                  <h3
+                    className={`text-sm font-semibold ${
+                      theme === "dark" ? "text-gray-900" : "text-white"
+                    }`}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p
+                    className={`text-xs mt-1 ${
+                      theme === "dark" ? "text-gray-600" : "text-gray-300"
+                    }`}
+                  >
+                    {feature.description}
+                  </p>
+                </PixelCard>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
