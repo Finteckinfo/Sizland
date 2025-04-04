@@ -340,7 +340,7 @@ export default function PixelCard({
         style={{
           position: "relative",
           zIndex: 2, // Ensure content is above the canvas
-          padding: "20px", // Add padding to avoid text touching edges
+          padding: "12px", // Add padding to avoid text touching edges
         }}
       >
         {children}

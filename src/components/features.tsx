@@ -18,11 +18,10 @@ const Features = () => {
   return (
     <section className="relative py-24">
       <div
-        className={`absolute inset-0 -z-10 ${
-          theme === "dark" ? "bg-navy-blue" : "bg-light-green"
-        }`}
+        className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue" : "bg-white"}`}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
         <div className="mb-10 lg:mb-16 flex justify-center items-center flex-col gap-x-0 gap-y-6 lg:gap-y-0 lg:flex-row lg:justify-between max-md:max-w-lg max-md:mx-auto">
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
             <h2
@@ -50,7 +49,7 @@ const Features = () => {
                   : "text-indigo-600 hover:text-indigo-700"
               } lg:justify-start`}
             >
-              Button CTA
+              Features
               <svg
                 width="20"
                 height="20"
@@ -72,21 +71,14 @@ const Features = () => {
 
         <div className="flex justify-center items-center gap-x-5 gap-y-8 lg:gap-y-0 flex-wrap md:flex-wrap lg:flex-nowrap lg:flex-row lg:justify-between lg:gap-x-8">
           {featuresData.map((feature, index) => {
-            const Icon =
-              (Icons[feature.icon as keyof typeof Icons] as LucideIcon) ||
-              Icons.Star;
-
-            const variant = theme === "dark" ? "blue" : "green";
+            const variant = theme === "dark" ? "blue" : "green"; // Apply green in light mode, blue in dark mode
 
             return (
               <PixelCard
                 key={index}
-                variant={variant}
-                className="w-full max-w-sm flex flex-col items-center text-center p-6 min-h-[300px]" // sets equal height
+                variant={variant} // Pass the correct variant
+                className="w-full max-w-sm"
               >
-                <div className="h-12 flex items-center justify-center mb-4">
-                  <Icon size={32} className="text-indigo-500" />
-                </div>
                 <h3
                   className={`text-xl font-semibold ${
                     theme === "dark" ? "text-gray-900" : "text-white"

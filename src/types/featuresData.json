@@ -1,4 +1,5 @@
 [
+<<<<<<< HEAD
     {
       "title": "Unified Wallets",
       "description": "We provide multi-chain support - Algorand, as well as other EVM-compatible chains.",
@@ -30,4 +31,33 @@
       "icon": "Workflow"
     }
   ]
+=======
+  {
+    "title": "Unified Wallets",
+    "description": "We provide multi-chain support - Algorand, as well as other EVM compatible chains",
+    "variant": "blue"
+  },
+  {
+    "title": "Siz Token",
+    "description": "Our platform provisions utility with SIZ Token in the Sizland Community",
+    "variant": "blue"
+  },
+  {
+    "title": "DEX",
+    "description": "Exchanges on Sizland Ecosystem bring transparency in trading SIZ Token",
+    "variant": "blue"
+  },
+  {
+    "title": "Fund Manager",
+    "description": "Manage your DeFi investments across chains using our dashboard",
+    "variant": "green"
+  },
+  {
+    "title": "ERP",
+    "description": "Enterprise Resource Planning tools for smart contract operations",
+    "variant": "green"
+  }
+]
+
+>>>>>>> 4794a19f6cc8fddb09b110d50e17cb11c27edd4f
   
