@@ -17,8 +17,8 @@ const About = () => {
                                         <img
                                             src={
                                                 theme === "dark"
-                                                  ? "/Algorand-darkmode.jpg" // Dark mode image
-                                                  : "/Algorand-lightmode.jpg" // Light mode image
+                                                  ? "/Algorand-lightmode.jpg"
+                                                  : "/Algorand-darkmode.jpg"
                                               }
                                               alt="Algorand"
                                             className="w-full rounded-2xl"
@@ -28,8 +28,8 @@ const About = () => {
                                         <img
                                             src={
                                                 theme === "dark"
-                                                  ? "/ethereum-darkmode.png"
-                                                  : "/ethereum-lightmode.jpg"
+                                                  ? "/ethereum-lightmode.jpg"
+                                                  : "/ethereum-darkmode.png"
                                               }
                                               alt="Ethereum"
                                             className="w-full rounded-2xl"
@@ -37,12 +37,12 @@ const About = () => {
                                     </div>
                                 </div>
                                 <div className="w-full px-3 sm:px-4 xl:w-1/2">
-                                    <div className={`relative z-10 my-4 ${theme === "dark" ? "bg-white p-2" : ""}`}>
+                                    <div className={`relative z-10 my-4 ${theme === "dark" ? "bg-black p-2" : "bg-white p-2 rounded-2xl"}`}>
                                         <img
                                             src={
                                                 theme === "dark"
-                                                  ? "/solana-darkmode.png"
-                                                  : "/solana-lightmode.png"
+                                                  ? "/solana-lightmode.png"
+                                                  : "/solana-darkmode.png"
                                               }
                                               alt="Solana"
                                             className="w-full rounded-2xl"
