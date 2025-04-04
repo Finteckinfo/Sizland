@@ -21,6 +21,7 @@ import Waves from "@/components/ui/wave"; // Import Waves
 import { useTheme } from "next-themes";
 import Features from "@/components/features";
 import InfoHub from "@/components/infoHub";
+import { useEffect, useState } from "react";
 
 const client = new QueryClient();
 
@@ -39,9 +40,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <WagmiProvider config={config}>
       <SessionProvider session={pageProps.session}>
         <QueryClientProvider client={client}>
-          <RainbowKitSiweNextAuthProvider
-            getSiweMessageOptions={getSiweMessageOptions}
-          >
+          <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
             <RainbowKitProvider>
               <ThemeProvider
                 attribute="class"
@@ -63,35 +62,46 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 function Layout({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme(); // Use the `useTheme` hook to get the current theme
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className={`relative overflow-hidden ${monsterrat.className}`}>
-      {/* Background Waves */}
-      <div className="absolute inset-0 -z-10">
-        <Waves
-          key={theme} // Force re-render on theme change using the theme as the key
-          lineColor={theme === "dark" ? "rgba(150, 196, 97, 0.2)" : "rgba(29, 31, 72, 0.2)"} // Green for dark mode, dark blue for light mode
-          backgroundColor={
-            theme === "dark"
-              ? "rgba(29, 31, 72)"
-              : "rgba(150, 196, 97)"
-          } // Slightly transparent dark blue for dark mode, green for light mode
-          waveSpeedX={0.02}
-          waveSpeedY={0.01}
-          waveAmpX={40}
-          waveAmpY={20}
-          friction={0.9}
-          tension={0.01}
-          maxCursorMove={120}
-          xGap={12}
-          yGap={36}
-        />
-      </div>
+      {/* Render Waves only after component has mounted to avoid SSR mismatches */}
+      {mounted && (
+        <div className="absolute inset-0 -z-10">
+          <Waves
+            key={theme} // Forces re-render on theme switch
+            lineColor={
+              theme === "dark"
+                ? "rgba(150, 196, 97, 0.2)"
+                : "rgba(29, 31, 72, 0.2)"
+            }
+            backgroundColor={
+              theme === "dark"
+                ? "rgba(29, 31, 72)"
+                : "rgba(150, 196, 97)"
+            }
+            waveSpeedX={0.02}
+            waveSpeedY={0.01}
+            waveAmpX={40}
+            waveAmpY={20}
+            friction={0.9}
+            tension={0.01}
+            maxCursorMove={120}
+            xGap={12}
+            yGap={36}
+          />
+        </div>
+      )}
 
       <Navbar />
       {children}
       <Features />
-      <InfoHub/>
+      <InfoHub />
       <Footer />
     </div>
   );
