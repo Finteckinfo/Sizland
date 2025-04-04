@@ -150,3 +150,7 @@
 .bg-light-green {
   background-color: rgb(150, 196, 97); /* Light green for light mode */
 }
+
+.bg-navy-blue-light{
+  background-color: rgb(59, 78, 121);
+}
