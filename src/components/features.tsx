@@ -18,7 +18,7 @@ const Features = () => {
   return (
     <section className="relative py-24">
       <div
-        className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue" : "bg-white"
+        className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue inset-shadow-2xl inset-shadow-black shadow-lg shadow-black" : "bg-white shadow-lg"
           }`}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

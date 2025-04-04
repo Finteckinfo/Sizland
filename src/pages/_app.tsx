@@ -22,6 +22,7 @@ import { useTheme } from "next-themes";
 import Features from "@/components/features";
 import InfoHub from "@/components/infoHub";
 import { useEffect, useState } from "react";
+import About from "@/components/about";
 
 const client = new QueryClient();
 
@@ -101,6 +102,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Features />
+      <About />
       <InfoHub />
       <Footer />
     </div>
