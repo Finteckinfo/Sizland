@@ -11,7 +11,7 @@ const InfoHub = () => {
                 <p className="text-center text-base font-semibold leading-7 text-indigo-600">
                     Infohub
                 </p>
-                <h2 className="text-center font-display text-3xl font-bold tracking-tight text-slate-900 dark:text-green-100 md:text-4xl">
+                <h2 className="text-center font-display text-3xl font-bold tracking-tight text-slate-900 dark:text-green-500 md:text-4xl">
                     Sizland Info hub
                 </h2>
 
