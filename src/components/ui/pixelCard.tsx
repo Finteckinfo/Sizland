@@ -326,7 +326,7 @@ export default function PixelCard({
       style={{ position: "relative", zIndex: 1 }}
     >
       <canvas 
-      className={`pixel-canvas ${theme === "dark" ? "bg-light-green" : "bg-navy-blue"}`}  
+      className={`pixel-canvas ${theme === "dark" ? "bg-green-400" : "bg-navy-blue"}`}  
       ref={canvasRef}
       style={{
         position: "absolute",
