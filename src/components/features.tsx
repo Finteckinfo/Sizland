@@ -21,7 +21,7 @@ const Features = () => {
         Features
       </p>
       <h2 className="text-center font-display mb-12 text-3xl font-bold tracking-tight text-slate-900 dark:text-green-500 md:text-4xl">
-        Sizland Info hub
+        <span className="font-pj">Sizland's Finest.</span>
       </h2>
       <div
         className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue inset-shadow-2xl inset-shadow-black shadow-lg shadow-black" : "bg-white shadow-lg"
