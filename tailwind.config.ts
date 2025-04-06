@@ -51,6 +51,9 @@ module.exports = {
           "5": "hsl(var(--chart-5))",
         },
       },
+      fontFamily: {
+        pj:['"PIXymbols Very Loose W01 Reg"', 'sans-serif'],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

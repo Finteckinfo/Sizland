@@ -101,9 +101,10 @@ export const Navbar: React.FC = () => {
             height={40}
             className="h-10 w-auto object-contain mr-2"
           />
-          <Typography variant="h3" className="font-bold">
-            SIZLAND
-          </Typography>
+          <button className="button1" data-text="Awesome">
+            <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
+            <span aria-hidden="true" className="hover-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
+          </button>
         </Link>
       </div>
       <Link href={"/"} className="flex items-center justify-start md:hidden">
