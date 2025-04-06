@@ -23,6 +23,8 @@ import Features from "@/components/features";
 import InfoHub from "@/components/infoHub";
 import { useEffect, useState } from "react";
 import About from "@/components/about";
+import Roadmap from "@/components/roadmap";
+import { PageLayout } from "@/components/page-layout";
 
 const client = new QueryClient();
 
@@ -102,8 +104,13 @@ function Layout({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Features />
-      <About />
+      <PageLayout title="About" description="About sizland">
+        <About />
+      </PageLayout>
       <InfoHub />
+      <PageLayout title="Roadmap" description="roadmap to sizland">
+        <Roadmap />
+      </PageLayout>
       <Footer />
     </div>
   );

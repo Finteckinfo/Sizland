@@ -2,7 +2,6 @@ import { PageLayout } from "@/components/page-layout";
 import { NextPage } from "next/types";
 import React from "react";
 import { Hero } from "@/components/hero"; // Import the Hero component
-import Features from "@/components/features";
 
 const HomePage: NextPage = () => {
   return (

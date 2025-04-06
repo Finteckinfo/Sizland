@@ -17,6 +17,12 @@ const Features = () => {
 
   return (
     <section className="relative py-24">
+      <p className="text-center text-base font-semibold leading-7 text-indigo-600">
+        Features
+      </p>
+      <h2 className="text-center font-display mb-12 text-3xl font-bold tracking-tight text-slate-900 dark:text-green-500 md:text-4xl">
+        Sizland Info hub
+      </h2>
       <div
         className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue inset-shadow-2xl inset-shadow-black shadow-lg shadow-black" : "bg-white shadow-lg"
           }`}
@@ -42,8 +48,8 @@ const Features = () => {
             <a
               href="#"
               className={`flex flex-row items-center justify-center gap-2 text-base font-semibold ${theme === "dark"
-                  ? "text-indigo-400 hover:text-indigo-500"
-                  : "text-indigo-600 hover:text-indigo-700"
+                ? "text-indigo-600 hover:text-green-400"
+                : "text-indigo-600 hover:text-green-400"
                 } lg:justify-start`}
             >
               Button CTA
@@ -53,14 +59,18 @@ const Features = () => {
                 viewBox="0 0 20 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className={`${theme === "dark"
+                    ? "text-indigo-600 hover:text-green-400"
+                    : "text-indigo-600 hover:text-green-400"
+                  }`}
               >
                 <path
                   d="M7.5 15L11.0858 11.4142C11.7525 10.7475 12.0858 10.4142 12.0858 10C12.0858 9.58579 11.7525 9.25245 11.0858 8.58579L7.5 5"
-                  stroke="#4F46E5"
+                  stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                ></path>
+                />
               </svg>
             </a>
           </div>
