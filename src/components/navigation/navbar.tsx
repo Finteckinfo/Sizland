@@ -116,7 +116,7 @@ export const Navbar: React.FC = () => {
           className="h-10 w-auto object-contain mr-2"
         />
         <Typography variant="h3" className="font-bold">
-          SIZLAND
+          <span className="font-pj">SIZLAND</span>
         </Typography>
       </Link>
       <div className="flex-1 justify-center hidden items-center gap-3 lg:flex">
