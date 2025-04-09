@@ -19,7 +19,7 @@ const Hero = () => {
                 Welcome to 
               </h1>
               <SplitText
-                text="Sizland"
+                text="Sizland."
                 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
                 delay={100}
                 animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
@@ -31,9 +31,23 @@ const Hero = () => {
                   console.log("Hero heading animation done.");
                 }}
               />
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 sm:mt-6 font-inter">
+              {/* <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 sm:mt-6 font-inter">
                 Sizland is a decentralized ecosystem that lets you get started!
-              </p>
+              </p> */}
+
+              <SplitText
+                text=" Learn. Invest. Grow. "
+                className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
+                delay={100}
+                animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+                animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+                easing={(t) => t * (2 - t)} // easeOutQuad
+                threshold={0.25}
+                rootMargin="-50px"
+                onLetterAnimationComplete={() => {
+                  console.log("Hero heading animation done.");
+                }}
+              />
 
               <p className="mt-2 text-md text-gray-500 dark:text-gray-400 sm:mt-4 font-inter">
                 We provide essential services to help founders and startups launch and grow they're business.

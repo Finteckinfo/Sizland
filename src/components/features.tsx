@@ -42,8 +42,7 @@ const Features = () => {
               className={`text-lg font-normal ${theme === "dark" ? "text-gray-400" : "text-gray-500"
                 } mb-5`}
             >
-              We provide all the advantages that can simplify all your financial
-              transactions without any further requirements
+              Sizland is a secure, transparent, and community-powered ecosystem where finance meets functionality. Our platform integrates enterprise tools, DeFi access, education tools, and blockchain innovation designed to empower businesses and remote teams with real-world utility from day one
             </p>
             <a
               href="#"

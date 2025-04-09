@@ -1,19 +1,19 @@
 [
     {
       "title": "Unified Wallets",
-      "description": "We provide multi-chain support - Algorand, as well as other EVM-compatible chains.",
+      "description": "A streamlined, all-in-one wallet that lets users manage fiat and crypto assets side-by-side.",
       "variant": "blue",
       "icon": "Wallet"
     },
     {
       "title": "Siz Token",
-      "description": "Our platform provisions utility with SIZ Token in the Sizland Community.",
+      "description": "The SIZ token is the thread that connects the entire ecosystem.",
       "variant": "blue",
       "icon": "Coins"
     },
     {
       "title": "DEX",
-      "description": "Exchanges on Sizland Ecosystem bring transparency in trading SIZ Token.",
+      "description": "Fast, cost-effective, and flexible, the exchange supports decentralized and centralized trading with full wallet integration.",
       "variant": "blue",
       "icon": "Shuffle"
     },
@@ -25,7 +25,7 @@
     },
     {
       "title": "ERP",
-      "description": "Streamline workflows and enhance operational efficiency with our ERP integration.",
+      "description": "At the heart of Sizland lies the ERP solution created for today’s decentralized world",
       "variant": "blue",
       "icon": "Workflow"
     }
