@@ -636,12 +636,16 @@ const About = () => {
                                 <p className="mb-8 text-base text-body-color dark:text-dark-6">
                                     Sizland is an ecosystem that onboards companies and individual for inclusion!
                                 </p>
-                                <Button1
-                                    onClick={() => console.log("Read More clicked")}
-                                    className="mb-4"
-                                >
-                                    Learn More
-                                </Button1>
+                                <a
+  href="https://linktr.ee/sizlandinvest"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button1 className="mb-4">
+    Learn More
+  </Button1>
+</a>
+
                             </div>
                         </div>
                     </div>
