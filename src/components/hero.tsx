@@ -17,7 +17,7 @@ const Hero = () => {
             <div className="text-center lg:text-left">
             <h1 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl">
                 Welcome to <SplitText
-                text="Sizland."
+                text="Sizland"
                 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
                 delay={100}
                 animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
