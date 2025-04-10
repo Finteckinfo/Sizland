@@ -34,7 +34,7 @@ const Features = () => {
               className={`text-4xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"
                 } leading-[3.25rem] lg:mb-6 mx-auto max-w-max lg:max-w-md lg:mx-0`}
             >
-              Enjoy the finest features with SIZLAND.
+              Why Choose Sizland?
             </h2>
           </div>
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
@@ -42,7 +42,9 @@ const Features = () => {
               className={`text-lg font-normal ${theme === "dark" ? "text-gray-400" : "text-gray-500"
                 } mb-5`}
             >
-              Sizland is a secure, transparent, and community-powered ecosystem where finance meets functionality. Our platform integrates enterprise tools, DeFi access, education tools, and blockchain innovation designed to empower businesses and remote teams with real-world utility from day one
+              Experience Blockchain-Powered Investment and Business Management with Sizland
+What sets us apart is our blockchain-powered ERP system, the heart of our ecosystem. Tailored specifically for remote teams, our ERP simplifies enterprise financial management by automating workflows and enabling real-time tracking, ensuring smooth operations and enhanced efficiency.
+But that’s not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you’ll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
             </p>
             <a
               href="#"

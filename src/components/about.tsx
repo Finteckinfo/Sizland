@@ -625,16 +625,21 @@ const About = () => {
                         <div className="w-full px-4 lg:w-1/2 xl:w-5/12">
                             <div className="mt-10 lg:mt-0">
                                 <span className="block mb-4 text-lg font-semibold text-dark dark:text-white">
-                                    Why Choose Sizland
+                                    Blockchains on SIZ
                                 </span>
                                 <h2 className="mb-5 text-3xl font-bold text-dark dark:text-white sm:text-[40px]/[48px]">
                                     Built upon state of the art blockchain platforms in a multi chain world!
                                 </h2>
                                 <p className="mb-5 text-base text-body-color dark:text-dark-6">
-                                    Sizalnd provisions the best out of any web3 news, first hand interactions with multi chain realm - Sizland
+                                Algorand, SUI, Base 
+
+
                                 </p>
                                 <p className="mb-8 text-base text-body-color dark:text-dark-6">
-                                    Sizland is an ecosystem that onboards companies and individual for inclusion!
+                                Base: Built for security and adoption, seamlessly integrates with DeFi, providing a reliable foundation for Sizland’s ERP.
+                                Sui: Built for speed and scalability, Sui supports dynamic transactions, ensuring high performance in Sizland’s ERP system.
+
+Algorand: Built for fast transactions and low costs, Algorand ensures smooth, sustainable operations within Sizland’s ERP.
                                 </p>
                                 <a
   href="https://linktr.ee/sizlandinvest"

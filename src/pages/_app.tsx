@@ -108,7 +108,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <About />
       </PageLayout>
       <InfoHub />
-      <PageLayout title="Roadmap" description="roadmap to sizland">
+      <PageLayout title="Sizland" description="SIZLAND">
         <Roadmap />
       </PageLayout>
       <Footer />
