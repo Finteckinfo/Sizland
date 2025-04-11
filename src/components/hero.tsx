@@ -73,7 +73,7 @@ const Hero = () => {
     rel="noopener noreferrer"
   >
     <Button1 className="px-6 py-3 text-lg font-bold text-white bg-gray-900 dark:bg-gray-800 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700">
-      Get Started
+      Join Our Community
     </Button1>
   </a>
 </Magnet>
