@@ -81,7 +81,7 @@ const productLinks: DropdownLinks[] = [
 const otherLinks: NavLink[] = [
   {
     label: "White Paper",
-    href: "/white-paper",
+    href: "/whitepaper",
   },
   {
     label: "Partners",
