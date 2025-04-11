@@ -34,7 +34,7 @@ const Features = () => {
               className={`text-4xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"
                 } leading-[3.25rem] lg:mb-6 mx-auto max-w-max lg:max-w-md lg:mx-0`}
             >
-              Sizland is a thriving ecosystem built on a decentralised space.
+              Sizland is a thriving ecosystem built on a decentralised space
             </h2>
           </div>
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
