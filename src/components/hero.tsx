@@ -62,7 +62,7 @@ const Hero = () => {
               />
 
               <p className="mt-2 text-md text-gray-500 dark:text-gray-400 sm:mt-4 font-inter">
-                We provide essential services to help founders and startups launch and grow they're business.
+                We provide essential services to help founders and startups launch and grow their business.
               </p>
 
               <div className="mt-6 sm:mt-8">
