@@ -48,7 +48,7 @@ const Hero = () => {
               </p> */}
 
               <SplitText
-                text=" Learn. Invest. Grow. "
+                text=" Learn. Earn. Invest. Grow. "
                 className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
                 delay={100}
                 animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
