@@ -79,7 +79,7 @@ const About = () => {
                 className="w-full rounded-2xl"
               />
               <p className="mt-3 text-base text-body-color dark:text-dark-6">
-                <strong>Base:</strong> Base extends Ethereum’s capabilities with low fees and fast transaction finality, optimizing the user experience across our blockchain ERP platform.
+                <strong>Base:</strong> Built by Coinbase, Base offers a secure and developer-friendly Ethereum Layer 2 solution, perfect for tokenizing real-world assets. Its compliance-focused design aligns with our investment fund's needs
               </p>
             </div>
 
@@ -95,7 +95,7 @@ const About = () => {
                 className="w-full rounded-2xl"
               />
               <p className="mt-3 text-base text-body-color dark:text-dark-6">
-                <strong>BNB Smart Chain:</strong> BNB Smart Chain connects us to growing ecosystems in Africa and underserved economies, offering low-cost access to our platform.
+                <strong>BNB Smart Chain:</strong> BNB Smart Chain connects us to growing ecosystems in Africa and underserved economies, offering low-cost access to our platform. Its broad adoption and integration with Binance's services support our mission of financial inclusion.
               </p>
             </div>
           </div>
