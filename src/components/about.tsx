@@ -22,7 +22,7 @@ const About = () => {
                 className="w-full rounded-2xl"
               />
               <p className="mt-3 text-base text-body-color dark:text-dark-6">
-                <strong>Algorand:</strong> Built for fast transactions and low costs, Algorand ensures smooth, sustainable operations within Sizland’s ERP.
+                <strong>Algorand:</strong> Algorand provides fast, secure, and low-cost transactions, making it ideal for our SIZ utility token. Its efficient Pure Proof-of-Stake system ensures seamless operations and environmental sustainability..
               </p>
             </div>
 
@@ -38,7 +38,7 @@ const About = () => {
                 className="w-full rounded-2xl"
               />
               <p className="mt-3 text-base text-body-color dark:text-dark-6">
-                <strong>Ethereum (Base & BNB):</strong> Built for security and adoption, seamlessly integrates with DeFi, providing a reliable foundation for Sizland’s ERP.
+                <strong>Ethereum (Base & BNB):</strong> BNB Smart Chain connects us to growing ecosystems in Africa and underserved economies, offering low-cost access to our platform. Its broad adoption and integration with Binance's services support our mission of financial inclusion.
               </p>
             </div>
 
@@ -56,7 +56,7 @@ const About = () => {
                 />
               </div>
               <p className="mt-3 text-base text-body-color dark:text-dark-6">
-                <strong>Sui:</strong> Built for speed and scalability, Sui supports dynamic transactions, ensuring high performance in Sizland’s ERP system.
+                <strong>Sui:</strong> Sui's high throughput and efficient data storage capabilities enable us to securely store ERP data on-chain. Its object-centric model ensures fast and reliable access to critical business information.
               </p>
             </div>
           </div>
