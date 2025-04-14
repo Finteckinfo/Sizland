@@ -68,7 +68,7 @@ const Hero = () => {
               <div className="mt-6 sm:mt-8">
               <Magnet padding={50} disabled={false} magnetStrength={50}>
   <a
-    href="https://linktr.ee/sizlandinvest"
+    href="https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL"
     target="_blank"
     rel="noopener noreferrer"
   >
