@@ -16,9 +16,7 @@ const Hero = () => {
           <div>
             <div className="text-center lg:text-left">
             <h1 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl">
-                Welcome to 
-              </h1>
-              <SplitText
+                Welcome to <SplitText
                 text="Sizland"
                 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
                 delay={100}
@@ -31,20 +29,55 @@ const Hero = () => {
                   console.log("Hero heading animation done.");
                 }}
               />
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 sm:mt-6 font-inter">
+              </h1>
+              {/* <SplitText
+                text="Sizland."
+                className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
+                delay={100}
+                animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+                animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+                easing={(t) => t * (2 - t)} // easeOutQuad
+                threshold={0.25}
+                rootMargin="-50px"
+                onLetterAnimationComplete={() => {
+                  console.log("Hero heading animation done.");
+                }}
+              /> */}
+              {/* <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 sm:mt-6 font-inter">
                 Sizland is a decentralized ecosystem that lets you get started!
-              </p>
+              </p> */}
+
+              <SplitText
+                text=" Learn. Earn. Invest. Grow. "
+                className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
+                delay={100}
+                animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+                animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+                easing={(t) => t * (2 - t)} // easeOutQuad
+                threshold={0.25}
+                rootMargin="-50px"
+                onLetterAnimationComplete={() => {
+                  console.log("Hero heading animation done.");
+                }}
+              />
 
               <p className="mt-2 text-md text-gray-500 dark:text-gray-400 sm:mt-4 font-inter">
-                We provide essential services to help founders and startups launch and grow they're business.
+                We provide essential services to help founders and startups launch and grow their business.
               </p>
 
               <div className="mt-6 sm:mt-8">
               <Magnet padding={50} disabled={false} magnetStrength={50}>
-                <Button1 className="px-6 py-3 text-lg font-bold text-white bg-gray-900 dark:bg-gray-800 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700">
-                  Get Started
-                </Button1>
-                </Magnet>
+  <a
+    href="https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Button1 className="px-6 py-3 text-lg font-bold text-white bg-gray-900 dark:bg-gray-800 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700">
+      Join Our Community
+    </Button1>
+  </a>
+</Magnet>
+
                 {/* <button className="group group-hover:before:duration-500 group-hover:after:duration-500 after:duration-500 hover:border-green-400 hover:before:[box-shadow:_20px_20px_20px_30px_#1e3a8a] duration-500 before:duration-500 hover:duration-500 underline underline-offset-2 hover:after:-right-8 hover:before:right-12 hover:before:-bottom-8 hover:before:blur hover:underline hover:underline-offset-4 origin-left hover:decoration-2 hover:text-green-400 relative bg-neutral-800 h-16 w-64 border text-left p-3 text-gray-50 text-base font-bold rounded-lg overflow-hidden before:absolute before:w-12 before:h-12 before:content-[''] before:right-1 before:top-1 before:z-10 before:bg-blue-900 before:rounded-full before:blur-lg after:absolute after:z-10 after:w-20 after:h-20 after:content-[''] after:bg-green-400 after:right-8 after:top-3 after:rounded-full after:blur-lg">
                     Get Sizld
                 </button> */}

@@ -4,48 +4,48 @@ import React from 'react';
 
 const roadmap = [
   {
-    title: 'Community Launch & Introduction',
-    date: 'Q2 2025',
+    title: 'Phase 1: Laying the Groundwork',
+    date: 'Months 1–6',
     description:
-      'Official introduction of the Sizland ecosystem and community. Establishing our presence with a focus on education, trust, and transparency.',
+      'We’re setting up smart contracts, building the ERP system, and getting everything secure. This includes testing our tools, setting up legal frameworks, and building our early community.',
     badge: 'Live',
   },
   {
-    title: 'Sizland Portal – Lounge & Core Modules',
-    date: 'Q2 2025',
+    title: 'Phase 2: Growing the Platform ',
+    date: 'Months 7–18',
     description:
-      'Deployment of the Sizland Hub with initial access to the Lounge area, offering seamless navigation to the ERP system, exchange, and investment modules.',
+      'We take things to the next level. We’ll integrate AI features, integrate DeFi tools, and make the platform mobile-friendly. Private and public token sales will also help fund the next stage and grow our community.',
   },
   {
-    title: 'Unified Wallet System',
-    date: 'Q3 2025',
+    title: 'Phase 3: Going Live',
+    date: 'Months 19–36',
     description:
-      'Launch of an integrated wallet supporting the SIZ token and all internal company tokens, providing secure and simplified access across the platform.',
+      'Everything comes together. We launch the token, offer more tools like savings and investment features, and start using NFTs and DAOs to give the community more say.',
   },
   {
-    title: 'Multi-Tenant ERP Platform',
-    date: 'Q3 2025',
+    title: 'Phase 4: Long-Term Growth',
+    date: '36+ Months',
     description:
-      'Rollout of the SaaS-based ERP system enabling companies to tokenize operations and manage workflows through customized tools.',
+      'After launch, we focus on building with the community. Sizland becomes fully decentralized, and users help shape the future. More products, more countries, and more freedom for users.',
   },
-  {
-    title: 'Integrated Cryptocurrency Exchange',
-    date: 'Q4 2025',
-    description:
-      'Introduction of an in-platform exchange allowing seamless trading of SIZ and company tokens, enhancing liquidity and accessibility.',
-  },
-  {
-    title: 'SIZ Token Utility & Staking',
-    date: 'Q4 2025',
-    description:
-      'Expansion of SIZ token functionality including staking mechanisms, fee utility, and participation in governance as the ecosystem matures.',
-  },
-  {
-    title: 'Investment Fund Activation',
-    date: 'Q1 2026',
-    description:
-      'Launch of our sustainable investment operations powered by ecosystem-generated revenue, driving value for users, partners, and stakeholders.',
-  },
+  // {
+  //   title: '',
+  //   date: 'Q4 2025',
+  //   description:
+  //     'Introduction of an in-platform exchange allowing seamless trading of SIZ and company tokens, enhancing liquidity and accessibility.',
+  // },
+  // {
+  //   title: 'SIZ Token Utility & Staking',
+  //   date: 'Q4 2025',
+  //   description:
+  //     'Expansion of SIZ token functionality including staking mechanisms, fee utility, and participation in governance as the ecosystem matures.',
+  // },
+  // {
+  //   title: 'Investment Fund Activation',
+  //   date: 'Q1 2026',
+  //   description:
+  //     'Launch of our sustainable investment operations powered by ecosystem-generated revenue, driving value for users, partners, and stakeholders.',
+  // },
 ];
 
 const Roadmap = () => {

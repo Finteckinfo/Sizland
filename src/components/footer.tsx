@@ -19,8 +19,8 @@ const footerLinks: FooterData[] = [
     href: "/terms",
   },
   {
-    label: "Cookie Policy",
-    href: "/cookie",
+    label: "Privacy Policy",
+    href: "/privacy-policy",
   },
   {
     label: "Legal Notice",

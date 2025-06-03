@@ -80,8 +80,8 @@ const productLinks: DropdownLinks[] = [
 
 const otherLinks: NavLink[] = [
   {
-    label: "Tokenomics",
-    href: "/tokenomics",
+    label: "White Paper",
+    href: "/white-paper",
   },
   {
     label: "Partners",

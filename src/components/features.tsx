@@ -21,7 +21,7 @@ const Features = () => {
         Features
       </p>
       <h2 className="text-center font-display mb-12 text-3xl font-bold tracking-tight text-slate-900 dark:text-green-500 md:text-4xl">
-        <span className="font-pj">Sizland's Finest.</span>
+        <span className="font-pj">Why choose SIZLAND?</span>
       </h2>
       <div
         className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-navy-blue inset-shadow-2xl inset-shadow-black shadow-lg shadow-black" : "bg-white shadow-lg"
@@ -34,7 +34,7 @@ const Features = () => {
               className={`text-4xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"
                 } leading-[3.25rem] lg:mb-6 mx-auto max-w-max lg:max-w-md lg:mx-0`}
             >
-              Enjoy the finest features with SIZLAND.
+              Sizland is a thriving ecosystem built on a decentralised space
             </h2>
           </div>
           <div className="relative w-full text-center lg:text-left lg:w-2/4">
@@ -42,8 +42,9 @@ const Features = () => {
               className={`text-lg font-normal ${theme === "dark" ? "text-gray-400" : "text-gray-500"
                 } mb-5`}
             >
-              We provide all the advantages that can simplify all your financial
-              transactions without any further requirements
+              Experience Blockchain-Powered Investment and Business Management with Sizland
+What sets us apart is our blockchain-powered ERP system, the heart of our ecosystem. Tailored specifically for remote teams, our ERP simplifies enterprise financial management by automating workflows and enabling real-time tracking, ensuring smooth operations and enhanced efficiency.
+But that’s not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you’ll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
             </p>
             <a
               href="#"
