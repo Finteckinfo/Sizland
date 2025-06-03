@@ -73,10 +73,10 @@ const Roadmap = () => {
                 </span>
               )}
             </h3>
-            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+            <time className="block mb-2 text-sm font-normal leading-none text-gray-600 dark:text-gray-600">
               {item.date}
             </time>
-            <p className="text-base font-normal text-gray-500 dark:text-gray-400">
+            <p className="text-base font-normal text-gray-700 dark:text-gray-500">
               {item.description}
             </p>
           </li>

@@ -104,11 +104,11 @@ function Layout({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Features />
-      <PageLayout title="About" description="About sizland">
+      <PageLayout title="" description="About sizland">
         <About />
       </PageLayout>
       <InfoHub />
-      <PageLayout title="Roadmap" description="roadmap to sizland">
+      <PageLayout title="" description="roadmap to sizland">
         <Roadmap />
       </PageLayout>
       <Footer />
