@@ -68,7 +68,7 @@ const About = () => {
             src={
               theme === "dark"
                 ? "/base-darkmode.jpg"
-                : "/base-darkmode.jpg"
+                : "/base-lightmode.webp"
             }
             alt="Base"
             className="w-full rounded-2xl"
