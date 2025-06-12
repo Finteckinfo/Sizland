@@ -56,6 +56,12 @@ export const ConnectWalletButton = () => {
                 </button>
                 <button
                   className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  onClick={() => connectWallet(WalletId.LUTE)}
+                >
+                  Connect Lute
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   onClick={() => connectWallet(WalletId.WALLETCONNECT)}
                 >
                   WalletConnect

@@ -1,9 +1,9 @@
-// src/lib/algorand/walletManager.ts
 import { WalletManager, NetworkId, WalletId } from '@txnlab/use-wallet'
 
 const wallets = [
   { id: WalletId.PERA },
   { id: WalletId.DEFLY },
+  { id: WalletId.LUTE },
   {
     id: WalletId.WALLETCONNECT as WalletId.WALLETCONNECT,
     options: {
