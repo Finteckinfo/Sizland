@@ -5,7 +5,7 @@ import { Montserrat } from "next/font/google";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { Providers } from './providers'
+import { Providers } from '@/providers/index'
 import { SessionProvider } from "next-auth/react";
 
 import { config } from "../wagmi";
