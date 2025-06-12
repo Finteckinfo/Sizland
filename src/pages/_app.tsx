@@ -5,11 +5,7 @@ import { Montserrat } from "next/font/google";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import {
-  RainbowKitSiweNextAuthProvider,
-  GetSiweMessageOptions,
-} from "@rainbow-me/rainbowkit-siwe-next-auth";
+import { Providers } from './providers'
 import { SessionProvider } from "next-auth/react";
 
 import { config } from "../wagmi";
@@ -28,10 +24,6 @@ import { PageLayout } from "@/components/page-layout";
 
 const client = new QueryClient();
 
-const getSiweMessageOptions: GetSiweMessageOptions = () => ({
-  statement: "Sign in to Rainbowkit with Ethereum",
-});
-
 export const monsterrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
@@ -43,8 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <WagmiProvider config={config}>
       <SessionProvider session={pageProps.session}>
         <QueryClientProvider client={client}>
-          <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
-            <RainbowKitProvider>
+          <Providers>
               <ThemeProvider
                 attribute="class"
                 defaultTheme="system"
@@ -55,8 +46,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                   <Component {...pageProps} />
                 </Layout>
               </ThemeProvider>
-            </RainbowKitProvider>
-          </RainbowKitSiweNextAuthProvider>
+            </Providers>
         </QueryClientProvider>
       </SessionProvider>
     </WagmiProvider>
