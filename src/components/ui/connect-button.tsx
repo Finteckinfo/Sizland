@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWallet, WalletId } from '@txnlab/use-wallet-react'
 import { Button } from './button'
 import { Button1 } from './button1'
@@ -9,6 +9,7 @@ import Image from 'next/image'
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
   const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const connectWallet = async (id: WalletId) => {
     const wallet = wallets.find(w => w.id === id)
@@ -27,12 +28,23 @@ export const ConnectWalletButton = () => {
   const shortenAddress = (address: string) =>
     `${address.slice(0, 6)}...${address.slice(-4)}`
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   if (!isReady) {
     return <Button disabled>Loading...</Button>
   }
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left" ref={dropdownRef}>
       {!activeAccount ? (
         <>
           <Button1 onClick={() => setIsOpen(!isOpen)} className="rounded-xl">
@@ -40,30 +52,34 @@ export const ConnectWalletButton = () => {
           </Button1>
 
           {isOpen && (
-            <div className="absolute mt-2 w-48 origin-top-right rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 bg-white dark:bg-zinc-900 border dark:border-zinc-700">
+            <div className="absolute mt-2 w-56 origin-top-right rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 bg-white dark:bg-zinc-900 border dark:border-zinc-700">
               <div className="py-1">
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   onClick={() => connectWallet(WalletId.PERA)}
                 >
+                  <Image src="/pera.svg" alt="Pera Wallet" width={20} height={20} />
                   Connect Pera
                 </button>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   onClick={() => connectWallet(WalletId.DEFLY)}
                 >
+                  <Image src="/defly.png" alt="Defly Wallet" width={20} height={20} />
                   Connect Defly
                 </button>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   onClick={() => connectWallet(WalletId.LUTE)}
                 >
+                  <Image src="/lute.png" alt="Lute Wallet" width={20} height={20} />
                   Connect Lute
                 </button>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   onClick={() => connectWallet(WalletId.WALLETCONNECT)}
                 >
+                  <Image src="/walletconnect.png" alt="WalletConnect" width={20} height={20} />
                   WalletConnect
                 </button>
               </div>
