@@ -7,13 +7,13 @@ const wallets = [
   {
     id: WalletId.WALLETCONNECT as WalletId.WALLETCONNECT,
     options: {
-      projectId: 'your_project_id_from_reown_cloud',
+      projectId: '73c1e95ad151f47ceaf415c997c218f5',
     },
     metadata: {
-      name: 'Your DApp Name',
-      description: 'Your dApp Description',
-      url: 'https://your-dapp.com',
-      icons: ['https://your-dapp.com/icon.png']
+      name: 'SiZLand',
+      description: 'Learn, Earn, Invest, Grow. We provide essential services to help founders and startups launch and grow their business.',
+      url: 'https://siz.land',
+      icons: ['https://www.siz.land/_next/image?url=%2Flogo1.png&w=96&q=75']
     }
   }
 ]
