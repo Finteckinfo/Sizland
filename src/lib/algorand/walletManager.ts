@@ -3,7 +3,11 @@ import { WalletManager, NetworkId, WalletId } from '@txnlab/use-wallet'
 const wallets = [
   { id: WalletId.PERA },
   { id: WalletId.DEFLY },
-  { id: WalletId.LUTE },
+  { id: WalletId.LUTE as WalletId.LUTE,
+    options: {
+        siteName: 'Sizland'  // Required
+      },
+   },
   {
     id: WalletId.WALLETCONNECT as WalletId.WALLETCONNECT,
     options: {
