@@ -64,58 +64,73 @@ export const ConnectWalletButton = () => {
 
   return (
     <>
-      <div className="relative inline-block text-left" ref={dropdownRef}>
+      <div className="wallet-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
         {!activeAccount ? (
           <>
-            <Button1 onClick={() => setIsOpen(!isOpen)} className="rounded-xl">
+            <Button1 onClick={() => setIsOpen(!isOpen)}>
               Connect Wallet
             </Button1>
 
             {isOpen && (
-              <div className="absolute mt-2 w-56 origin-top-right rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 bg-white dark:bg-zinc-900 border dark:border-zinc-700">
-                <div className="py-1">
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    onClick={() => connectWallet(WalletId.PERA)}
-                  >
-                    <Image src="/pera.svg" alt="Pera Wallet" width={20} height={20} />
-                    Connect Pera
-                  </button>
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    onClick={() => connectWallet(WalletId.DEFLY)}
-                  >
-                    <Image src="/defly.png" alt="Defly Wallet" width={20} height={20} />
-                    Connect Defly
-                  </button>
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    onClick={() => connectWallet(WalletId.LUTE)}
-                  >
-                    <Image src="/lute.png" alt="Lute Wallet" width={20} height={20} />
-                    Connect Lute
-                  </button>
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    onClick={() => connectWallet(WalletId.WALLETCONNECT)}
-                  >
-                    <Image src="/walletconnect.png" alt="WalletConnect" width={20} height={20} />
-                    WalletConnect
-                  </button>
-                </div>
+              <div
+                className="card"
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  zIndex: 1000,
+                  marginTop: '0.5rem', // some spacing below button
+                  background: 'white',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '0.5rem',
+                  minWidth: '200px'
+                }}
+              >
+                <ul className="list">
+                  <li className="element">
+                    <button onClick={() => connectWallet(WalletId.PERA)} className="element">
+                      <Image src="/pera.svg" alt="Pera Wallet" width={20} height={20} />
+                      <p className="label">Connect Pera</p>
+                    </button>
+                  </li>
+                  <li className="element">
+                    <button onClick={() => connectWallet(WalletId.DEFLY)} className="element">
+                      <Image src="/defly.png" alt="Defly Wallet" width={20} height={20} />
+                      <p className="label">Connect Defly</p>
+                    </button>
+                  </li>
+                  <li className="element">
+                    <button onClick={() => connectWallet(WalletId.LUTE)} className="element">
+                      <Image src="/lute.png" alt="Lute Wallet" width={20} height={20} />
+                      <p className="label">Connect Lute</p>
+                    </button>
+                  </li>
+                  <li className="element">
+                    <button onClick={() => connectWallet(WalletId.WALLETCONNECT)} className="element">
+                      <Image src="/walletconnect.png" alt="WalletConnect" width={20} height={20} />
+                      <p className="label">WalletConnect</p>
+                    </button>
+                  </li>
+                </ul>
               </div>
             )}
           </>
         ) : (
-          <div className="flex gap-2 max-md:flex-col-reverse md:justify-center md:items-center">
+          <div className="wallet-button-group" style={{ display: 'flex', gap: '8px' }}>
             <Button
               variant="outline"
-              className="rounded-xl"
               onClick={() =>
                 alert(`Connected to ${activeWallet?.metadata?.name || activeWallet?.id}`)
               }
             >
-              <div className="bg-black w-3 h-3 rounded-full overflow-hidden mr-2">
+              <div style={{
+                background: 'black',
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                marginRight: 8
+              }}>
                 <Image alt="Algorand icon" src="/algorand-logo.svg" width={12} height={12} />
               </div>
               {activeWallet?.metadata?.name || 'Algorand'}
@@ -124,7 +139,12 @@ export const ConnectWalletButton = () => {
             <Button
               variant="outline"
               onClick={handleDisconnect}
-              className="bg-gradient rounded-xl font-normal hover:opacity-90 text-gray-100 dark:text-foreground"
+              style={{
+                background: 'linear-gradient(135deg, #1d1d1d, #444)',
+                color: 'white',
+                borderRadius: 12,
+                fontWeight: 400
+              }}
             >
               {shortenAddress(activeAccount.address)}
             </Button>
