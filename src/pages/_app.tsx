@@ -93,14 +93,6 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <Navbar />
       {children}
-      <Features />
-      <PageLayout title="" description="About sizland">
-        <About />
-      </PageLayout>
-      <InfoHub />
-      <PageLayout title="" description="roadmap to sizland">
-        <Roadmap />
-      </PageLayout>
       <Footer />
     </div>
   );
