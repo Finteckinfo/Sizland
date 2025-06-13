@@ -15,12 +15,7 @@ import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import Waves from "@/components/ui/wave"; // Import Waves
 import { useTheme } from "next-themes";
-import Features from "@/components/features";
-import InfoHub from "@/components/infoHub";
 import { useEffect, useState } from "react";
-import About from "@/components/about";
-import Roadmap from "@/components/roadmap";
-import { PageLayout } from "@/components/page-layout";
 
 const client = new QueryClient();
 
