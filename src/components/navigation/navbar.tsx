@@ -1,12 +1,12 @@
-// import logoDark from "@/assets/dark-logo.svg";
-// import logoLight from "@/assets/light-logo.svg";
-// import logo from "@/assets/logo-symbol.svg";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
-import { ConnectWalletButton } from "@/components/ui/connect-button";
+import { ConnectWalletButton } from "../ui/connect-button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,21 +16,20 @@ import {
   NavigationMenuTrigger,
   ListItem,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "../ui/navigation-menu";
 import { Typography } from "../ui/typography";
 import { Separator } from "@radix-ui/react-separator";
-import React from "react";
 
-// Scroll to section function with offset
+// Utility to scroll with offset for fixed navbar
 const scrollToSection = (
-  e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>,
   id: string
 ) => {
   e.preventDefault();
   const section = document.querySelector(id) as HTMLElement;
   if (section) {
     window.scrollTo({
-      top: section.offsetTop - 70, // Adjust for the fixed navbar height
+      top: section.offsetTop - 70,
       behavior: "smooth",
     });
   }
@@ -92,6 +91,7 @@ const otherLinks: NavLink[] = [
 export const Navbar: React.FC = () => {
   return (
     <div className="fixed z-50 flex w-full justify-between items-center border-b border-neutral-400/50 bg-white/50 p-4 backdrop-blur-xl dark:bg-black/50 md:px-16 md:py-4">
+      {/* Desktop Logo */}
       <div className="flex-1 hidden md:block">
         <Link href="/" className="flex items-center justify-start">
           <Image
@@ -103,11 +103,15 @@ export const Navbar: React.FC = () => {
           />
           <button className="button1" data-text="Awesome">
             <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
-            <span aria-hidden="true" className="hover-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
+            <span aria-hidden="true" className="hover-text1 font-pj">
+              &nbsp;SIZLAND&nbsp;
+            </span>
           </button>
         </Link>
       </div>
-      <Link href={"/"} className="flex items-center justify-start md:hidden">
+
+      {/* Mobile Logo */}
+      <Link href="/" className="flex items-center justify-start md:hidden">
         <Image
           src="/logo1.png"
           alt="Sizland Logo"
@@ -115,19 +119,23 @@ export const Navbar: React.FC = () => {
           height={40}
           className="h-10 w-auto object-contain mr-2"
         />
-        <Typography variant="h3" className="font-bold">
-          <span className="font-pj">SIZLAND</span>
+        <Typography variant="h3" className="font-bold font-pj">
+          SIZLAND
         </Typography>
       </Link>
+
+      {/* Desktop Nav */}
       <div className="flex-1 justify-center hidden items-center gap-3 lg:flex">
         <NaviLinks />
       </div>
 
-      <div className="flex-1  justify-end items-center gap-3 hidden  lg:flex">
+      {/* Actions */}
+      <div className="flex-1 justify-end items-center gap-3 hidden lg:flex">
         <ThemeToggler />
         <ConnectWalletButton />
       </div>
 
+      {/* Mobile Menu */}
       <div className="block lg:hidden">
         <HeaderSheet />
       </div>
@@ -139,31 +147,27 @@ export const NaviLinks: React.FC = () => {
   return (
     <NavigationMenu>
       <NavigationMenuList>
+        {/* Dropdown */}
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="">Siz</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Siz</NavigationMenuTrigger>
           <NavigationMenuContent className="flex">
             {productLinks.map((navLink, index) => (
               <ul
                 key={index}
-                className="flex flex-col w-[200px] gap-3 p-4 md:w-[250px] md:grid-cols-2 lg:w-[300px] "
+                className="flex flex-col w-[200px] gap-3 p-4 md:w-[250px] lg:w-[300px]"
               >
-                <Typography className="" variant={"large"}>
-                  {navLink.label}
-                </Typography>
+                <Typography variant="large">{navLink.label}</Typography>
                 {navLink.paths.map((path, index) => (
                   <React.Fragment key={path.label}>
                     <ListItem
                       title={path.label}
                       href={path.href}
-                      onClick={(e) => scrollToSection(e, path.href)} // Add onClick handler for smooth scroll
+                      onClick={(e) => scrollToSection(e, path.href)}
                     >
                       {path.description}
                     </ListItem>
                     {index !== navLink.paths.length - 1 && (
-                      <Separator
-                        orientation="horizontal"
-                        className="dark:border-[#E8E8E8]/20 border-[1px] border-black/20"
-                      />
+                      <Separator className="dark:border-[#E8E8E8]/20 border-black/20 border-[1px]" />
                     )}
                   </React.Fragment>
                 ))}
@@ -172,6 +176,7 @@ export const NaviLinks: React.FC = () => {
           </NavigationMenuContent>
         </NavigationMenuItem>
 
+        {/* Static Links */}
         {otherLinks.map((navLink, index) => (
           <NavigationMenuItem key={index}>
             <Link href={navLink.href} legacyBehavior passHref>
@@ -187,19 +192,8 @@ export const NaviLinks: React.FC = () => {
 };
 
 export const MobileNavLinks: React.FC = () => {
-  const scrollToSection = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    sectionId: string
-  ) => {
-    e.preventDefault();
-    const section = document.querySelector(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2 ">
+    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
       {otherLinks.map((navLink, index) => (
         <Link
           key={index}
@@ -217,13 +211,13 @@ export const MobileNavLinks: React.FC = () => {
           </Typography>
           <div className="flex flex-col items-center space-y-2">
             {navLink.paths.map((path, index) => (
-              <Link
+              <button
                 key={index}
-                href={path.href}
+                onClick={(e) => scrollToSection(e, path.href)}
                 className="text-base text-black dark:text-white hover:text-green-800 transition-colors duration-200"
               >
                 {path.label}
-              </Link>
+              </button>
             ))}
           </div>
         </div>

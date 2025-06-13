@@ -11,15 +11,21 @@ const HomePage: NextPage = () => {
   return (
     <>
       <PageLayout title="Homepage" description="Welcome to Sizland">
-        <Hero /> {/* Use the Hero component */}
+        <section id="hero">
+          <Hero /> {/* Use the Hero component */}
+        </section>
       </PageLayout>
-       <Features />
-      <PageLayout title="" description="About sizland">
-        <About />
+      <Features />
+      <PageLayout title="#about" description="About sizland">
+        <section id="about">
+          <About />
+        </section>
       </PageLayout>
       <InfoHub />
-      <PageLayout title="" description="roadmap to sizland">
-        <Roadmap />
+      <PageLayout title="#roadmap" description="roadmap to sizland">
+        <section id="roadmap">
+          <Roadmap />
+        </section>
       </PageLayout>
     </>
   );
