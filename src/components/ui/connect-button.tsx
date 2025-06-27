@@ -111,7 +111,14 @@ export const ConnectWalletButton = () => {
                       <p className="label">WalletConnect</p>
                     </button>
                   </li>
+                  <div className="line" style={{ margin: '0.5rem 0' }}></div>
                 </ul>
+                <p style={{ padding: '0 1rem 1rem', fontSize: '0.875rem', color: '#666' }}>
+                  Don’t have a wallet?{' '}
+                  <a href="#" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+                    Create
+                  </a>
+                </p>
               </div>
             )}
           </>

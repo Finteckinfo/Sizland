@@ -16,7 +16,7 @@ export const HeadComponent: React.FC<HeadComponentProps> = ({
 }) => {
   return (
     <Head>
-      <title>{title}</title>
+      <title>SIZLAND</title>
       <meta name="description" content={description} />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="icon" href="/favicon.ico" />
