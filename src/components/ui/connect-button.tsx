@@ -6,12 +6,31 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
+import { generateWallet } from '@/pages/api/wallet';
+import { WalletPopup } from './wallet';
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const [generatedWallet, setGeneratedWallet] = useState<null | {
+    address: string;
+    private_key: string;
+    mnemonic: string;
+  }>(null);
+
+  const handleGenerateWallet = async () => {
+    try {
+      const wallet = await generateWallet();
+      setGeneratedWallet(wallet);
+    } catch (err) {
+      console.error("Wallet creation failed", err);
+      setToastMsg("Wallet creation failed.");
+      setTimeout(() => setToastMsg(''), 3000);
+    }
+  };
 
   const connectWallet = async (id: WalletId) => {
     const wallet = wallets.find(w => w.id === id)
@@ -115,7 +134,14 @@ export const ConnectWalletButton = () => {
                 </ul>
                 <p style={{ padding: '0 1rem 1rem', fontSize: '0.875rem', color: '#666' }}>
                   Don’t have a wallet?{' '}
-                  <a href="#" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleGenerateWallet()
+                    }}
+                    style={{ color: '#0070f3', textDecoration: 'underline', cursor: 'pointer' }}
+                  >
                     Create
                   </a>
                 </p>
@@ -160,6 +186,16 @@ export const ConnectWalletButton = () => {
       </div>
 
       {toastMsg && <Toast message={toastMsg} />}
+      {generatedWallet && (
+        <WalletPopup
+          data={generatedWallet}
+          onClose={() => setGeneratedWallet(null)}
+        />
+      )}
     </>
   )
 }
+function setToastMsg(arg0: string) {
+  throw new Error('Function not implemented.')
+}
+
