@@ -87,8 +87,16 @@ But that's not all, our platform also provides access to various investment oppo
 
             // Determine link for each card
             const isERP = feature.title === "ERP";
-            const href = isERP ? "https://sizerp.vercel.app" : "#";
-            const isExternal = isERP;
+            const isFundManager = feature.title === "Fund Manager";
+            let href = "#";
+            let isExternal = false;
+            if (isERP) {
+              href = "https://sizerp.vercel.app";
+              isExternal = true;
+            } else if (isFundManager) {
+              href = "https://sandbox.sizland.tech/";
+              isExternal = true;
+            }
 
             return (
               <a
