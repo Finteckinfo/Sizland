@@ -44,7 +44,7 @@ const Features = () => {
             >
               Experience Blockchain-Powered Investment and Business Management with Sizland
 What sets us apart is our blockchain-powered ERP system, the heart of our ecosystem. Tailored specifically for remote teams, our ERP simplifies enterprise financial management by automating workflows and enabling real-time tracking, ensuring smooth operations and enhanced efficiency.
-But that’s not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you’ll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
+But that's not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you'll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
             </p>
             <a
               href="#"
@@ -85,29 +85,39 @@ But that’s not all, our platform also provides access to various investment op
 
             const variant = theme === "dark" ? "blue" : "green";
 
-            return (
-              <PixelCard
-                key={index}
-                variant={variant}
-                className="w-full max-w-sm flex flex-col items-center text-center p-6 min-h-[300px]" // sets equal height
-              >
-                <div className="h-12 flex items-center justify-center mb-4">
-                  <Icon size={32} className="text-indigo-500" />
-                </div>
-                <h3
-                  className={`text-xl font-semibold ${theme === "dark" ? "text-gray-900" : "text-white"
-                    }`}
-                >
-                  {feature.title}
-                </h3>
-                <p
-                  className={`text-sm mt-2 ${theme === "dark" ? "text-gray-600" : "text-gray-300"
-                    }`}
-                >
-                  {feature.description}
-                </p>
-              </PixelCard>
+            // Determine link for each card
+            const isERP = feature.title === "ERP";
+            const href = isERP ? "https://sizerp.vercel.app" : "#";
+            const isExternal = isERP;
 
+            return (
+              <a
+                key={index}
+                href={href}
+                {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                style={{ textDecoration: 'none', display: 'contents' }}
+              >
+                <PixelCard
+                  variant={variant}
+                  className="w-full max-w-sm flex flex-col items-center text-center p-6 min-h-[300px] cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                >
+                  <div className="h-12 flex items-center justify-center mb-4">
+                    <Icon size={32} className="text-indigo-500" />
+                  </div>
+                  <h3
+                    className={`text-xl font-semibold ${theme === "dark" ? "text-gray-900" : "text-white"
+                      }`}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p
+                    className={`text-sm mt-2 ${theme === "dark" ? "text-gray-600" : "text-gray-300"
+                      }`}
+                  >
+                    {feature.description}
+                  </p>
+                </PixelCard>
+              </a>
             );
           })}
         </div>

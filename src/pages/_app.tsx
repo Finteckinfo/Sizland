@@ -17,6 +17,15 @@ import Waves from "@/components/ui/wave"; // Import Waves
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
+// Defensive theme check: Only allow valid theme values in localStorage
+if (typeof window !== "undefined") {
+  const validThemes = ["light", "dark", "system"];
+  const theme = localStorage.getItem("theme");
+  if (theme && (!validThemes.includes(theme) || theme.includes(" "))) {
+    localStorage.removeItem("theme");
+  }
+}
+
 const client = new QueryClient();
 
 export const monsterrat = Montserrat({
