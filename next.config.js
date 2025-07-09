@@ -1,5 +1,8 @@
 // next.config.js
-const { webpackFallback } = require('@txnlab/use-wallet-react')
+// Removed: const { webpackFallback } = require('@txnlab/use-wallet-react')
+
+// Manually define fallbacks if needed. For now, use an empty object.
+const webpackFallback = {};
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
