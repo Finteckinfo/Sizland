@@ -6,7 +6,7 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
-import { generateWallet } from '@/pages/api/wallet';
+import { generateWallet } from '@/pages/api/generateWallet';
 import { WalletPopup } from './wallet';
 
 export const ConnectWalletButton = () => {
