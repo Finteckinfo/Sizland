@@ -24,34 +24,44 @@ export class GeneratedWalletProvider implements CustomProvider {
   }
 
   async resumeSession(): Promise<WalletAccount[] | void> {
-    const cached = localStorage.getItem('generated-wallet')
-    if (cached) {
-      const { address, privateKey } = JSON.parse(cached)
+    const data = localStorage.getItem('generated-wallet')
+    if (!data) return
+
+    try {
+      const { address, privateKey } = JSON.parse(data)
       this.account = { name: 'Generated Wallet', address }
       this.sk = new Uint8Array(Buffer.from(privateKey, 'base64'))
       return [this.account]
+    } catch (err) {
+      console.error('Failed to resume generated wallet session:', err)
+      return
     }
   }
 
   async signTransactions(
-  txnGroup: algosdk.Transaction[] | Uint8Array[] | (algosdk.Transaction[] | Uint8Array[])[],
-  indexesToSign?: number[]
-): Promise<(Uint8Array | null)[]> {
-  const txns: algosdk.Transaction[] = []
+    txnGroup:
+      | algosdk.Transaction[]
+      | Uint8Array[]
+      | (algosdk.Transaction[] | Uint8Array[])[],
+    indexesToSign?: number[]
+  ): Promise<(Uint8Array | null)[]> {
+    const txns: algosdk.Transaction[] = []
 
-  const flatten = (arr: any[]) => arr.flatMap(tx => Array.isArray(tx) ? tx : [tx])
-  const flatGroup = flatten(Array.isArray(txnGroup) ? txnGroup : [txnGroup])
+    const flatten = (arr: any[]) =>
+      arr.flatMap((tx) => (Array.isArray(tx) ? tx : [tx]))
+    const flatGroup = flatten(Array.isArray(txnGroup) ? txnGroup : [txnGroup])
 
-  for (const txn of flatGroup) {
-    if (txn instanceof Uint8Array) {
-      txns.push(algosdk.decodeUnsignedTransaction(txn))
-    } else {
-      txns.push(txn)
+    for (const txn of flatGroup) {
+      if (txn instanceof Uint8Array) {
+        txns.push(algosdk.decodeUnsignedTransaction(txn))
+      } else {
+        txns.push(txn)
+      }
     }
+
+    const toSign = indexesToSign ?? txns.map((_, i) => i)
+    return txns.map((txn, i) =>
+      toSign.includes(i) ? algosdk.signTransaction(txn, this.sk).blob : null
+    )
   }
-
-  const toSign = indexesToSign ?? txns.map((_, i) => i)
-  return txns.map((txn, i) => toSign.includes(i) ? algosdk.signTransaction(txn, this.sk).blob : null)
-}
-
 }
