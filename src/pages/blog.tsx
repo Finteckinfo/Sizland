@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { NextPage } from "next";
 
-const ComingSoonPage: NextPage = () => {
+const BlogPage: NextPage = () => {
   return (
     <PageLayout
-      title="Coming Soon"
-      description="This page will be available soon."
+      title="Blog Coming Soon"
+      description="Our blog will be available soon."
       justify="center"
     >
       <div className="flex flex-col justify-center items-center gap-8 text-center">
-        <Typography variant="h1">Coming Soon</Typography>
+        <Typography variant="h1">Blog Coming Soon</Typography>
         <Typography variant="paragraph">
-          We are working on this page. Please check back later!
+          We are working on our blog. Stay tuned for updates and articles!
         </Typography>
         <Link href="/" passHref>
           <Button className="gap-2">Go Back to Homepage</Button>
@@ -24,4 +24,4 @@ const ComingSoonPage: NextPage = () => {
   );
 };
 
-export default ComingSoonPage;
+export default BlogPage; 
