@@ -9,7 +9,6 @@ import { Toast } from './Toast'
 import { generateWallet } from '@/pages/api/generateWallet'
 import { WalletPopup } from './wallet'
 import { GeneratedWalletProvider } from '@/lib/algorand/GeneratedWalletProvider'
-import { manager } from '@/lib/algorand/walletManager'
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
@@ -28,22 +27,25 @@ export const ConnectWalletButton = () => {
       const wallet = await generateWallet()
       setGeneratedWallet(wallet)
 
-      const provider = new GeneratedWalletProvider({
-        address: wallet.address,
-        privateKey: wallet.private_key,
-      })
-
-      // Inject into localStorage to persist reload (manager already reads from it)
+      // Store it in localStorage so `resumeSession()` works
       localStorage.setItem(
         'generated-wallet',
         JSON.stringify({ address: wallet.address, privateKey: wallet.private_key })
       )
 
-      // Reload page to force WalletManager to pick up the new wallet
-      window.location.reload()
+      // Now connect to the custom wallet without reloading
+      const customWallet = wallets.find(w => w.id === WalletId.CUSTOM)
+      if (!customWallet) {
+        console.error('Custom wallet not registered in walletManager.')
+        setToastMsg('Custom wallet not available.')
+        return
+      }
+
+      await customWallet.connect()
+      setIsOpen(false)
     } catch (err) {
-      console.error("Wallet creation failed", err)
-      setToastMsg("Wallet creation failed.")
+      console.error('Wallet creation failed', err)
+      setToastMsg('Wallet creation failed.')
       setTimeout(() => setToastMsg(''), 3000)
     }
   }
