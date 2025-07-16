@@ -6,31 +6,47 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
-import { generateWallet } from '@/pages/api/generateWallet';
-import { WalletPopup } from './wallet';
+import { generateWallet } from '@/pages/api/generateWallet'
+import { WalletPopup } from './wallet'
+import { GeneratedWalletProvider } from '@/lib/algorand/GeneratedWalletProvider'
+import { manager } from '@/lib/algorand/walletManager'
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
+
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
   const [generatedWallet, setGeneratedWallet] = useState<null | {
-    address: string;
-    private_key: string;
-    mnemonic: string;
-  }>(null);
+    address: string
+    private_key: string
+    mnemonic: string
+  }>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleGenerateWallet = async () => {
     try {
-      const wallet = await generateWallet();
-      setGeneratedWallet(wallet);
+      const wallet = await generateWallet()
+      setGeneratedWallet(wallet)
+
+      const provider = new GeneratedWalletProvider({
+        address: wallet.address,
+        privateKey: wallet.private_key,
+      })
+
+      // Inject into localStorage to persist reload (manager already reads from it)
+      localStorage.setItem(
+        'generated-wallet',
+        JSON.stringify({ address: wallet.address, privateKey: wallet.private_key })
+      )
+
+      // Reload page to force WalletManager to pick up the new wallet
+      window.location.reload()
     } catch (err) {
-      console.error("Wallet creation failed", err);
-      setToastMsg("Wallet creation failed.");
-      setTimeout(() => setToastMsg(''), 3000);
+      console.error("Wallet creation failed", err)
+      setToastMsg("Wallet creation failed.")
+      setTimeout(() => setToastMsg(''), 3000)
     }
-  };
+  }
 
   const connectWallet = async (id: WalletId) => {
     const wallet = wallets.find(w => w.id === id)
@@ -86,9 +102,7 @@ export const ConnectWalletButton = () => {
       <div className="wallet-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
         {!activeAccount ? (
           <>
-            <Button1 onClick={() => setIsOpen(!isOpen)}>
-              Connect Wallet
-            </Button1>
+            <Button1 onClick={() => setIsOpen(!isOpen)}>Connect Wallet</Button1>
 
             {isOpen && (
               <div
@@ -98,11 +112,11 @@ export const ConnectWalletButton = () => {
                   top: '100%',
                   right: 0,
                   zIndex: 1000,
-                  marginTop: '0.5rem', // some spacing below button
+                  marginTop: '0.5rem',
                   background: 'white',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '0.5rem',
-                  minWidth: '200px'
+                  minWidth: '200px',
                 }}
               >
                 <ul className="list">
@@ -156,14 +170,16 @@ export const ConnectWalletButton = () => {
                 alert(`Connected to ${activeWallet?.metadata?.name || activeWallet?.id}`)
               }
             >
-              <div style={{
-                background: 'black',
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                marginRight: 8
-              }}>
+              <div
+                style={{
+                  background: 'black',
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  marginRight: 8,
+                }}
+              >
                 <Image alt="Algorand icon" src="/algorand-logo.svg" width={12} height={12} />
               </div>
               {activeWallet?.metadata?.name || 'Algorand'}
@@ -176,7 +192,7 @@ export const ConnectWalletButton = () => {
                 background: 'linear-gradient(135deg, #1d1d1d, #444)',
                 color: 'white',
                 borderRadius: 12,
-                fontWeight: 400
+                fontWeight: 400,
               }}
             >
               {shortenAddress(activeAccount.address)}
@@ -187,15 +203,8 @@ export const ConnectWalletButton = () => {
 
       {toastMsg && <Toast message={toastMsg} />}
       {generatedWallet && (
-        <WalletPopup
-          data={generatedWallet}
-          onClose={() => setGeneratedWallet(null)}
-        />
+        <WalletPopup data={generatedWallet} onClose={() => setGeneratedWallet(null)} />
       )}
     </>
   )
 }
-function setToastMsg(arg0: string) {
-  throw new Error('Function not implemented.')
-}
-

@@ -1,4 +1,25 @@
 import { WalletManager, NetworkId, WalletId } from '@txnlab/use-wallet'
+import { GeneratedWalletProvider } from './GeneratedWalletProvider'
+import type { SupportedWallet } from '@txnlab/use-wallet'
+
+// ... your existing wallets
+const localGeneratedWallet = typeof window !== 'undefined'
+  ? localStorage.getItem('generated-wallet')
+  : null
+
+const customGeneratedWallet: SupportedWallet[] = localGeneratedWallet
+  ? [{
+      id: WalletId.CUSTOM,
+      options: {
+        provider: new GeneratedWalletProvider(JSON.parse(localGeneratedWallet))
+      },
+      metadata: {
+        name: 'Generated Wallet',
+        icon: '/algorand-logo.svg'
+      }
+    }]
+  : []
+
 
 const wallets = [
   { id: WalletId.PERA },
@@ -26,7 +47,8 @@ const wallets = [
         icons: ['https://www.siz.land/_next/image?url=%2Flogo1.png&w=96&q=75'],
       },
     }
-  }
+  },
+  ...customGeneratedWallet
 ]
 
 const networks = {
