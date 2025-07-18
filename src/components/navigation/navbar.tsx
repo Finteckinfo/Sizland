@@ -90,6 +90,10 @@ const otherLinks: NavLink[] = [
     label: "Blog",
     href: "/blog",
   },
+  {
+    label: "transactions",
+    href: "/transactions",
+  },
 ];
 
 export const Navbar: React.FC = () => {

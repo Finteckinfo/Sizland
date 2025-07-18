@@ -288,3 +288,151 @@
   background-color: hsla(243, 10%, 20%, 0.3);
   border: none;
 }
+
+/*transactions*/
+/* === Wallet Page Styling === */
+
+.action-card {
+  width: 100%;
+  background: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  margin-bottom: 3.5rem;
+  border: 1px solid #d6d6d6;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.action-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.action-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.action-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.action-input,
+.action-select {
+  flex: 1 1 200px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.action-input:focus,
+.action-select:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+.action-buttons {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+.btn-submit {
+  background-color: #0070f3;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.btn-submit:hover {
+  background-color: #005ac1;
+}
+
+/* === Transaction Cards Grid === */
+
+.transactions-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr; /* default to 1 column */
+}
+
+@media (min-width: 768px) {
+  .transactions-grid {
+    grid-template-columns: repeat(2, 1fr); /* medium screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .transactions-grid {
+    grid-template-columns: repeat(3, 1fr); /* large screens */
+  }
+}
+
+
+.transaction-card {
+  background: #fdfdfd;
+  border-radius: 14px;
+  padding: 1.5rem;
+  border-left: 6px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.transaction-card.confirmed {
+  border-left-color: #4CAF50;
+}
+
+.transaction-card.pending {
+  border-left-color: #FFC107;
+}
+
+.transaction-card.failed {
+  border-left-color: #F44336;
+}
+
+.tx-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.tx-status {
+  font-size: 0.9rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  background-color: #eee;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Status Colors */
+.transaction-card.confirmed .tx-status {
+  background-color: #e6f9ec;
+  color: #2e7d32;
+}
+.transaction-card.pending .tx-status {
+  background-color: #fff8e1;
+  color: #f9a825;
+}
+.transaction-card.failed .tx-status {
+  background-color: #fdecea;
+  color: #c62828;
+}
