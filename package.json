@@ -37,6 +37,8 @@
     "express": "^5.1.0",
     "framer-motion": "^12.6.3",
     "gsap": "^3.12.7",
+    "highcharts": "^12.3.0",
+    "highcharts-react-official": "^3.2.2",
     "lucide-react": "^0.441.0",
     "lute-connect": "^1.6.1",
     "next": "^15.2.4",
