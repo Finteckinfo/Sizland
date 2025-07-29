@@ -7,12 +7,12 @@ import { NextPage } from "next";
 const BlogPage: NextPage = () => {
   return (
     <PageLayout
-      title="Blog Coming Soon"
+      title="Coming Soon"
       description="Our blog will be available soon."
       justify="center"
     >
       <div className="flex flex-col justify-center items-center gap-8 text-center">
-        <Typography variant="h1">Blog Coming Soon</Typography>
+        <Typography variant="h1">Coming Soon</Typography>
         <Typography variant="paragraph">
           We are working on our blog. Stay tuned for updates and articles!
         </Typography>

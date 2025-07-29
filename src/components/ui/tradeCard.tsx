@@ -1,8 +1,16 @@
 // src/components/ui/tradeCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 export const TradeCard: React.FC = () => {
+  const [amount, setAmount] = useState<number>(0);
+
+  // Price increases by $0.01 for every 10 tokens above 0
+  const pricePerToken = 0.25 + Math.floor(amount / 10) * 0.01;
+  const subtotal = amount * pricePerToken;
+  const fee = subtotal * 0.01;
+  const total = subtotal + fee;
+
   return (
     <div className="rounded-2xl border border-gray-300 p-4 w-full space-y-4 bg-white text-gray-900 dark:bg-navy-blue dark:text-gray-100">
       {/* Header */}
@@ -12,20 +20,42 @@ export const TradeCard: React.FC = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Learn. Earn. Invest. Grow.</p>
         </div>
         <Button className="h-[48px] px-4 text-sm">
-          0.00 SIZ
+          {amount.toFixed(2)} SIZ
         </Button>
       </div>
 
       {/* Form */}
-      <form className="space-y-3">
-        {['Amount SIZ', 'Price BPL', 'Fee (1%)', 'Total BPL'].map((label, idx) => (
-          <input
-            key={idx}
-            type="text"
-            placeholder={label}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-        ))}
+      <form className="space-y-3" onSubmit={e => e.preventDefault()}>
+        <input
+          type="number"
+          min={0}
+          step={1}
+          placeholder="Amount SIZ"
+          value={amount === 0 ? '' : amount}
+          onChange={e => setAmount(Number(e.target.value))}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+        <input
+          type="text"
+          placeholder="Price Per Token"
+          value={`$${pricePerToken.toFixed(2)} USD`}
+          readOnly
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+        <input
+          type="text"
+          placeholder="Fee (1%)"
+          value={`$${fee.toFixed(2)} USD`}
+          readOnly
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+        <input
+          type="text"
+          placeholder="Total"
+          value={`$${total.toFixed(2)} USD`}
+          readOnly
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
         {/* Buy/Sell Buttons */}
         <div className="flex space-x-4 pt-2">
           <Button className="bg-green-500 text-white hover:bg-green-600 flex items-center gap-2">
