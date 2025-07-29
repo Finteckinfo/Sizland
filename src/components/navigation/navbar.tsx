@@ -91,8 +91,8 @@ const otherLinks: NavLink[] = [
     href: "/blog",
   },
   {
-    label: "transactions",
-    href: "/transactions",
+    label: "Wallet",
+    href: "/wallet",
   },
 ];
 

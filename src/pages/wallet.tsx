@@ -1,4 +1,4 @@
-// src/pages/transactions.tsx
+// src/pages/wallet.tsx
 import React from 'react';
 import { OrderCard } from '@/components/ui/orderCard';
 import { TradeCard } from '@/components/ui/tradeCard';
@@ -44,7 +44,7 @@ const candleChartOptions = {
   ]
 };
 
-const TransactionsPage = () => {
+const WalletPage = () => {
   return (
     <PageLayout title="Trade" description="Trade with Sizland">
       <div className="p-6 space-y-6">
@@ -65,4 +65,4 @@ const TransactionsPage = () => {
   );
 };
 
-export default TransactionsPage;
+export default WalletPage; 
