@@ -41,6 +41,11 @@ export const WalletBalance: React.FC = () => {
     }
   };
 
+  // Get the SIZ asset ID for the selected network
+  const getSizAssetId = (network: Network) => {
+    return network === 'mainnet' ? 2905622564 : 739030083;
+  };
+
   // Set mounted to true after component mounts on client
   useEffect(() => {
     setMounted(true);
@@ -56,34 +61,39 @@ export const WalletBalance: React.FC = () => {
     try {
       const client = getAlgorandClient(selectedNetwork);
       const account = await client.accountInformation(activeAccount.address).do();
-      
-      console.log('Raw account data:', account); // Debug log
-      
-      // Fetch asset params for each asset
-      const assets: Asset[] = await Promise.all(
-        (account.assets || []).map(async (asset: any) => {
-          const assetId = Number(asset['asset-id']);
-          let name, unitName, decimals;
-          try {
-            const assetInfo = await client.getAssetByID(assetId).do();
-            name = assetInfo.params.name;
-            unitName = assetInfo.params.unitName;
-            decimals = assetInfo.params.decimals;
-          } catch (e) {
-            // If fetching asset params fails, fallback to undefined
-            name = undefined;
-            unitName = undefined;
-            decimals = 0;
-          }
-          return {
-            assetId,
-            amount: Number(asset.amount),
-            name,
-            unitName,
-            decimals,
-          };
-        })
+
+      const sizAssetId = getSizAssetId(selectedNetwork);
+
+      // Find the SIZ asset in the user's assets
+      const sizAssetRaw = (account.assets || []).find(
+        (asset: any) => Number(asset['asset-id']) === sizAssetId
       );
+
+      let amount = 0;
+      if (sizAssetRaw) {
+        amount = Number(sizAssetRaw.amount);
+      }
+
+      // Always fetch SIZ asset params
+      let name, unitName, decimals;
+      try {
+        const assetInfo = await client.getAssetByID(sizAssetId).do();
+        name = assetInfo.params.name;
+        unitName = assetInfo.params['unit-name']; // <-- correct!
+        decimals = assetInfo.params.decimals;
+      } catch (e) {
+        name = undefined;
+        unitName = undefined;
+        decimals = 0;
+      }
+
+      const assets: Asset[] = [{
+        assetId: sizAssetId,
+        amount,
+        name,
+        unitName,
+        decimals,
+      }];
 
       const formattedAccount: AccountInfo = {
         amount: Number(account.amount),
@@ -91,10 +101,8 @@ export const WalletBalance: React.FC = () => {
         assets,
       };
 
-      console.log('Formatted account data:', formattedAccount); // Debug log
       setAccountInfo(formattedAccount);
     } catch (err) {
-      console.error('Failed to fetch account info:', err);
       setError('Failed to load wallet information');
     } finally {
       setLoading(false);
@@ -193,7 +201,7 @@ export const WalletBalance: React.FC = () => {
               {selectedNetwork === 'mainnet' ? 'MainNet' : 'TestNet'}
               <ChevronDownIcon className="h-4 w-4" />
             </Button>
-            
+
             {showNetworkDropdown && (
               <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[120px]">
                 <button
@@ -217,10 +225,10 @@ export const WalletBalance: React.FC = () => {
               </div>
             )}
           </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={fetchAccountInfo}
             disabled={loading}
           >
@@ -274,7 +282,7 @@ export const WalletBalance: React.FC = () => {
               <CoinsIcon className="h-5 w-5 text-yellow-500" />
               <Typography variant="h4">ALGO Balance</Typography>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <Typography variant="small" className="text-gray-500 mb-1">
@@ -284,7 +292,7 @@ export const WalletBalance: React.FC = () => {
                   {formatNumber(totalAlgoBalance)} ALGO
                 </Typography>
               </div>
-              
+
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <Typography variant="small" className="text-gray-500 mb-1">
                   Available
@@ -305,39 +313,49 @@ export const WalletBalance: React.FC = () => {
             </div>
           </div>
 
-          {/* Other Assets */}
+          {/* SIZ Token */}
           {accountInfo.assets.length > 0 && (
             <div className="space-y-3">
-              <Typography variant="h4">Other Assets</Typography>
+              <Typography variant="h4">SIZ Token</Typography>
               <div className="space-y-2">
                 {accountInfo.assets.map((asset) => (
-                  <div 
-                    key={asset.assetId} 
-                    className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between items-center"
+                  <div
+                    key={asset.assetId}
+                    className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-700 flex justify-between items-center"
                   >
                     <div>
-                      <Typography variant="paragraph" className="font-medium">
-                        {asset.name || `Asset ${asset.assetId}`}
+                      <Typography variant="paragraph" className="font-bold text-blue-600 dark:text-blue-400">
+                        {asset.name || 'SIZ Token'}
                       </Typography>
                       <Typography variant="small" className="text-gray-500">
-                        ID: {asset.assetId}
+                        Asset ID: {asset.assetId}
                       </Typography>
                     </div>
-                    <Typography variant="paragraph" className="font-mono">
-                      {formatAssetAmount(asset.amount, asset.decimals)} {asset.unitName || ''}
-                    </Typography>
+                    <div className="text-right">
+                      <Typography variant="h4" className="font-bold text-blue-600 dark:text-blue-400">
+                        {formatAssetAmount(asset.amount, asset.decimals)} {asset.unitName || 'SIZ'}
+                      </Typography>
+                      <Typography variant="small" className="text-gray-500">
+                        SIZ Token Balance
+                      </Typography>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* No Assets Message */}
+          {/* No SIZ Tokens Message */}
           {accountInfo.assets.length === 0 && (
-            <div className="text-center py-4">
-              <Typography variant="paragraph" className="text-gray-500">
-                No other assets found in this wallet
-              </Typography>
+            <div className="text-center py-6">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Typography variant="paragraph" className="text-gray-500 mb-2">
+                  No SIZ tokens found in this wallet
+                </Typography>
+                <Typography variant="small" className="text-gray-400">
+                  Switch networks to view SIZ tokens on different networks
+                </Typography>
+              </div>
             </div>
           )}
         </div>
