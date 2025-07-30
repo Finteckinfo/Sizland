@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Typography } from './typography';
 import { Button } from './button';
-import { WalletIcon, CoinsIcon, AlertCircleIcon } from 'lucide-react';
+import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon } from 'lucide-react';
+import algosdk from 'algosdk';
 
 interface Asset {
   assetId: number;
@@ -20,12 +21,25 @@ interface AccountInfo {
   assets: Asset[];
 }
 
+type Network = 'testnet' | 'mainnet';
+
 export const WalletBalance: React.FC = () => {
   const { activeAccount, activeWallet, algodClient } = useWallet();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [selectedNetwork, setSelectedNetwork] = useState<Network>('testnet');
+  const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
+
+  // Create Algorand client for the selected network
+  const getAlgorandClient = (network: Network) => {
+    if (network === 'mainnet') {
+      return new algosdk.Algodv2('', 'https://mainnet-api.algonode.cloud', '');
+    } else {
+      return new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
+    }
+  };
 
   // Set mounted to true after component mounts on client
   useEffect(() => {
@@ -34,27 +48,47 @@ export const WalletBalance: React.FC = () => {
 
   // Fetch account information
   const fetchAccountInfo = async () => {
-    if (!activeAccount?.address || !algodClient) return;
+    if (!activeAccount?.address) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const account = await algodClient.accountInformation(activeAccount.address).do();
+      const client = getAlgorandClient(selectedNetwork);
+      const account = await client.accountInformation(activeAccount.address).do();
       
       console.log('Raw account data:', account); // Debug log
       
-      // Format the account data with proper BigInt conversion
+      // Fetch asset params for each asset
+      const assets: Asset[] = await Promise.all(
+        (account.assets || []).map(async (asset: any) => {
+          const assetId = Number(asset['asset-id']);
+          let name, unitName, decimals;
+          try {
+            const assetInfo = await client.getAssetByID(assetId).do();
+            name = assetInfo.params.name;
+            unitName = assetInfo.params.unitName;
+            decimals = assetInfo.params.decimals;
+          } catch (e) {
+            // If fetching asset params fails, fallback to undefined
+            name = undefined;
+            unitName = undefined;
+            decimals = 0;
+          }
+          return {
+            assetId,
+            amount: Number(asset.amount),
+            name,
+            unitName,
+            decimals,
+          };
+        })
+      );
+
       const formattedAccount: AccountInfo = {
         amount: Number(account.amount),
         minBalance: Number(account.minBalance || 0),
-        assets: account.assets?.map((asset: any) => ({
-          assetId: Number(asset['asset-id']),
-          amount: Number(asset.amount),
-          name: asset.name,
-          unitName: asset['unit-name'],
-          decimals: asset.decimals
-        })) || []
+        assets,
       };
 
       console.log('Formatted account data:', formattedAccount); // Debug log
@@ -67,14 +101,22 @@ export const WalletBalance: React.FC = () => {
     }
   };
 
-  // Fetch account info when wallet connects (only on client)
+  // Fetch account info when wallet connects or network changes (only on client)
   useEffect(() => {
     if (mounted && activeAccount?.address) {
       fetchAccountInfo();
     } else {
       setAccountInfo(null);
     }
-  }, [mounted, activeAccount?.address]);
+  }, [mounted, activeAccount?.address, selectedNetwork]);
+
+  // Handle network change
+  const handleNetworkChange = (network: Network) => {
+    setSelectedNetwork(network);
+    setShowNetworkDropdown(false);
+    // Clear current account info to force refresh with new network
+    setAccountInfo(null);
+  };
 
   // Calculate balances with proper number handling
   const totalAlgoBalance = accountInfo ? accountInfo.amount / 1_000_000 : 0;
@@ -138,14 +180,53 @@ export const WalletBalance: React.FC = () => {
           <WalletIcon className="h-6 w-6 text-blue-500" />
           <Typography variant="h3">Wallet Balance</Typography>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={fetchAccountInfo}
-          disabled={loading}
-        >
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Network Selector */}
+          <div className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
+              className="flex items-center gap-2"
+            >
+              <span className={`w-2 h-2 rounded-full ${selectedNetwork === 'mainnet' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+              {selectedNetwork === 'mainnet' ? 'MainNet' : 'TestNet'}
+              <ChevronDownIcon className="h-4 w-4" />
+            </Button>
+            
+            {showNetworkDropdown && (
+              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[120px]">
+                <button
+                  onClick={() => handleNetworkChange('testnet')}
+                  className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                    selectedNetwork === 'testnet' ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                  TestNet
+                </button>
+                <button
+                  onClick={() => handleNetworkChange('mainnet')}
+                  className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                    selectedNetwork === 'mainnet' ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  MainNet
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchAccountInfo}
+            disabled={loading}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Wallet Info */}
@@ -157,7 +238,7 @@ export const WalletBalance: React.FC = () => {
           {activeAccount.address.slice(0, 8)}...{activeAccount.address.slice(-8)}
         </Typography>
         <Typography variant="small" className="text-gray-500">
-          {activeWallet?.metadata?.name || 'Algorand Wallet'}
+          {activeWallet?.metadata?.name || 'Algorand Wallet'} • {selectedNetwork === 'mainnet' ? 'MainNet' : 'TestNet'}
         </Typography>
       </div>
 
