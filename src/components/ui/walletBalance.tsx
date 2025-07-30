@@ -79,7 +79,7 @@ export const WalletBalance: React.FC = () => {
       try {
         const assetInfo = await client.getAssetByID(sizAssetId).do();
         name = assetInfo.params.name;
-        unitName = assetInfo.params['unit-name']; // <-- correct!
+        unitName = assetInfo.params.unitName; // <-- correct!
         decimals = assetInfo.params.decimals;
       } catch (e) {
         name = undefined;
