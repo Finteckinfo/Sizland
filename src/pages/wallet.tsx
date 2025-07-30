@@ -3,6 +3,7 @@ import React from 'react';
 import { OrderCard } from '@/components/ui/orderCard';
 import { TradeCard } from '@/components/ui/tradeCard';
 import { CandleStickChart } from '@/components/ui/candleStickChart';
+import { WalletBalance } from '@/components/ui/walletBalance';
 import { PageLayout } from '@/components/page-layout';
 
 const dummyOrders = [
@@ -48,6 +49,12 @@ const WalletPage = () => {
   return (
     <PageLayout title="Trade" description="Trade with Sizland">
       <div className="p-6 space-y-6">
+        {/* Wallet Balance Section */}
+        <div className="w-full">
+          <WalletBalance />
+        </div>
+        
+        {/* Trading Section */}
         <div className="flex gap-4">
           <div className="w-1/4">
             <OrderCard type="sell" data={dummyOrders} />
