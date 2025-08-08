@@ -54,6 +54,7 @@ module.exports = {
       fontFamily: {
         pj:['"PIXymbols Very Loose W01 Reg"', 'sans-serif'],
       },
+
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import Waves from "@/components/ui/wave"; // Import Waves
+
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
