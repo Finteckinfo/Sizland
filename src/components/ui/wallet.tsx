@@ -1,6 +1,9 @@
 'use client'
 
 import React from 'react';
+import { Typography } from './typography';
+import { Button } from './button';
+import { Copy, X, CheckCircle } from 'lucide-react';
 
 export const WalletPopup = ({
   data,
@@ -9,125 +12,114 @@ export const WalletPopup = ({
   data: { address: string; private_key: string; mnemonic: string };
   onClose: () => void;
 }) => {
-  const handleCopy = () => {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = async () => {
     const copyText = `Address: ${data.address}\nPrivate Key: ${data.private_key}\nMnemonic: ${data.mnemonic}`;
-    navigator.clipboard.writeText(copyText);
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0, left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 9999,
-        padding: '1rem',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#fff',
-          borderRadius: '1rem',
-          maxWidth: '600px',
-          width: '100%',
-          padding: '2rem',
-          fontFamily: 'monospace',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-        }}
-      >
-        <h2 style={{ fontSize: '1.75rem', marginBottom: '1.5rem', color: '#111' }}>
-          ✅ Wallet Created Successfully
-        </h2>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }}>
-            Address:
-          </label>
-          <pre
-            style={{
-              backgroundColor: '#f4f4f4',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              overflowX: 'auto',
-              wordWrap: 'break-word',
-              fontSize: '0.95rem',
-            }}
-          >
-            {data.address}
-          </pre>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-300 dark:border-gray-600 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+              <Typography variant="h3" className="text-gray-900 dark:text-gray-100">
+                Wallet Created Successfully
+              </Typography>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <Typography variant="paragraph" className="text-gray-600 dark:text-gray-400 mt-2">
+            Your wallet credentials have been generated and sent to your email. Keep them safe!
+          </Typography>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }}>
-            Private Key:
-          </label>
-          <pre
-            style={{
-              backgroundColor: '#f4f4f4',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              overflowX: 'auto',
-              wordWrap: 'break-word',
-              fontSize: '0.95rem',
-            }}
-          >
-            {data.private_key}
-          </pre>
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Address */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-500 dark:text-gray-400 font-medium">
+              Address
+            </Typography>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <Typography variant="paragraph" className="font-mono text-sm break-all text-gray-900 dark:text-gray-100">
+                {data.address}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Private Key */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-500 dark:text-gray-400 font-medium">
+              Private Key
+            </Typography>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <Typography variant="paragraph" className="font-mono text-sm break-all text-gray-900 dark:text-gray-100">
+                {data.private_key}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Mnemonic */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-500 dark:text-gray-400 font-medium">
+              Mnemonic (25 words)
+            </Typography>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <Typography variant="paragraph" className="font-mono text-sm break-words text-gray-900 dark:text-gray-100 leading-relaxed">
+                {data.mnemonic}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Warning */}
+          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <Typography variant="small" className="text-yellow-800 dark:text-yellow-200">
+              ⚠️ <strong>Important:</strong> Store these credentials securely. Never share your private key or mnemonic with anyone. 
+              You can use the mnemonic to recover your wallet if needed.
+            </Typography>
+          </div>
         </div>
 
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }}>
-            Mnemonic:
-          </label>
-          <pre
-            style={{
-              backgroundColor: '#f4f4f4',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              overflowX: 'auto',
-              wordWrap: 'break-word',
-              fontSize: '0.95rem',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            {data.mnemonic}
-          </pre>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-          <button
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+          <Button
+            variant="outline"
             onClick={handleCopy}
-            style={{
-              padding: '0.6rem 1.2rem',
-              backgroundColor: '#0070f3',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-            }}
+            className="flex items-center gap-2"
           >
-            📋 Copy Info
-          </button>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '0.6rem 1.2rem',
-              backgroundColor: '#e0e0e0',
-              color: '#333',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-            }}
-          >
-            ❌ Close
-          </button>
+            {copied ? (
+              <>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copy All
+              </>
+            )}
+          </Button>
+          <Button onClick={onClose}>
+            Close
+          </Button>
         </div>
       </div>
     </div>

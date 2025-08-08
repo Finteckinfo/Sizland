@@ -16,7 +16,12 @@ import { ConnectWalletButton } from "../ui/connect-button";
 import { Typography } from "../ui/typography";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-export const HeaderSheet: React.FC = () => {
+interface NavLink {
+  label: string;
+  href: string;
+}
+
+export const HeaderSheet: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
   return (
@@ -42,7 +47,7 @@ export const HeaderSheet: React.FC = () => {
         </div>
         <div className="flex flex-col items-stretch gap-2">
           <ConnectWalletButton />
-          <MobileNavLinks />
+          <MobileNavLinks otherLinks={otherLinks} />
         </div>
         <div className="absolute bottom-4 left-4">
           <ThemeToggler />

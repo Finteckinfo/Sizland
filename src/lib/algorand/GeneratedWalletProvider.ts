@@ -2,40 +2,56 @@ import algosdk from 'algosdk'
 import { CustomProvider, WalletAccount } from '@txnlab/use-wallet'
 
 export class GeneratedWalletProvider implements CustomProvider {
-  private account: WalletAccount
-  private sk: Uint8Array
+  private account: WalletAccount | null = null
+  private sk: Uint8Array | null = null
 
-  constructor({ address, privateKey }: { address: string; privateKey: string }) {
-    this.account = {
-      name: 'Generated Wallet',
-      address,
+  constructor() {
+    // Initialize without parameters - will load from localStorage when needed
+  }
+
+  private loadWalletFromStorage(): boolean {
+    if (typeof window === 'undefined') return false
+    
+    const data = localStorage.getItem('generated-wallet')
+    if (!data) return false
+
+    try {
+      const { address, privateKey } = JSON.parse(data)
+      this.account = {
+        name: 'Generated Wallet',
+        address,
+      }
+      this.sk = new Uint8Array(Buffer.from(privateKey, 'base64'))
+      return true
+    } catch (err) {
+      console.error('Failed to load generated wallet from storage:', err)
+      return false
     }
-
-    this.sk = new Uint8Array(Buffer.from(privateKey, 'base64'))
-    localStorage.setItem('generated-wallet', JSON.stringify({ address, privateKey }))
   }
 
   async connect(): Promise<WalletAccount[]> {
+    if (!this.loadWalletFromStorage()) {
+      throw new Error('No generated wallet found in storage')
+    }
+    
+    if (!this.account) {
+      throw new Error('Failed to load wallet account')
+    }
+
     return [this.account]
   }
 
   async disconnect(): Promise<void> {
     localStorage.removeItem('generated-wallet')
+    this.account = null
+    this.sk = null
   }
 
   async resumeSession(): Promise<WalletAccount[] | void> {
-    const data = localStorage.getItem('generated-wallet')
-    if (!data) return
-
-    try {
-      const { address, privateKey } = JSON.parse(data)
-      this.account = { name: 'Generated Wallet', address }
-      this.sk = new Uint8Array(Buffer.from(privateKey, 'base64'))
+    if (this.loadWalletFromStorage() && this.account) {
       return [this.account]
-    } catch (err) {
-      console.error('Failed to resume generated wallet session:', err)
-      return
     }
+    return
   }
 
   async signTransactions(
@@ -45,6 +61,10 @@ export class GeneratedWalletProvider implements CustomProvider {
       | (algosdk.Transaction[] | Uint8Array[])[],
     indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> {
+    if (!this.sk) {
+      throw new Error('No private key available for signing')
+    }
+
     const txns: algosdk.Transaction[] = []
 
     const flatten = (arr: any[]) =>
@@ -61,7 +81,7 @@ export class GeneratedWalletProvider implements CustomProvider {
 
     const toSign = indexesToSign ?? txns.map((_, i) => i)
     return txns.map((txn, i) =>
-      toSign.includes(i) ? algosdk.signTransaction(txn, this.sk).blob : null
+      toSign.includes(i) ? algosdk.signTransaction(txn, this.sk!).blob : null
     )
   }
 }

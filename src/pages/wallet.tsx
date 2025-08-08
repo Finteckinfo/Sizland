@@ -1,10 +1,12 @@
 // src/pages/wallet.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { OrderCard } from '@/components/ui/orderCard';
 import { TradeCard } from '@/components/ui/tradeCard';
 import { CandleStickChart } from '@/components/ui/candleStickChart';
 import { WalletBalance } from '@/components/ui/walletBalance';
+
 import { PageLayout } from '@/components/page-layout';
+import { useWallet } from '@txnlab/use-wallet-react';
 
 const dummyOrders = [
   { price: '0.45', amount: '100', total: '45' },
@@ -46,6 +48,9 @@ const candleChartOptions = {
 };
 
 const WalletPage = () => {
+  const { activeAccount } = useWallet();
+
+
   return (
     <PageLayout title="Trade" description="Trade with Sizland">
       <div className="p-6 space-y-6">
@@ -53,6 +58,8 @@ const WalletPage = () => {
         <div className="w-full">
           <WalletBalance />
         </div>
+
+
         
         {/* Trading Section */}
         <div className="flex gap-4">

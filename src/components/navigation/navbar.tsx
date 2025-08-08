@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
+import { loadWallet } from "@/lib/algorand/walletGenerator";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -77,22 +78,53 @@ const productLinks: DropdownLinks[] = [
   },
 ];
 
-const otherLinks: NavLink[] = [
-  {
-    label: "White Paper",
-    href: "/whitepaper",
-  },
-  {
-    label: "Blog",
-    href: "/blog",
-  },
-  {
-    label: "Wallet",
-    href: "/wallet",
-  },
-];
-
 export const Navbar: React.FC = () => {
+  const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const wallet = loadWallet();
+    setHasGeneratedWallet(!!wallet);
+
+    // Listen for wallet generation events
+    const handleWalletGenerated = () => {
+      setHasGeneratedWallet(true);
+    };
+
+    const handleWalletCleared = () => {
+      setHasGeneratedWallet(false);
+    };
+
+    window.addEventListener('walletGenerated', handleWalletGenerated);
+    window.addEventListener('walletCleared', handleWalletCleared);
+
+    return () => {
+      window.removeEventListener('walletGenerated', handleWalletGenerated);
+      window.removeEventListener('walletCleared', handleWalletCleared);
+    };
+  }, []);
+
+  const otherLinks: NavLink[] = [
+    {
+      label: "White Paper",
+      href: "/whitepaper",
+    },
+    {
+      label: "Blog",
+      href: "/blog",
+    },
+    {
+      label: "Wallet",
+      href: "/wallet",
+    },
+    // Conditionally add New Wallet link
+    ...(hasGeneratedWallet ? [{
+      label: "New Wallet",
+      href: "/new-wallet",
+    }] : []),
+  ];
+
   return (
     <div className="fixed z-50 flex w-full justify-between items-center border-b border-neutral-400/50 bg-white/50 p-4 backdrop-blur-xl dark:bg-black/50 md:px-16 md:py-4">
       {/* Desktop Logo */}
@@ -130,7 +162,7 @@ export const Navbar: React.FC = () => {
 
       {/* Desktop Nav */}
       <div className="flex-1 justify-center hidden items-center gap-3 lg:flex">
-        <NaviLinks />
+        <NaviLinks otherLinks={otherLinks} />
       </div>
 
       {/* Actions */}
@@ -141,13 +173,13 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       <div className="block lg:hidden">
-        <HeaderSheet />
+        <HeaderSheet otherLinks={otherLinks} />
       </div>
     </div>
   );
 };
 
-export const NaviLinks: React.FC = () => {
+export const NaviLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -195,7 +227,7 @@ export const NaviLinks: React.FC = () => {
   );
 };
 
-export const MobileNavLinks: React.FC = () => {
+export const MobileNavLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
   return (
     <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
       {otherLinks.map((navLink, index) => (

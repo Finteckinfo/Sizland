@@ -6,47 +6,98 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
-import { generateWallet } from '@/pages/api/generateWallet'
-import { WalletPopup } from './wallet'
+import { generateAlgorandWallet, storeWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator'
 import { GeneratedWalletProvider } from '@/lib/algorand/GeneratedWalletProvider'
+import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/router'
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
+  const router = useRouter()
 
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
-  const [generatedWallet, setGeneratedWallet] = useState<null | {
-    address: string
-    private_key: string
-    mnemonic: string
-  }>(null)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [email, setEmail] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isEmailSending, setIsEmailSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleGenerateWallet = async () => {
+    if (!email.trim()) {
+      setError('Please enter your email address')
+      return
+    }
+
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address')
+      return
+    }
+
+    setIsGenerating(true)
+    setError(null)
+    setSuccess(null)
+
     try {
-      const wallet = await generateWallet()
-      setGeneratedWallet(wallet)
+      // Generate wallet
+      const wallet = generateAlgorandWallet()
 
-      // Store it in localStorage so `resumeSession()` works
-      localStorage.setItem(
-        'generated-wallet',
-        JSON.stringify({ address: wallet.address, privateKey: wallet.private_key })
-      )
+      // Store wallet in localStorage
+      storeWallet(wallet)
 
-      // Now connect to the custom wallet without reloading
-      const customWallet = wallets.find(w => w.id === WalletId.CUSTOM)
-      if (!customWallet) {
-        console.error('Custom wallet not registered in walletManager.')
-        setToastMsg('Custom wallet not available.')
-        return
+      // Send email with credentials
+      setIsEmailSending(true)
+      const emailResponse = await fetch('/api/sendWalletEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          address: wallet.address,
+          privateKey: wallet.privateKey,
+          mnemonic: wallet.mnemonic,
+        }),
+      })
+
+      if (!emailResponse.ok) {
+        throw new Error('Failed to send email')
       }
 
-      await customWallet.connect()
+      setSuccess('Wallet generated successfully! Check your email for credentials.')
+
+      // Auto-connect the generated wallet with proper error handling
+      try {
+        const customWallet = wallets.find(w => w.id === WalletId.CUSTOM)
+        if (customWallet) {
+          console.log('🔍 Debug - Found custom wallet, attempting to connect...')
+          await customWallet.connect()
+          console.log('🔍 Debug - Custom wallet connected successfully!')
+        } else {
+          console.error('🔍 Debug - Custom wallet not found in wallets list')
+        }
+      } catch (connectError) {
+        console.error('🔍 Debug - Failed to auto-connect wallet:', connectError)
+        // Don't throw error here as wallet was still generated successfully
+        // The user can manually connect later
+      }
+
       setIsOpen(false)
+      setShowEmailForm(false)
+      
+      // Notify navbar that a wallet has been generated
+      window.dispatchEvent(new CustomEvent('walletGenerated'));
+      
+      // Redirect to the new wallet page
+      router.push('/new-wallet')
     } catch (err) {
-      console.error('Wallet creation failed', err)
-      setToastMsg('Wallet creation failed.')
-      setTimeout(() => setToastMsg(''), 3000)
+      console.error('Wallet generation failed:', err)
+      setError('Failed to generate wallet. Please try again.')
+    } finally {
+      setIsGenerating(false)
+      setIsEmailSending(false)
     }
   }
 
@@ -154,7 +205,7 @@ export const ConnectWalletButton = () => {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
-                      handleGenerateWallet()
+                      setShowEmailForm(true)
                     }}
                     style={{ color: '#0070f3', textDecoration: 'underline', cursor: 'pointer' }}
                   >
@@ -204,8 +255,159 @@ export const ConnectWalletButton = () => {
       </div>
 
       {toastMsg && <Toast message={toastMsg} />}
-      {generatedWallet && (
-        <WalletPopup data={generatedWallet} onClose={() => setGeneratedWallet(null)} />
+      
+      {/* Email Form Modal */}
+      {showEmailForm && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '1rem',
+              maxWidth: '500px',
+              width: '100%',
+              padding: '2rem',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+            }}
+          >
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#111', textAlign: 'center' }}>
+              🎉 Create Your Sizland Wallet
+            </h2>
+            
+            <p style={{ marginBottom: '1.5rem', color: '#666', textAlign: 'center' }}>
+              Enter your email to receive your wallet credentials securely.
+            </p>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem', color: '#333' }}>
+                Email Address:
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                }}
+                disabled={isGenerating}
+              />
+            </div>
+
+            {error && (
+              <div style={{ 
+                padding: '0.75rem', 
+                backgroundColor: '#fee2e2', 
+                border: '1px solid #fecaca',
+                borderRadius: '0.5rem',
+                marginBottom: '1rem',
+                color: '#dc2626'
+              }}>
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div style={{ 
+                padding: '0.75rem', 
+                backgroundColor: '#dcfce7', 
+                border: '1px solid #bbf7d0',
+                borderRadius: '0.5rem',
+                marginBottom: '1rem',
+                color: '#166534'
+              }}>
+                {success}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+              <button
+                onClick={() => {
+                  setShowEmailForm(false)
+                  setEmail('')
+                  setError(null)
+                  setSuccess(null)
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  flex: 1,
+                }}
+                disabled={isGenerating}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleGenerateWallet}
+                disabled={isGenerating || !email.trim()}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: isGenerating || !email.trim() ? '#ccc' : '#0070f3',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: isGenerating || !email.trim() ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  flex: 1,
+                }}
+              >
+                {isGenerating ? 'Generating...' : 'Generate Wallet'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Sending Overlay */}
+      {isEmailSending && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '1rem',
+              padding: '2rem',
+              textAlign: 'center',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📧</div>
+            <h3 style={{ marginBottom: '0.5rem', color: '#333' }}>Sending Wallet Credentials</h3>
+            <p style={{ color: '#666' }}>Please wait while we send your wallet credentials to your email...</p>
+          </div>
+        </div>
       )}
     </>
   )

@@ -8,25 +8,6 @@ import {
 import { GeneratedWalletProvider } from './GeneratedWalletProvider'
 import { ALGORAND_NETWORKS } from '@/lib/config'
 
-// Only access localStorage on client-side
-const localGeneratedWallet =
-  typeof window !== 'undefined' ? localStorage.getItem('generated-wallet') : null
-
-const customGeneratedWallet: SupportedWallet[] = localGeneratedWallet
-  ? [
-      {
-        id: WalletId.CUSTOM,
-        options: {
-          provider: new GeneratedWalletProvider(JSON.parse(localGeneratedWallet)),
-        },
-        metadata: {
-          name: 'Generated Wallet',
-          icon: '/algorand-logo.svg',
-        },
-      },
-    ]
-  : []
-
 const wallets: SupportedWallet[] = [
   { id: WalletId.PERA },
   { id: WalletId.DEFLY },
@@ -50,7 +31,17 @@ const wallets: SupportedWallet[] = [
       },
     } satisfies WalletConnectOptions,
   },
-  ...customGeneratedWallet,
+  // Always include the GeneratedWalletProvider
+  {
+    id: WalletId.CUSTOM,
+    options: {
+      provider: new GeneratedWalletProvider(),
+    },
+    metadata: {
+      name: 'Generated Wallet',
+      icon: '/algorand-logo.svg',
+    },
+  },
 ]
 
 const networks = {
