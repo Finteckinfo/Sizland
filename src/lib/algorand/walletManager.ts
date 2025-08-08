@@ -6,6 +6,7 @@ import {
   type WalletConnectOptions,
 } from '@txnlab/use-wallet'
 import { GeneratedWalletProvider } from './GeneratedWalletProvider'
+import { ALGORAND_NETWORKS } from '@/lib/config'
 
 // Only access localStorage on client-side
 const localGeneratedWallet =
@@ -54,32 +55,32 @@ const wallets: SupportedWallet[] = [
 
 const networks = {
   [NetworkId.TESTNET]: {
-    name: 'Testnet',
+    name: ALGORAND_NETWORKS.testnet.name,
     algod: {
-      baseServer: 'https://testnet-api.algonode.cloud',
+      baseServer: ALGORAND_NETWORKS.testnet.algodUrl,
       port: '',
       token: '',
     },
     indexer: {
-      baseServer: 'https://testnet-idx.algonode.cloud',
+      baseServer: ALGORAND_NETWORKS.testnet.indexerUrl,
       port: '',
       token: '',
     },
-    chainId: '416001',
+    chainId: ALGORAND_NETWORKS.testnet.chainId,
   },
   [NetworkId.MAINNET]: {
-    name: 'MainNet',
+    name: ALGORAND_NETWORKS.mainnet.name,
     algod: {
-      baseServer: 'https://mainnet-api.algonode.cloud',
+      baseServer: ALGORAND_NETWORKS.mainnet.algodUrl,
       port: '',
       token: '',
     },
     indexer: {
-      baseServer: 'https://mainnet-idx.algonode.cloud',
+      baseServer: ALGORAND_NETWORKS.mainnet.indexerUrl,
       port: '',
       token: '',
     },
-    chainId: '4160',
+    chainId: ALGORAND_NETWORKS.mainnet.chainId,
   },
 }
 

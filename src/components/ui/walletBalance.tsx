@@ -6,6 +6,7 @@ import { Typography } from './typography';
 import { Button } from './button';
 import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon } from 'lucide-react';
 import algosdk from 'algosdk';
+import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
 
 interface Asset {
   assetId: number;
@@ -21,8 +22,6 @@ interface AccountInfo {
   assets: Asset[];
 }
 
-type Network = 'testnet' | 'mainnet';
-
 export const WalletBalance: React.FC = () => {
   const { activeAccount, activeWallet, algodClient } = useWallet();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
@@ -34,16 +33,13 @@ export const WalletBalance: React.FC = () => {
 
   // Create Algorand client for the selected network
   const getAlgorandClient = (network: Network) => {
-    if (network === 'mainnet') {
-      return new algosdk.Algodv2('', 'https://mainnet-api.algonode.cloud', '');
-    } else {
-      return new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
-    }
+    const networkConfig = ALGORAND_NETWORKS[network];
+    return new algosdk.Algodv2('', networkConfig.algodUrl, '');
   };
 
   // Get the SIZ asset ID for the selected network
   const getSizAssetId = (network: Network) => {
-    return network === 'mainnet' ? 2905622564 : 739030083;
+    return SIZ_ASSET_IDS[network];
   };
 
   // Set mounted to true after component mounts on client
@@ -79,7 +75,7 @@ export const WalletBalance: React.FC = () => {
       try {
         const assetInfo = await client.getAssetByID(sizAssetId).do();
         name = assetInfo.params.name;
-        unitName = assetInfo.params.unitName; // <-- correct!
+        unitName = assetInfo.params.unitName;
         decimals = assetInfo.params.decimals;
       } catch (e) {
         name = undefined;

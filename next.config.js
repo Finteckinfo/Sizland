@@ -1,9 +1,4 @@
 // next.config.js
-// Removed: const { webpackFallback } = require('@txnlab/use-wallet-react')
-
-// Manually define fallbacks if needed. For now, use an empty object.
-const webpackFallback = {};
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -11,7 +6,10 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        ...webpackFallback,
+        buffer: require.resolve('buffer'),
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        util: require.resolve('util'),
       }
     }
     return config

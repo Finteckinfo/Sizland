@@ -67,9 +67,32 @@ const MainContainer: React.FC<LayoutProps & { children: React.ReactNode; backgro
     stretch: "items-stretch",
   }[align];
 
+  const flexDirectionClass = {
+    row: "flex-row",
+    col: "flex-col",
+  }[flexDirection];
+
+  const gapClass = {
+    1: "gap-1",
+    2: "gap-2",
+    3: "gap-3",
+    4: "gap-4",
+    5: "gap-5",
+    6: "gap-6",
+    7: "gap-7",
+    8: "gap-8",
+    9: "gap-9",
+    10: "gap-10",
+    12: "gap-12",
+    16: "gap-16",
+    20: "gap-20",
+    24: "gap-24",
+    32: "gap-32",
+  }[gap] || "gap-8";
+
   return (
     <main
-      className={`min-h-[100vh] p-8 flex flex-${flexDirection} ${justifyClass} ${alignClass} gap-${gap} py-32`}
+      className={`min-h-[100vh] p-8 flex ${flexDirectionClass} ${justifyClass} ${alignClass} ${gapClass} py-32`}
       style={{ background: background }} // Apply the background style conditionally
     >
       {children}

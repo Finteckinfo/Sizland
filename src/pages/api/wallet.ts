@@ -1,6 +1,6 @@
 // src/pages/api/wallet.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axiosInstance from './axiosInstace';
+import axiosInstance from './axiosInstance';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",
@@ -29,7 +32,7 @@
     "@walletconnect/sign-client": "^2.21.2",
     "algosdk": "^3.3.1",
     "axios": "^1.10.0",
-    "caniuse-lite": "^1.0.30001709",
+    "caniuse-lite": "^1.0.30001733",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
@@ -42,7 +45,7 @@
     "lucide-react": "^0.441.0",
     "lute-connect": "^1.6.1",
     "next": "^15.2.4",
-    "next-auth": "^4.24.7",
+    "next-auth": "^5.0.0-beta.29",
     "next-themes": "^0.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -56,9 +59,14 @@
     "@types/node": "^20.14.8",
     "@types/react": "^18.3.5",
     "autoprefixer": "^10.4.20",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
     "globals": "^15.9.0",
     "postcss": "^8.4.47",
+    "prettier": "^3.3.3",
+    "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.12",
-    "typescript": "5.5.2"
+    "typescript": "5.5.2",
+    "util": "^0.12.5"
   }
 }
