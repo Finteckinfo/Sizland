@@ -1,5 +1,5 @@
 // Code in this file is based on https://docs.login.xyz/integrations/nextauth.js
-// Updated for NextAuth v5
+// Updated for NextAuth v4
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { SiweMessage } from "siwe";
@@ -10,7 +10,7 @@ declare module "next-auth" {
   }
 }
 
-const handler = NextAuth({
+export default NextAuth({
   providers: [
     CredentialsProvider({
       name: "Ethereum",
@@ -72,5 +72,3 @@ const handler = NextAuth({
     strategy: "jwt",
   },
 });
-
-export { handler as GET, handler as POST };

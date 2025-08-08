@@ -56,48 +56,20 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-2 right-2 text-white p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition"
-              aria-label="Close video modal"
             >
               <X size={24} />
             </button>
 
             {/* Video */}
             <div className="aspect-w-16 aspect-h-9">
-              {video.includes('youtube.com') || video.includes('youtu.be') ? (
-                <iframe
-                  src={video}
-                  width={videoWidth}
-                  height={videoHeight}
-                  className="w-full rounded-lg"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <video
-                  src={video}
-                  width={videoWidth}
-                  height={videoHeight}
-                  controls
-                  autoPlay
-                  className="w-full rounded-lg"
-                  onError={(e) => {
-                    const target = e.target as HTMLVideoElement;
-                    target.style.display = 'none';
-                    const container = target.parentElement;
-                    if (container) {
-                      container.innerHTML = `
-                        <div class="flex items-center justify-center w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                          <div class="text-center">
-                            <p class="text-gray-600 dark:text-gray-400 mb-2">Video not available</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500">Please add your video file to /public/videos/sizland-intro.mp4</p>
-                          </div>
-                        </div>
-                      `;
-                    }
-                  }}
-                />
-              )}
+              <video
+                src={video}
+                width={videoWidth}
+                height={videoHeight}
+                controls
+                autoPlay
+                className="w-full rounded-lg"
+              />
             </div>
           </div>
         </div>
