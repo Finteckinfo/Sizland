@@ -5,8 +5,7 @@ import { Button } from './button';
 import { Typography } from './typography';
 import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { generateAlgorandWallet, storeWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator';
-import { GeneratedWalletProvider } from '@/lib/algorand/GeneratedWalletProvider';
-import { useWallet } from '@txnlab/use-wallet-react';
+ 
 
 interface WalletGeneratorProps {
   onWalletGenerated?: (wallet: GeneratedWallet) => void;
@@ -19,8 +18,7 @@ export const WalletGenerator: React.FC<WalletGeneratorProps> = ({ onWalletGenera
   const [generatedWallet, setGeneratedWallet] = useState<GeneratedWallet | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
-  const { providers, activeAccount, connect } = useWallet();
+
 
   const handleGenerateWallet = async () => {
     if (!email.trim()) {
