@@ -140,8 +140,8 @@ Generated on: ${new Date().toLocaleString()}
             Wallet Created Successfully!
           </Typography>
           <Typography variant="paragraph" className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Your Sizland wallet has been generated and is ready to use. The credentials have been sent to your email.
-            Keep this information secure - you'll need it to access your wallet.
+            Your Sizland wallet has been generated locally in your browser and is ready to use.
+            Keep the credentials below secure — you'll need them to access your wallet.
           </Typography>
         </div>
 

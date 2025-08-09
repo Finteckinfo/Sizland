@@ -6,9 +6,8 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
-import { generateAlgorandWallet, storeWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator'
-import { GeneratedWalletProvider } from '@/lib/algorand/GeneratedWalletProvider'
-import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
+ 
 import { useRouter } from 'next/router'
 
 export const ConnectWalletButton = () => {
@@ -17,25 +16,13 @@ export const ConnectWalletButton = () => {
 
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
-  const [showEmailForm, setShowEmailForm] = useState(false)
-  const [email, setEmail] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isEmailSending, setIsEmailSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleGenerateWallet = async () => {
-    if (!email.trim()) {
-      setError('Please enter your email address')
-      return
-    }
-
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address')
-      return
-    }
-
     setIsGenerating(true)
     setError(null)
     setSuccess(null)
@@ -47,26 +34,7 @@ export const ConnectWalletButton = () => {
       // Store wallet in localStorage
       storeWallet(wallet)
 
-      // Send email with credentials
-      setIsEmailSending(true)
-      const emailResponse = await fetch('/api/sendWalletEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          address: wallet.address,
-          privateKey: wallet.privateKey,
-          mnemonic: wallet.mnemonic,
-        }),
-      })
-
-      if (!emailResponse.ok) {
-        throw new Error('Failed to send email')
-      }
-
-      setSuccess('Wallet generated successfully! Check your email for credentials.')
+      setSuccess('Wallet generated successfully!')
 
       // Auto-connect the generated wallet with proper error handling
       try {
@@ -85,7 +53,7 @@ export const ConnectWalletButton = () => {
       }
 
       setIsOpen(false)
-      setShowEmailForm(false)
+      setShowCreate(false)
       
       // Notify navbar that a wallet has been generated
       window.dispatchEvent(new CustomEvent('walletGenerated'));
@@ -97,7 +65,6 @@ export const ConnectWalletButton = () => {
       setError('Failed to generate wallet. Please try again.')
     } finally {
       setIsGenerating(false)
-      setIsEmailSending(false)
     }
   }
 
@@ -205,7 +172,7 @@ export const ConnectWalletButton = () => {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
-                      setShowEmailForm(true)
+                      setShowCreate(true)
                     }}
                     style={{ color: '#0070f3', textDecoration: 'underline', cursor: 'pointer' }}
                   >
@@ -256,8 +223,8 @@ export const ConnectWalletButton = () => {
 
       {toastMsg && <Toast message={toastMsg} />}
       
-      {/* Email Form Modal */}
-      {showEmailForm && (
+      {/* Create Wallet Modal */}
+      {showCreate && (
         <div
           style={{
             position: 'fixed',
@@ -287,28 +254,8 @@ export const ConnectWalletButton = () => {
             </h2>
             
             <p style={{ marginBottom: '1.5rem', color: '#666', textAlign: 'center' }}>
-              Enter your email to receive your wallet credentials securely.
+              Your wallet will be generated locally in your browser. Nothing is sent to a server.
             </p>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem', color: '#333' }}>
-                Email Address:
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                }}
-                disabled={isGenerating}
-              />
-            </div>
 
             {error && (
               <div style={{ 
@@ -339,8 +286,7 @@ export const ConnectWalletButton = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
               <button
                 onClick={() => {
-                  setShowEmailForm(false)
-                  setEmail('')
+                  setShowCreate(false)
                   setError(null)
                   setSuccess(null)
                 }}
@@ -360,14 +306,14 @@ export const ConnectWalletButton = () => {
               </button>
               <button
                 onClick={handleGenerateWallet}
-                disabled={isGenerating || !email.trim()}
+                disabled={isGenerating}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: isGenerating || !email.trim() ? '#ccc' : '#0070f3',
+                  backgroundColor: isGenerating ? '#ccc' : '#0070f3',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '0.5rem',
-                  cursor: isGenerating || !email.trim() ? 'not-allowed' : 'pointer',
+                  cursor: isGenerating ? 'not-allowed' : 'pointer',
                   fontWeight: 'bold',
                   flex: 1,
                 }}
@@ -375,37 +321,6 @@ export const ConnectWalletButton = () => {
                 {isGenerating ? 'Generating...' : 'Generate Wallet'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Email Sending Overlay */}
-      {isEmailSending && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0, left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 10000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '1rem',
-              padding: '2rem',
-              textAlign: 'center',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-            }}
-          >
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📧</div>
-            <h3 style={{ marginBottom: '0.5rem', color: '#333' }}>Sending Wallet Credentials</h3>
-            <p style={{ color: '#666' }}>Please wait while we send your wallet credentials to your email...</p>
           </div>
         </div>
       )}
