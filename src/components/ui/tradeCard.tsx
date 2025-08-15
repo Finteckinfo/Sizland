@@ -1,6 +1,7 @@
 // src/components/ui/tradeCard.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Button1 } from '@/components/ui/button1';
 
 export const TradeCard: React.FC = () => {
   const [amount, setAmount] = useState<number>(0);
@@ -19,11 +20,11 @@ export const TradeCard: React.FC = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400">Learn. Earn. Invest. Grow.</p>
       </div>
 
-      {/* SIZ Amount Display - Centered */}
+      {/* SIZ Amount Display - Centered with Button1 styling */}
       <div className="text-center">
-        <Button className="h-[40px] sm:h-[48px] px-6 sm:px-8 text-sm bg-blue-500 hover:bg-blue-600 text-white">
+        <Button1 className="px-6 py-3 text-lg font-bold">
           {amount.toFixed(2)} SIZ
-        </Button>
+        </Button1>
       </div>
 
       {/* Form - Centered */}
