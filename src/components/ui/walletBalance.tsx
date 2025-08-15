@@ -216,21 +216,21 @@ export const WalletBalance: React.FC = () => {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-300 p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
           <WalletIcon className="h-6 w-6 text-blue-500" />
           <Typography variant="h3">Wallet Balance</Typography>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           {/* Network Selector */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start"
             >
               <span className={`w-2 h-2 rounded-full ${selectedNetwork === 'mainnet' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
               {selectedNetwork === 'mainnet' ? 'MainNet' : 'TestNet'}
@@ -238,7 +238,7 @@ export const WalletBalance: React.FC = () => {
             </Button>
 
             {showNetworkDropdown && (
-              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[120px]">
+              <div className="absolute top-full left-0 sm:right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[120px] w-full sm:w-auto">
                 <button
                   onClick={() => handleNetworkChange('testnet')}
                   className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
@@ -266,6 +266,7 @@ export const WalletBalance: React.FC = () => {
             size="sm"
             onClick={fetchAccountInfo}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             Refresh
           </Button>
@@ -273,11 +274,11 @@ export const WalletBalance: React.FC = () => {
       </div>
 
       {/* Wallet Info */}
-      <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <Typography variant="small" className="text-gray-500 mb-1">
           Connected Wallet
         </Typography>
-        <Typography variant="paragraph" className="font-mono">
+        <Typography variant="paragraph" className="font-mono text-sm sm:text-base break-all">
           {activeAccount.address.slice(0, 8)}...{activeAccount.address.slice(-8)}
         </Typography>
         <Typography variant="small" className="text-gray-500">
@@ -287,7 +288,7 @@ export const WalletBalance: React.FC = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="text-center py-8">
+        <div className="text-center py-6 sm:py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <Typography variant="paragraph" className="text-gray-500">
             Loading wallet information...
@@ -297,7 +298,7 @@ export const WalletBalance: React.FC = () => {
 
       {/* Error State */}
       {error && (
-        <div className="text-center py-8">
+        <div className="text-center py-6 sm:py-8">
           <AlertCircleIcon className="h-8 w-8 text-red-500 mx-auto mb-4" />
           <Typography variant="paragraph" className="text-red-500 mb-4">
             {error}
@@ -310,7 +311,7 @@ export const WalletBalance: React.FC = () => {
 
       {/* Balance Information */}
       {accountInfo && !loading && !error && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* SIZ Token */}
           {accountInfo.assets.length > 0 && (
             <div className="space-y-3">
@@ -322,7 +323,7 @@ export const WalletBalance: React.FC = () => {
                 {accountInfo.assets.map((asset) => (
                   <div
                     key={asset.assetId}
-                    className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-200 dark:border-green-700 flex justify-between items-center"
+                    className="p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-200 dark:border-green-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0"
                   >
                     <div>
                       <Typography variant="paragraph" className="font-bold text-green-600 dark:text-green-400">
@@ -332,7 +333,7 @@ export const WalletBalance: React.FC = () => {
                         Asset ID: {asset.assetId}
                       </Typography>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       <Typography variant="h4" className="font-bold text-green-600 dark:text-green-400">
                         {formatAssetAmount(asset.amount, asset.decimals)} {asset.unitName || 'SIZ'}
                       </Typography>
@@ -348,8 +349,8 @@ export const WalletBalance: React.FC = () => {
 
           {/* No SIZ Tokens Message */}
           {accountInfo.assets.length === 0 && (
-            <div className="text-center py-6">
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="text-center py-4 sm:py-6">
+              <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <Typography variant="paragraph" className="text-gray-500 mb-2">
                   No SIZ tokens found in this wallet
                 </Typography>
@@ -367,7 +368,7 @@ export const WalletBalance: React.FC = () => {
               <Typography variant="h4">ALGO Balance</Typography>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <Typography variant="small" className="text-gray-500 mb-1">
                   Total Balance

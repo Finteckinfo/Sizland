@@ -34,14 +34,14 @@ const About = () => {
       title: "Base",
       description: "Ethereum L2",
       label: "Blockchain",
-      content: "Coinbase-built secure platform for tokenizing real-world assets and compliance."
+      content: "Coinbase-built secure platform."
     },
     {
       color: "linear-gradient(135deg, #0a1a1a 0%, #1a3a3a 100%)",
       title: "BNB Smart Chain",
       description: "Growing access",
       label: "Blockchain",
-      content: "Connects to Africa and underserved economies with low-cost access and financial inclusion."
+      content: "Connects to Africa and underserved economies."
     }
   ];
 

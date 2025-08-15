@@ -49,7 +49,7 @@ export const CandleStickChart = () => {
       backgroundColor: 'transparent',
     },
     title: {
-      text: 'SizCoin (Live)',
+      text: 'Siz (Live)',
       style: { color: '#d1d5db' },
     },
     xAxis: {
@@ -87,7 +87,7 @@ export const CandleStickChart = () => {
 
   return (
     <div className="w-full rounded-2xl border border-gray-300 p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors">
-      <h2 className="text-xl font-bold mb-4">Live Market Chart</h2>
+      <h2 className="text-xl font-bold mb-4">Live SIZ Chart</h2>
       <HighchartsReact
         highcharts={Highcharts}
         constructorType="stockChart"

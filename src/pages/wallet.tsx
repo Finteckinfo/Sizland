@@ -53,27 +53,35 @@ const WalletPage = () => {
 
   return (
     <PageLayout title="Trade" description="Trade with Sizland">
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Wallet Balance Section */}
         <div className="w-full">
           <WalletBalance />
         </div>
 
-
         
         {/* Trading Section */}
-        <div className="flex gap-4">
-          <div className="w-1/4">
-            <OrderCard type="sell" data={dummyOrders} />
-          </div>
-          <div className="w-1/4">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          {/* Buy Order - Left side on desktop */}
+          <div className="w-full lg:w-1/4">
             <OrderCard type="buy" data={dummyOrders} />
           </div>
-          <div className="w-1/2">
+          
+          {/* Quick Trade - Center on desktop */}
+          <div className="w-full lg:w-1/2">
             <TradeCard />
           </div>
+          
+          {/* Sell Order - Right side on desktop */}
+          <div className="w-full lg:w-1/4">
+            <OrderCard type="sell" data={dummyOrders} />
+          </div>
         </div>
-        <CandleStickChart />
+        
+        {/* Chart - Full width on all screen sizes */}
+        <div className="w-full">
+          <CandleStickChart />
+        </div>
       </div>
     </PageLayout>
   );
