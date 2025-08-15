@@ -13,28 +13,28 @@ const About = () => {
       title: "SIZ Platform",
       description: "Multi-chain ecosystem",
       label: "Core",
-      content: "Built on state-of-the-art blockchain platforms. Strategic integration with Algorand, Sui, Base, and BNB for robust ERP infrastructure."
+      content: "Built on blockchain platforms. Strategic integration with Algorand, Sui, Base, and BNB for robust ERP infrastructure."
     },
     {
       color: "linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%)",
       title: "Algorand",
       description: "Fast & secure",
       label: "Blockchain",
-      content: "Ideal for SIZ utility token with efficient Pure Proof-of-Stake and environmental sustainability."
+      content: "Ideal for SIZ utility token."
     },
     {
       color: "linear-gradient(135deg, #1a0a1a 0%, #3a1a3a 100%)",
       title: "Sui",
       description: "High throughput",
       label: "Blockchain",
-      content: "High throughput and efficient data storage for secure ERP data on-chain with object-centric model."
+      content: "High throughput and efficient data storage."
     },
     {
       color: "linear-gradient(135deg, #1a1a0a 0%, #3a3a1a 100%)",
       title: "Base",
       description: "Ethereum L2",
       label: "Blockchain",
-      content: "Coinbase-built secure platform perfect for tokenizing real-world assets and compliance."
+      content: "Coinbase-built secure platform for tokenizing real-world assets and compliance."
     },
     {
       color: "linear-gradient(135deg, #0a1a1a 0%, #1a3a3a 100%)",
