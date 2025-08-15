@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
 import { loadWallet } from "@/lib/algorand/walletGenerator";
+import PillNav from "../ui/PillNav";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -105,9 +106,13 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  const otherLinks: NavLink[] = [
+  const navItems = [
     {
-      label: "White Paper",
+      label: "Siz",
+      href: "#hero",
+    },
+    {
+      label: "Whitepaper",
       href: "/whitepaper",
     },
     {
@@ -160,9 +165,22 @@ export const Navbar: React.FC = () => {
         </Typography>
       </Link>
 
-      {/* Desktop Nav */}
-      <div className="flex-1 justify-center hidden items-center gap-3 lg:flex">
-        <NaviLinks otherLinks={otherLinks} />
+      {/* Desktop Nav - Centered PillNav */}
+      <div className="flex-1 justify-center hidden items-center lg:flex">
+        <PillNav
+          logo="/logo1.png"
+          logoAlt="Sizland Logo"
+          items={navItems}
+          activeHref="/"
+          className="custom-nav"
+          ease="power2.easeOut"
+          baseColor="#10b981"
+          pillColor="#ffffff"
+          hoveredPillTextColor="#ffffff"
+          pillTextColor="#10b981"
+          productLinks={productLinks}
+          onScrollToSection={scrollToSection}
+        />
       </div>
 
       {/* Actions */}
@@ -173,7 +191,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       <div className="block lg:hidden">
-        <HeaderSheet otherLinks={otherLinks} />
+        <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
       </div>
     </div>
   );

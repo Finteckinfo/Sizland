@@ -136,49 +136,149 @@ export const ConnectWalletButton = () => {
                   background: 'white',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '0.5rem',
-                  minWidth: '200px',
+                  minWidth: '280px',
+                  maxWidth: '320px',
+                  padding: '1rem',
+                  minHeight: '320px',
                 }}
               >
                 <ul className="list">
-                  <li className="element">
-                    <button onClick={() => connectWallet(WalletId.PERA)} className="element">
-                      <Image src="/pera.svg" alt="Pera Wallet" width={20} height={20} />
-                      <p className="label">Connect Pera</p>
+                  <li className="element" style={{ marginBottom: '0.5rem' }}>
+                    <button onClick={() => connectWallet(WalletId.PERA)} className="element" style={{ 
+                      width: '100%', 
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#f9fafb',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}>
+                      <Image src="/pera.svg" alt="Pera Wallet" width={16} height={16} />
+                      <p className="label" style={{ margin: 0, fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Connect Pera</p>
                     </button>
                   </li>
-                  <li className="element">
-                    <button onClick={() => connectWallet(WalletId.DEFLY)} className="element">
-                      <Image src="/defly.png" alt="Defly Wallet" width={20} height={20} />
-                      <p className="label">Connect Defly</p>
+                  <li className="element" style={{ marginBottom: '0.5rem' }}>
+                    <button onClick={() => connectWallet(WalletId.DEFLY)} className="element" style={{ 
+                      width: '100%', 
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#f9fafb',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}>
+                      <Image src="/defly.png" alt="Defly Wallet" width={16} height={16} />
+                      <p className="label" style={{ margin: 0, fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Connect Defly</p>
                     </button>
                   </li>
-                  <li className="element">
-                    <button onClick={() => connectWallet(WalletId.LUTE)} className="element">
-                      <Image src="/lute.png" alt="Lute Wallet" width={20} height={20} />
-                      <p className="label">Connect Lute</p>
+                  <li className="element" style={{ marginBottom: '0.5rem' }}>
+                    <button onClick={() => connectWallet(WalletId.LUTE)} className="element" style={{ 
+                      width: '100%', 
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#f9fafb',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}>
+                      <Image src="/lute.png" alt="Lute Wallet" width={16} height={16} />
+                      <p className="label" style={{ margin: 0, fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Connect Lute</p>
                     </button>
                   </li>
-                  <li className="element">
-                    <button onClick={() => connectWallet(WalletId.WALLETCONNECT)} className="element">
-                      <Image src="/walletconnect.png" alt="WalletConnect" width={20} height={20} />
-                      <p className="label">WalletConnect</p>
+                  <li className="element" style={{ marginBottom: '0.5rem' }}>
+                    <button onClick={() => connectWallet(WalletId.WALLETCONNECT)} className="element" style={{ 
+                      width: '100%', 
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#f9fafb',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}>
+                      <Image src="/walletconnect.png" alt="WalletConnect" width={16} height={16} />
+                      <p className="label" style={{ margin: 0, fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>WalletConnect</p>
                     </button>
                   </li>
-                  <div className="line" style={{ margin: '0.5rem 0' }}></div>
+                  <div className="line" style={{ margin: '0.75rem 0' }}></div>
                 </ul>
-                <p style={{ padding: '0 1rem 1rem', fontSize: '0.875rem', color: '#666' }}>
-                  Don’t have a wallet?{' '}
+                <div style={{ 
+                  padding: '0.75rem 0.5rem 0.5rem', 
+                  fontSize: '0.875rem', 
+                  color: '#666',
+                  textAlign: 'center',
+                  borderTop: '1px solid #e5e7eb',
+                  marginTop: '0.75rem',
+                  paddingTop: '0.75rem'
+                }}>
+                  Don't have a wallet?{' '}
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
                       setShowCreate(true)
                     }}
-                    style={{ color: '#0070f3', textDecoration: 'underline', cursor: 'pointer' }}
+                    style={{ 
+                      color: '#0070f3', 
+                      textDecoration: 'underline', 
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
                   >
                     Create
                   </a>
-                </p>
+                </div>
               </div>
             )}
           </>
