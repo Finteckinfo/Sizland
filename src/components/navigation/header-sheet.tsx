@@ -40,17 +40,33 @@ export const HeaderSheet: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks })
           </SheetDescription>
         </VisuallyHidden>
 
-        <div className="mb-6">
-          <Typography variant="h3" className="font-bold">
-            SIZLAND
-          </Typography>
+        {/* Enhanced Header with PillNav-like styling */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-lg">
+            <Typography variant="h3" className="font-bold text-white">
+              SIZLAND
+            </Typography>
+          </div>
         </div>
-        <div className="flex flex-col items-stretch gap-2">
-          <ConnectWalletButton />
-          <MobileNavLinks otherLinks={otherLinks} />
+
+        {/* Enhanced Navigation Items with PillNav Effect */}
+        <div className="flex flex-col items-center gap-4 px-6">
+          {/* Connect Wallet Button with enhanced styling */}
+          <div className="w-full">
+            <ConnectWalletButton />
+          </div>
+          
+          {/* Navigation Links with PillNav-like styling */}
+          <div className="w-full">
+            <MobileNavLinks otherLinks={otherLinks} />
+          </div>
         </div>
-        <div className="absolute bottom-4 left-4">
-          <ThemeToggler />
+
+        {/* Theme Toggler positioned at bottom */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-full p-2 shadow-lg">
+            <ThemeToggler />
+          </div>
         </div>
       </SheetContent>
     </Sheet>

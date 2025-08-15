@@ -247,31 +247,71 @@ export const NaviLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) =
 
 export const MobileNavLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
   return (
-    <div className="flex flex-col items-center text-center space-y-4 px-4 py-2">
+    <div className="flex flex-col items-center space-y-4 w-full">
+      {/* Main Navigation Links with PillNav-like styling */}
       {otherLinks.map((navLink, index) => (
-        <Link
-          key={index}
-          href={navLink.href}
-          className="text-lg font-medium text-black dark:text-white hover:text-green-800 transition-colors duration-200"
-        >
-          {navLink.label}
-        </Link>
+        <div key={index} className="w-full mobile-sidebar-item" style={{ '--item-index': index } as React.CSSProperties}>
+          <Link
+            href={navLink.href}
+            className="group relative w-full block"
+          >
+            <div className="relative overflow-hidden">
+              {/* PillNav-like background with vertical animation */}
+              <div className="pill-background"></div>
+              
+              {/* Content with proper padding and centering */}
+              <div className="content px-6 py-4 text-center">
+                <span className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-white transition-colors duration-300">
+                  {navLink.label}
+                </span>
+              </div>
+              
+              {/* Subtle border glow */}
+              <div className="absolute inset-0 rounded-full border-2 border-green-400/30 group-hover:border-green-400/50 transition-all duration-300"></div>
+            </div>
+          </Link>
+        </div>
       ))}
 
+      {/* Product Links Section with enhanced styling */}
       {productLinks.map((navLink, index) => (
-        <div key={index} className="w-full">
-          <Typography variant="large" className="mb-2 text-center">
-            {navLink.label}
-          </Typography>
-          <div className="flex flex-col items-center space-y-2">
-            {navLink.paths.map((path, index) => (
-              <button
-                key={index}
-                onClick={(e) => scrollToSection(e, path.href)}
-                className="text-base text-black dark:text-white hover:text-green-800 transition-colors duration-200"
-              >
-                {path.label}
-              </button>
+        <div key={index} className="w-full space-y-3">
+          {/* Section Title with PillNav-like styling */}
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 dark:from-green-500/30 dark:to-green-600/30 rounded-full border border-green-400/30">
+              <Typography variant="large" className="font-semibold text-green-700 dark:text-green-300">
+                {navLink.label}
+              </Typography>
+            </div>
+          </div>
+          
+          {/* Product Paths with enhanced styling */}
+          <div className="flex flex-col items-center space-y-3">
+            {navLink.paths.map((path, pathIndex) => (
+              <div key={pathIndex} className="w-full mobile-sidebar-item" style={{ '--item-index': otherLinks.length + pathIndex } as React.CSSProperties}>
+                <button
+                  onClick={(e) => scrollToSection(e, path.href)}
+                  className="group relative w-full block"
+                >
+                  <div className="relative overflow-hidden">
+                    {/* PillNav-like background with vertical animation */}
+                    <div className="pill-background"></div>
+                    
+                    {/* Content with proper padding and centering */}
+                    <div className="content px-4 py-3 text-center">
+                      <div className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-white transition-colors duration-300">
+                        {path.label}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-green-100 transition-colors duration-300 mt-1">
+                        {path.description}
+                      </div>
+                    </div>
+                    
+                    {/* Subtle border glow */}
+                    <div className="absolute inset-0 rounded-full border border-green-400/30 group-hover:border-green-400/50 transition-all duration-300"></div>
+                  </div>
+                </button>
+              </div>
             ))}
           </div>
         </div>

@@ -1126,3 +1126,57 @@
   width: 100%;
   height: 100%;
 }
+
+/* Enhanced Mobile Sidebar Styling */
+.mobile-sidebar-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+.mobile-sidebar-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.mobile-sidebar-item .pill-background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: inherit;
+}
+
+.mobile-sidebar-item:hover .pill-background {
+  transform: translateY(0);
+}
+
+.mobile-sidebar-item .content {
+  position: relative;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.mobile-sidebar-item:hover .content {
+  color: #ffffff;
+}
+
+/* Mobile sidebar entrance animation */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-sidebar-item {
+  animation: slideInFromTop 0.5s ease forwards;
+  animation-delay: calc(var(--item-index) * 0.1s);
+  opacity: 0;
+}
