@@ -1119,3 +1119,10 @@
 .mobile-menu-button:hover .hamburger-line {
   background: #ffffff;
 }
+
+/* MetaBalls Component */
+.metaballs-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
