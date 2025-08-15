@@ -31,7 +31,7 @@ interface PillNavProps {
   onMobileMenuClick?: () => void;
   initialLoadAnimation?: boolean;
   productLinks?: DropdownLinks[];
-  onScrollToSection?: (e: React.MouseEvent, href: string) => void;
+  onScrollToSection?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>, href: string) => void;
 }
 
 const PillNav = ({
@@ -220,11 +220,11 @@ const PillNav = ({
     setIsSizDropdownOpen(!isSizDropdownOpen);
   };
 
-  const handleScrollToSection = (e: React.MouseEvent, href: string) => {
+  const handleScrollToSection = (e: React.MouseEvent<Element, MouseEvent>, href: string) => {
     e.preventDefault();
     setIsSizDropdownOpen(false);
     if (onScrollToSection) {
-      onScrollToSection(e, href);
+      onScrollToSection(e as React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>, href);
     }
   };
 
@@ -342,7 +342,7 @@ const PillNav = ({
                       onClick={toggleSizDropdown}
                       onMouseEnter={() => handleEnter(i)}
                       onMouseLeave={() => handleLeave(i)}
-                      aria-expanded={isSizDropdownOpen.toString()}
+                      aria-expanded={isSizDropdownOpen}
                       aria-haspopup="true"
                     >
                       <span
