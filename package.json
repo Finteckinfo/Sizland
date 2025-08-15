@@ -40,7 +40,7 @@
     "ethers": "^5",
     "express": "^5.1.0",
     "framer-motion": "^12.6.3",
-    "gsap": "^3.12.7",
+    "gsap": "^3.13.0",
     "highcharts": "^12.3.0",
     "highcharts-react-official": "^3.2.2",
     "lucide-react": "^0.441.0",
