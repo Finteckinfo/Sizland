@@ -9,46 +9,39 @@ const About = () => {
   // Custom card data for SIZ content
   const sizCardData = [
     {
-      color: "#060010",
-      title: "SIZ",
-      description: "Multi-chain blockchain ecosystem",
-      label: "Main",
-      content: "Strategic integration with Algorand, Sui, Base, and BNB for robust ERP infrastructure."
+      color: "linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%)",
+      title: "SIZ Platform",
+      description: "Multi-chain ecosystem",
+      label: "Core",
+      content: "Built on state-of-the-art blockchain platforms. Strategic integration with Algorand, Sui, Base, and BNB for robust ERP infrastructure."
     },
     {
-      color: "#060010",
+      color: "linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%)",
       title: "Algorand",
-      description: "Fast & secure transactions",
-      label: "Platform",
+      description: "Fast & secure",
+      label: "Blockchain",
       content: "Ideal for SIZ utility token with efficient Pure Proof-of-Stake and environmental sustainability."
     },
     {
-      color: "#060010",
+      color: "linear-gradient(135deg, #1a0a1a 0%, #3a1a3a 100%)",
       title: "Sui",
-      description: "High throughput storage",
-      label: "Platform",
-      content: "Secure ERP data storage on-chain with fast, reliable access to business information."
+      description: "High throughput",
+      label: "Blockchain",
+      content: "High throughput and efficient data storage for secure ERP data on-chain with object-centric model."
     },
     {
-      color: "#060010",
+      color: "linear-gradient(135deg, #1a1a0a 0%, #3a3a1a 100%)",
       title: "Base",
-      description: "Ethereum L2 solution",
-      label: "Platform",
+      description: "Ethereum L2",
+      label: "Blockchain",
       content: "Coinbase-built secure platform perfect for tokenizing real-world assets and compliance."
     },
     {
-      color: "#060010",
+      color: "linear-gradient(135deg, #0a1a1a 0%, #1a3a3a 100%)",
       title: "BNB Smart Chain",
-      description: "Growing ecosystems",
-      label: "Platform",
+      description: "Growing access",
+      label: "Blockchain",
       content: "Connects to Africa and underserved economies with low-cost access and financial inclusion."
-    },
-    {
-      color: "#060010",
-      title: "Learn More",
-      description: "Explore Sizland",
-      label: "Action",
-      content: "Discover blockchain-powered business solutions and investment opportunities."
     }
   ];
 
