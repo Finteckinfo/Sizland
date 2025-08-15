@@ -13,7 +13,7 @@ const About = () => {
       title: "SIZ Platform",
       description: "Multi-chain ecosystem",
       label: "Core",
-      content: "Built on blockchain platforms. Strategic integration with Algorand, Sui, Base, and BNB for robust ERP infrastructure."
+      content: "Built on blockchain platforms. Strategic integration with Algorand, Sui."
     },
     {
       color: "linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%)",
