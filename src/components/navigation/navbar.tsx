@@ -132,8 +132,55 @@ export const Navbar: React.FC = () => {
 
   return (
     <div className="fixed z-50 flex w-full justify-between items-center border-b border-neutral-400/50 bg-white/50 p-4 backdrop-blur-xl dark:bg-black/50 md:px-16 md:py-4">
-      {/* Desktop Logo */}
-      <div className="flex-1 hidden md:block">
+      {/* Desktop Layout - Three Column Structure */}
+      <div className="hidden lg:flex w-full items-center">
+        {/* Left Section - Logo */}
+        <div className="flex-shrink-0">
+          <Link href="/" className="flex items-center justify-start">
+            <Image
+              src="/logo1.png"
+              alt="Sizland Logo"
+              width={40}
+              height={40}
+              className="h-10 w-auto object-contain mr-2"
+            />
+            <button className="button1" data-text="Awesome">
+              <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
+              <span aria-hidden="true" className="hover-text1 font-pj">
+                &nbsp;SIZLAND&nbsp;
+              </span>
+            </button>
+          </Link>
+        </div>
+
+        {/* Center Section - PillNav (Always Centered) */}
+        <div className="flex-1 flex justify-center items-center px-8">
+          <PillNav
+            logo="/logo1.png"
+            logoAlt="Sizland Logo"
+            items={navItems}
+            activeHref="/"
+            className="custom-nav"
+            ease="power2.easeOut"
+            baseColor="#10b981"
+            pillColor="#ffffff"
+            hoveredPillTextColor="#ffffff"
+            pillTextColor="#10b981"
+            productLinks={productLinks}
+            onScrollToSection={scrollToSection}
+          />
+        </div>
+
+        {/* Right Section - Actions */}
+        <div className="flex-shrink-0 flex items-center gap-3">
+          <ThemeToggler />
+          <ConnectWalletButton />
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden flex w-full items-center justify-between">
+        {/* Mobile Logo */}
         <Link href="/" className="flex items-center justify-start">
           <Image
             src="/logo1.png"
@@ -142,58 +189,15 @@ export const Navbar: React.FC = () => {
             height={40}
             className="h-10 w-auto object-contain mr-2"
           />
-          <button className="button1" data-text="Awesome">
-            <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
-            <span aria-hidden="true" className="hover-text1 font-pj">
+          <button className="button1-mobile" data-text="Awesome">
+            <span className="actual-text1-mobile font-pj">&nbsp;SIZLAND&nbsp;</span>
+            <span aria-hidden="true" className="hover-text1-mobile font-pj">
               &nbsp;SIZLAND&nbsp;
             </span>
           </button>
         </Link>
-      </div>
 
-      {/* Mobile Logo */}
-      <Link href="/" className="flex items-center justify-start md:hidden">
-        <Image
-          src="/logo1.png"
-          alt="Sizland Logo"
-          width={40}
-          height={40}
-          className="h-10 w-auto object-contain mr-2"
-        />
-        <button className="button1-mobile" data-text="Awesome">
-          <span className="actual-text1-mobile font-pj">&nbsp;SIZLAND&nbsp;</span>
-          <span aria-hidden="true" className="hover-text1-mobile font-pj">
-            &nbsp;SIZLAND&nbsp;
-          </span>
-        </button>
-      </Link>
-
-      {/* Desktop Nav - Centered PillNav */}
-      <div className="flex-1 justify-center hidden items-center lg:flex">
-        <PillNav
-          logo="/logo1.png"
-          logoAlt="Sizland Logo"
-          items={navItems}
-          activeHref="/"
-          className="custom-nav"
-          ease="power2.easeOut"
-          baseColor="#10b981"
-          pillColor="#ffffff"
-          hoveredPillTextColor="#ffffff"
-          pillTextColor="#10b981"
-          productLinks={productLinks}
-          onScrollToSection={scrollToSection}
-        />
-      </div>
-
-      {/* Actions */}
-      <div className="flex-1 justify-end items-center gap-3 hidden lg:flex">
-        <ThemeToggler />
-        <ConnectWalletButton />
-      </div>
-
-      {/* Mobile Menu */}
-      <div className="block lg:hidden">
+        {/* Mobile Menu */}
         <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
       </div>
     </div>

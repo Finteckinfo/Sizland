@@ -876,6 +876,8 @@
   border: none;
 }
 
+
+
 @media (max-width: 768px) {
   .pill-nav-container {
     width: 100%;

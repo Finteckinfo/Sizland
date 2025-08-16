@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import MetaBalls from "./ui/MetaBalls";
@@ -25,26 +25,43 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
   videoHeight = 1080,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
+
+  // Add delay to show the MetaBalls animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAnimation(true);
+    }, 1500); // 1.5 second delay for better user experience
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
       {/* Enhanced Thumbnail Button with MetaBalls Background */}
       <div className="relative cursor-pointer group" onClick={() => setIsOpen(true)}>
-        {/* MetaBalls Background Effect */}
-        <div className="absolute inset-0 rounded-lg overflow-hidden">
-          <MetaBalls
-            color="#10b981"
-            cursorBallColor="#059669"
-            cursorBallSize={3}
-            ballCount={20}
-            animationSize={25}
-            enableMouseInteraction={true}
-            enableTransparency={true}
-            hoverSmoothness={0.08}
-            clumpFactor={1.2}
-            speed={0.4}
-            className="w-full h-full"
-          />
+        {/* MetaBalls Background Effect with Delay */}
+        <div className={`absolute inset-0 rounded-lg overflow-hidden transition-opacity duration-1000 ${showAnimation ? 'opacity-100' : 'opacity-0'}`}>
+          {showAnimation ? (
+            <MetaBalls
+              color="#10b981"
+              cursorBallColor="#059669"
+              cursorBallSize={3}
+              ballCount={20}
+              animationSize={25}
+              enableMouseInteraction={true}
+              enableTransparency={true}
+              hoverSmoothness={0.08}
+              clumpFactor={1.2}
+              speed={0.4}
+              className="w-full h-full"
+            />
+          ) : (
+            // Loading placeholder with subtle animation
+            <div className="w-full h-full bg-gradient-to-br from-green-50/30 to-emerald-50/30 dark:from-green-900/20 dark:to-emerald-900/20 flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+          )}
         </div>
         
         {/* Video Thumbnail with Enhanced Styling */}

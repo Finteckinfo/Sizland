@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Typography } from './typography';
 import { Button } from './button';
+import { ConnectWalletButton } from './connect-button';
 import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon } from 'lucide-react';
 import algosdk from 'algosdk';
 import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
@@ -209,7 +210,7 @@ export const WalletBalance: React.FC = () => {
           <Typography variant="paragraph" className="text-gray-500 mb-4">
             Connect your wallet to view your balance
           </Typography>
-          <Button disabled>Connect Wallet</Button>
+          <ConnectWalletButton />
         </div>
       </div>
     );
