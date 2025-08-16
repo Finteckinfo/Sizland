@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
+import { createPortal } from "react-dom";
+import FlowingMenu from "./FlowingMenu";
 
 interface DropdownLinks {
   label: string;
@@ -62,7 +64,7 @@ const PillNav = ({
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const navItemsRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLElement | null>(null);
-  const sizDropdownRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     const layout = () => {
@@ -167,19 +169,7 @@ const PillNav = ({
     return () => window.removeEventListener("resize", onResize);
   }, [items, ease, initialLoadAnimation]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sizDropdownRef.current && !sizDropdownRef.current.contains(event.target as Node)) {
-        setIsSizDropdownOpen(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const handleEnter = (i: number) => {
     const tl = tlRefs.current[i];
@@ -342,7 +332,7 @@ const PillNav = ({
                       onClick={toggleSizDropdown}
                       onMouseEnter={() => handleEnter(i)}
                       onMouseLeave={() => handleLeave(i)}
-                      aria-expanded={isSizDropdownOpen}
+                      aria-expanded={isSizDropdownOpen ? "true" : "false"}
                       aria-haspopup="true"
                     >
                       <span
@@ -372,38 +362,21 @@ const PillNav = ({
                       </svg>
                     </button>
                     
-                    {/* Dropdown menu */}
-                    {isSizDropdownOpen && (
-                      <div
-                        ref={sizDropdownRef}
-                        className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
-                        role="menu"
-                      >
-                        <div className="p-4">
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                            {item.label}
-                          </div>
-                          <div className="space-y-2">
-                            {productLinks.map((navLink, index) => (
-                              <div key={index}>
-                                {navLink.paths.map((path, pathIndex) => (
-                                  <button
-                                    key={pathIndex}
-                                    onClick={(e) => handleScrollToSection(e, path.href)}
-                                    className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
-                                    role="menuitem"
-                                  >
-                                    <div className="font-medium">{path.label}</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                      {path.description}
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                    {/* FlowingMenu for Siz dropdown */}
+                    {isSizDropdownOpen && createPortal(
+                      <FlowingMenu
+                        items={productLinks.flatMap(navLink => 
+                          navLink.paths.map(path => ({
+                            link: path.href,
+                            text: path.label,
+                            image: `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`
+                          }))
+                        )}
+                        isOpen={isSizDropdownOpen}
+                        onClose={() => setIsSizDropdownOpen(false)}
+                        onScrollToSection={handleScrollToSection}
+                      />,
+                      document.body
                     )}
                   </div>
                 ) : (

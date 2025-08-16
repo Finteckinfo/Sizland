@@ -1264,3 +1264,237 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* FlowingMenu Component Styles - Matching Mobile Sidebar Theme */
+.flowing-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+.flowing-menu-container {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 3rem 2rem 2rem 2rem;
+  width: 90vw;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.4s ease-out;
+}
+
+.dark .flowing-menu-container {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flowing-menu-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 31px;
+  height: 31px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.flowing-menu-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.dark .flowing-menu-close {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+.flowing-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 300px;
+  margin-top: 1rem;
+}
+
+.flowing-menu__item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flowing-menu__item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.flowing-menu__item-link {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.dark .flowing-menu__item-link {
+  color: #f1f5f9;
+}
+
+.flowing-menu__item:hover .flowing-menu__item-link {
+  color: #ffffff;
+}
+
+.flowing-menu__item:hover .flowing-marquee {
+  transform: translateY(0);
+  animation: marqueeEntrance 0.6s ease-out;
+}
+
+.flowing-menu__item:hover .flowing-menu__item-link {
+  color: #ffffff;
+  z-index: 3;
+}
+
+/* Marquee Effect */
+.flowing-marquee {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.flowing-marquee__inner-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flowing-marquee__inner {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  white-space: nowrap;
+  animation: marqueeScroll 20s linear infinite;
+  width: max-content;
+}
+
+.flowing-marquee__inner span {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.flowing-marquee__img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* FlowingMenu Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marqueeEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FlowingMenu Responsive Design */
+@media (max-width: 768px) {
+  .flowing-menu-container {
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .flowing-menu {
+    min-width: 250px;
+    margin-top: 0.5rem;
+  }
+  
+  .flowing-menu__item-link {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+  
+  .flowing-marquee__img {
+    width: 50px;
+    height: 50px;
+  }
+}
