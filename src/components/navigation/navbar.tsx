@@ -160,9 +160,12 @@ export const Navbar: React.FC = () => {
           height={40}
           className="h-10 w-auto object-contain mr-2"
         />
-        <Typography variant="h3" className="font-bold font-pj">
-          SIZLAND
-        </Typography>
+        <button className="button1-mobile" data-text="Awesome">
+          <span className="actual-text1-mobile font-pj">&nbsp;SIZLAND&nbsp;</span>
+          <span aria-hidden="true" className="hover-text1-mobile font-pj">
+            &nbsp;SIZLAND&nbsp;
+          </span>
+        </button>
       </Link>
 
       {/* Desktop Nav - Centered PillNav */}
