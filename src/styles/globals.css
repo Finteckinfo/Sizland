@@ -1373,17 +1373,13 @@
 }
 
 .flowing-menu__item:hover .flowing-menu__item-link {
-  color: #ffffff;
+  color: transparent;
+  z-index: 3;
 }
 
 .flowing-menu__item:hover .flowing-marquee {
   transform: translateY(0);
   animation: marqueeEntrance 0.6s ease-out;
-}
-
-.flowing-menu__item:hover .flowing-menu__item-link {
-  color: #ffffff;
-  z-index: 3;
 }
 
 /* Marquee Effect */
@@ -1457,7 +1453,7 @@
 
 @keyframes marqueeScroll {
   0% {
-    transform: translateX(0);
+    transform: translateX(100%);
   }
   100% {
     transform: translateX(-100%);
@@ -1468,6 +1464,10 @@
   0% {
     opacity: 0;
     transform: translateY(100%) scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
   100% {
     opacity: 1;
