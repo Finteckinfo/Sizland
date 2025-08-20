@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
-import { createCheckoutSession } from '@/app/actions/stripe';
+// Call the API route instead of importing server actions directly to avoid bundling server-only deps in the browser
 import { calculateTokenPrice, validateTokenAmount, formatCurrency } from '@/lib/stripe/config';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from 'lucide-react';
@@ -74,13 +74,18 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
     setSuccess('');
 
     try {
-      const result = await createCheckoutSession({
-        tokenAmount,
-        userEmail: userEmail.trim(),
-        userWalletAddress: activeAccount.address,
-        successUrl: `${window.location.origin}/wallet?success=true&tokens=${tokenAmount}`,
-        cancelUrl: `${window.location.origin}/wallet?canceled=true`,
+      const res = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenAmount,
+          userEmail: userEmail.trim(),
+          userWalletAddress: activeAccount.address,
+          successUrl: `${window.location.origin}/wallet?success=true&tokens=${tokenAmount}`,
+          cancelUrl: `${window.location.origin}/wallet?canceled=true`,
+        }),
       });
+      const result = await res.json();
 
       if (result.success && result.sessionId) {
         setSuccess('Redirecting to secure checkout...');

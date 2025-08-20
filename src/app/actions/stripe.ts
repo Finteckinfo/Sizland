@@ -1,6 +1,7 @@
 'use server';
 
-import { stripe, calculateTokenPrice, validateTokenAmount, generatePaymentReference } from '@/lib/stripe/config';
+import { calculateTokenPrice, validateTokenAmount, generatePaymentReference } from '@/lib/stripe/config';
+import { stripe } from '@/lib/stripe/server';
 
 export interface CreateCheckoutSessionData {
   tokenAmount: number;

@@ -1,10 +1,6 @@
-import Stripe from 'stripe';
-
-// Stripe Configuration
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-  typescript: true,
-});
+// Note: Do NOT import Stripe SDK here.
+// This module is shared by client and server for pricing utilities only.
+// Server-only Stripe initialization lives in `src/lib/stripe/server.ts`.
 // SIZ Token Pricing Configuration
 export const SIZ_TOKEN_PRICING = {
   BASE_PRICE_PER_TOKEN: 0.25, // $0.25 USD per SIZ token
