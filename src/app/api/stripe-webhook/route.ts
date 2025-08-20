@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { headers } from 'next/headers';
 import { sizTokenTransferService } from '@/lib/algorand/token-transfer';
-import { paymentDB } from '@/scripts/db-payments';
+import { paymentDB } from '@/lib/database/payments';
 
 export const runtime = 'nodejs';
 
@@ -230,7 +230,7 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
     const paymentTransaction = await paymentDB.createPaymentTransaction({
       payment_reference: data.paymentReference,
       stripe_payment_intent_id: data.paymentIntentId,
-      stripe_session_id: data.sessionId,
+      stripe_session_id: data.sessionId || undefined,
       amount: data.amount,
       currency: data.currency,
       token_amount: data.tokenAmount,

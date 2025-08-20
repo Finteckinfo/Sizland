@@ -49,7 +49,7 @@ export function generateNewAccount(): {
 } {
   const account = algosdk.generateAccount();
   return {
-    address: account.addr,
+    address: account.addr as unknown as string,
     privateKey: Buffer.from(account.sk).toString('base64'),
     mnemonic: algosdk.secretKeyToMnemonic(account.sk),
   };

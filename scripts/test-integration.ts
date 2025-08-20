@@ -6,7 +6,7 @@
  */
 
 import { sizTokenTransferService } from '../src/lib/algorand/token-transfer';
-import { paymentDB } from './db-payments';
+import { paymentDB } from '../src/lib/database/payments';
 
 async function testIntegration() {
   console.log('🧪 Testing SIZ Token Integration...\n');

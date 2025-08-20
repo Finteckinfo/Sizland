@@ -38,7 +38,11 @@ export class SizTokenTransferService {
     }
 
     try {
-      this.centralWallet = algosdk.mnemonicToSecretKey(mnemonic);
+      const account = algosdk.mnemonicToSecretKey(mnemonic);
+      this.centralWallet = {
+        addr: account.addr as unknown as string,
+        sk: account.sk
+      };
     } catch (err) {
       throw new Error(`Failed to convert mnemonic to secret key: ${(err as Error).message}`);
     }
@@ -82,7 +86,7 @@ export class SizTokenTransferService {
         return { hasBalance: false, balance: 0, error: 'Central wallet has not opted into SIZ token' };
       }
 
-      return { hasBalance: true, balance: assetHolding.amount };
+      return { hasBalance: true, balance: Number(assetHolding.amount) };
     } catch (error) {
       return { hasBalance: false, balance: 0, error: `Failed to check balance: ${error}` };
     }
@@ -193,13 +197,14 @@ export class SizTokenTransferService {
         assetIndex: this.assetId,
         amount: params.amount,
         suggestedParams,
-      });
+      } as any);
 
       // Sign transaction with mnemonic-derived private key
       const signedTxn = txn.signTxn(this.centralWallet.sk);
 
       // Send transaction
-      const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
+      const response = await algodClient.sendRawTransaction(signedTxn).do();
+      const txId = response.txid;
 
       // Wait for confirmation (4 rounds)
       const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);

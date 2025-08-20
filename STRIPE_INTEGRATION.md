@@ -50,7 +50,7 @@ The Stripe integration enables users to purchase SIZ tokens using credit cards, 
    - Pricing configuration
    - Utility functions
 
-5. **Database Integration** (`scripts/db-payments.ts`)
+5. **Database Integration** (`src/lib/database/payments.ts`)
    - Payment transaction tracking
    - Token inventory management
    - User balance updates
