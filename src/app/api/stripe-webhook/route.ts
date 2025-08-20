@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { headers } from 'next/headers';
+import { sizTokenTransferService } from '@/lib/algorand/token-transfer';
+import { paymentDB } from '@/scripts/db-payments';
 
 export const runtime = 'nodejs';
 
@@ -217,25 +219,127 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
   console.log('Processing successful payment:', data.paymentReference);
   
   try {
-    // TODO: Implement token transfer logic
-    // This is where you'll integrate with Algorand to transfer tokens
-    
-    // 1. Verify payment hasn't been processed before (idempotency)
-    // 2. Transfer SIZ tokens from central wallet to user wallet
-    // 3. Update database with transaction details
-    // 4. Send confirmation email to user
-    
-    console.log('Payment processed successfully:', {
-      paymentReference: data.paymentReference,
-      tokenAmount: data.tokenAmount,
-      userWalletAddress: data.userWalletAddress,
+    // 1. Check idempotency - verify payment hasn't been processed before
+    const idempotencyCheck = await paymentDB.checkPaymentIdempotency(data.paymentReference);
+    if (idempotencyCheck.found && idempotencyCheck.current_status === 'completed') {
+      console.log('Payment already processed:', data.paymentReference);
+      return;
+    }
+
+    // 2. Create or update payment transaction record
+    const paymentTransaction = await paymentDB.createPaymentTransaction({
+      payment_reference: data.paymentReference,
+      stripe_payment_intent_id: data.paymentIntentId,
+      stripe_session_id: data.sessionId,
       amount: data.amount,
       currency: data.currency,
+      token_amount: data.tokenAmount,
+      price_per_token: data.pricePerToken,
+      user_wallet_address: data.userWalletAddress,
+      customer_email: data.customerEmail,
+      payment_status: 'pending_token_transfer',
+      token_transfer_status: 'pending',
     });
 
-    // For now, we'll just log the success
-    // In the next phase, we'll implement the actual token transfer
-    
+    // 3. Validate user wallet address
+    if (!data.userWalletAddress) {
+      console.error('No user wallet address provided for payment:', data.paymentReference);
+      await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'No wallet address provided');
+      return;
+    }
+
+    // 4. Check token inventory and reserve tokens
+    const inventoryCheck = await paymentDB.checkTokenInventory(data.tokenAmount);
+    if (!inventoryCheck.available) {
+      console.error('Insufficient token inventory for payment:', data.paymentReference);
+      await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'Insufficient token inventory');
+      return;
+    }
+
+    // Reserve tokens for this transaction
+    await paymentDB.reserveTokens(data.tokenAmount, paymentTransaction.id);
+
+    try {
+      // 5. Transfer SIZ tokens from central wallet to user wallet
+      console.log('Initiating SIZ token transfer:', {
+        to: data.userWalletAddress,
+        amount: data.tokenAmount,
+        paymentId: paymentTransaction.id,
+      });
+
+      const transferResult = await sizTokenTransferService.transferSizTokens({
+        receiverAddress: data.userWalletAddress,
+        amount: data.tokenAmount,
+        paymentId: paymentTransaction.id,
+      });
+
+      if (transferResult.success && transferResult.txId) {
+        // 6. Update database with successful transfer
+        await paymentDB.updateTokenTransferStatus(
+          paymentTransaction.id,
+          'completed',
+          transferResult.txId
+        );
+        await paymentDB.updatePaymentStatus(paymentTransaction.id, 'completed', 'Tokens transferred successfully');
+        
+        // 7. Update user wallet balance
+        await paymentDB.updateUserWalletBalance(
+          data.userWalletAddress,
+          data.tokenAmount,
+          'credit'
+        );
+
+        console.log('SIZ token transfer completed successfully:', {
+          paymentReference: data.paymentReference,
+          txId: transferResult.txId,
+          tokenAmount: data.tokenAmount,
+          userWalletAddress: data.userWalletAddress,
+        });
+
+        // 8. Record successful token transfer
+        await paymentDB.recordTokenTransfer({
+          payment_transaction_id: paymentTransaction.id,
+          from_address: process.env.CENTRAL_WALLET_ADDRESS!,
+          to_address: data.userWalletAddress,
+          asset_id: process.env.SIZ_TOKEN_ASSET_ID!,
+          amount: data.tokenAmount,
+          transaction_id: transferResult.txId,
+          status: 'completed',
+        });
+
+      } else {
+        // Transfer failed
+        console.error('SIZ token transfer failed:', transferResult.error);
+        await paymentDB.updateTokenTransferStatus(
+          paymentTransaction.id,
+          'failed',
+          undefined,
+          transferResult.error
+        );
+        await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', `Token transfer failed: ${transferResult.error}`);
+        
+        // Release reserved tokens
+        await paymentDB.releaseReservedTokens(paymentTransaction.id);
+      }
+
+    } catch (transferError) {
+      console.error('Error during token transfer:', transferError);
+      
+      // Update database with failure
+      await paymentDB.updateTokenTransferStatus(
+        paymentTransaction.id,
+        'failed',
+        undefined,
+        transferError instanceof Error ? transferError.message : 'Unknown transfer error'
+      );
+      await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'Token transfer error occurred');
+      
+      // Release reserved tokens
+      await paymentDB.releaseReservedTokens(paymentTransaction.id);
+      
+      throw transferError;
+    }
+
   } catch (error) {
     console.error('Error processing payment:', error);
     throw error;
