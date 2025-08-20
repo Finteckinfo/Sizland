@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const paymentReference = generatePaymentReference();
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'us_bank_account'],
+      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {

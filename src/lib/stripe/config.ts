@@ -17,7 +17,7 @@ export const STRIPE_PRODUCT_CONFIG = {
   PRODUCT_NAME: 'SIZ Token',
   PRODUCT_DESCRIPTION: 'SIZ Token - Learn. Earn. Invest. Grow.',
   CURRENCY: 'usd',
-  PAYMENT_METHOD_TYPES: ['card', 'us_bank_account'] as const,
+  PAYMENT_METHOD_TYPES: ['card'] as const,
   MODE: 'payment' as const,
 } as const;
 
