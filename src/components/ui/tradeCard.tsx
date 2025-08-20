@@ -2,15 +2,49 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
+import { TokenPurchaseForm } from './token-purchase-form';
+import { useWallet } from '@txnlab/use-wallet-react';
 
 export const TradeCard: React.FC = () => {
   const [amount, setAmount] = useState<number>(0);
+  const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
+  const { activeAccount } = useWallet();
 
   // Price increases by $0.01 for every 10 tokens above 0
   const pricePerToken = 0.25 + Math.floor(amount / 10) * 0.01;
   const subtotal = amount * pricePerToken;
   const fee = subtotal * 0.01;
   const total = subtotal + fee;
+
+  const handleBuyClick = () => {
+    if (!activeAccount?.address) {
+      alert('Please connect your wallet first to purchase SIZ tokens');
+      return;
+    }
+    setShowPurchaseForm(true);
+  };
+
+  const handleClosePurchaseForm = () => {
+    setShowPurchaseForm(false);
+  };
+
+  if (showPurchaseForm) {
+    return (
+      <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 w-full space-y-4 sm:space-y-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Purchase SIZ Tokens</h2>
+          <Button
+            onClick={handleClosePurchaseForm}
+            variant="ghost"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </Button>
+        </div>
+        <TokenPurchaseForm />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 w-full space-y-4 sm:space-y-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
@@ -62,7 +96,10 @@ export const TradeCard: React.FC = () => {
         
         {/* Buy/Sell Buttons - Side by side and centered */}
         <div className="flex justify-center gap-3 sm:gap-4 pt-2 sm:pt-4">
-          <Button className="bg-green-500 text-white hover:bg-green-600 flex items-center justify-center gap-2 px-6 sm:px-8">
+          <Button 
+            onClick={handleBuyClick}
+            className="bg-green-500 text-white hover:bg-green-600 flex items-center justify-center gap-2 px-6 sm:px-8"
+          >
             <span>Buy</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
