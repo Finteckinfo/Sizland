@@ -136,8 +136,8 @@ The token pricing is configured in `src/lib/stripe/config.ts`:
 ```typescript
 export const SIZ_TOKEN_PRICING = {
   BASE_PRICE_PER_TOKEN: 0.25,        // $0.25 USD per SIZ token
-  PRICE_INCREMENT: 0.01,             // $0.01 increase per 10 tokens
-  TOKEN_INCREMENT: 10,                // Price increases every 10 tokens
+  PRICE_INCREMENT: 0.00,             // No price increase - flat rate
+  TOKEN_INCREMENT: 1,                 // No increment needed for flat pricing
   MIN_PURCHASE: 1,                   // Minimum 1 SIZ token
   MAX_PURCHASE: 10000,               // Maximum 10,000 SIZ tokens
   PROCESSING_FEE_PERCENTAGE: 0.029,  // 2.9% Stripe processing fee

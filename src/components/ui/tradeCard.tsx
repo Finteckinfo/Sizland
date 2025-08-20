@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
 import { TokenPurchaseForm } from './token-purchase-form';
 import { useWallet } from '@txnlab/use-wallet-react';
+import { calculateTokenPrice } from '@/lib/stripe/config';
 
 export const TradeCard: React.FC = () => {
   const [amount, setAmount] = useState<number>(0);
   const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
   const { activeAccount } = useWallet();
 
-  // Price increases by $0.01 for every 10 tokens above 0
-  const pricePerToken = 0.25 + Math.floor(amount / 10) * 0.01;
-  const subtotal = amount * pricePerToken;
-  const fee = subtotal * 0.01;
-  const total = subtotal + fee;
+  // Use centralized pricing calculation
+  const pricing = amount > 0 ? calculateTokenPrice(amount) : { pricePerToken: 0.25, subtotal: 0, processingFee: 0, total: 0 };
+  const pricePerToken = pricing.pricePerToken;
+  const subtotal = pricing.subtotal;
+  const fee = pricing.processingFee;
+  const total = pricing.total;
 
   const handleBuyClick = () => {
     if (!activeAccount?.address) {
@@ -81,7 +83,7 @@ export const TradeCard: React.FC = () => {
         />
         <input
           type="text"
-          placeholder="Fee (1%)"
+          placeholder="Processing Fee"
           value={`$${fee.toFixed(2)} USD`}
           readOnly
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-center"
