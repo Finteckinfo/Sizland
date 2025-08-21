@@ -1,6 +1,5 @@
-const dotenv = require('dotenv');
-
-dotenv.config();
+// Load environment variables
+require('dotenv').config();
 
 async function testArc59FinalIntegration() {
   console.log('🧪 Testing ARC-0059 Final Integration...\n');

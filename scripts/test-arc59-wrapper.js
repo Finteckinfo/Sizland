@@ -1,5 +1,5 @@
-const dotenv = require('dotenv');
-dotenv.config();
+// Load environment variables
+require('dotenv').config();
 
 // Mock the algodClient for testing
 const mockAlgodClient = {

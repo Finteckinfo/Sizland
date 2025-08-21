@@ -1,0 +1,23 @@
+# Exclude test scripts from production build
+scripts/
+*.test.ts
+*.test.js
+test-*.ts
+test-*.js
+
+# Exclude development files
+.env.local
+.env.development
+.env.test
+
+# Exclude documentation
+*.md
+docs/
+
+# Exclude deployment scripts
+deploy-*.ts
+deploy-*.js
+
+# Exclude temporary files
+*.tmp
+*.temp
