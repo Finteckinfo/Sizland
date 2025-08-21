@@ -1,6 +1,7 @@
 import algosdk from 'algosdk';
 import { algodClient } from './client';
 import { decodePrivateKey, isValidAlgorandAddress } from './utils';
+import { Arc59Client } from './arc59/client';
 
 export interface TokenTransferParams {
   receiverAddress: string;
@@ -26,9 +27,10 @@ export interface OptInStatus {
 }
 
 export class SizTokenTransferService {
-  private readonly assetId: number;
+  private readonly assetId: bigint;
   private readonly centralWalletAddress: string;
   private readonly centralWallet: { addr: string; sk: Uint8Array };
+  private arc59Client?: Arc59Client;
 
   constructor() {
     if (!process.env.SIZ_TOKEN_ASSET_ID) {
@@ -57,8 +59,17 @@ export class SizTokenTransferService {
       throw new Error(`Failed to convert mnemonic to secret key: ${(err as Error).message}`);
     }
 
-    this.assetId = Number(process.env.SIZ_TOKEN_ASSET_ID);
+    this.assetId = BigInt(process.env.SIZ_TOKEN_ASSET_ID);
     this.centralWalletAddress = process.env.CENTRAL_WALLET_ADDRESS;
+    
+    // Initialize ARC-0059 client if app ID is configured
+    if (process.env.ARC59_APP_ID) {
+      this.arc59Client = new Arc59Client({
+        appId: Number(process.env.ARC59_APP_ID),
+        sender: this.centralWallet.addr,
+        signer: this.createSigner()
+      });
+    }
   }
 
   /**
@@ -73,6 +84,26 @@ export class SizTokenTransferService {
    */
   validateCentralWalletAddress(): boolean {
     return this.centralWallet.addr === this.centralWalletAddress;
+  }
+
+  /**
+   * Create a transaction signer for the central wallet
+   */
+  private createSigner(): algosdk.TransactionSigner {
+    return async (txnGroup: algosdk.Transaction[], indexesToSign: number[]) => {
+      const signedTxns: Uint8Array[] = [];
+      
+      for (let i = 0; i < txnGroup.length; i++) {
+        const txn = txnGroup[i];
+        if (indexesToSign.includes(i) && txn.sender.toString() === this.centralWallet.addr) {
+          signedTxns.push(txn.signTxn(this.centralWallet.sk));
+        } else {
+          signedTxns.push(new Uint8Array(0));
+        }
+      }
+      
+      return signedTxns;
+    };
   }
 
   /**
@@ -124,6 +155,24 @@ export class SizTokenTransferService {
       const minBalanceRequired = 0.1; // 0.1 ALGO required for asset opt-in
       const canOptIn = alogBalance >= minBalanceRequired;
       
+      // If ARC-0059 is available and user is not opted in, check inbox
+      if (this.arc59Client && !isOptedIn) {
+        try {
+          const inboxBalance = await this.arc59Client.checkInboxBalance(receiverAddress, this.assetId);
+          if (inboxBalance > 0) {
+            return {
+              isOptedIn: false,
+              canOptIn: true,
+              alogBalance,
+              minBalanceRequired,
+              error: `User has ${inboxBalance} SIZ tokens in ARC-0059 inbox. They can claim them without opt-in.`
+            };
+          }
+        } catch (inboxError) {
+          console.warn('Failed to check ARC-0059 inbox balance:', inboxError);
+        }
+      }
+      
       return { 
         isOptedIn, 
         canOptIn,
@@ -148,7 +197,7 @@ export class SizTokenTransferService {
     error?: string 
   }> {
     try {
-      const assetInfo = await algodClient.getAssetByID(this.assetId).do();
+      const assetInfo = await algodClient.getAssetByID(Number(this.assetId)).do();
       const freezeAddress = assetInfo.params.freeze;
       
       if (!freezeAddress) {
@@ -179,6 +228,49 @@ export class SizTokenTransferService {
    * Transfer SIZ tokens from central wallet to receiver
    */
   async transferSizTokens(params: TokenTransferParams): Promise<TransferResult> {
+    // If ARC-0059 is available, use it for seamless transfers
+    if (this.arc59Client) {
+      return this.transferViaArc59(params);
+    }
+    
+    // Fallback to direct transfer
+    return this.transferDirect(params);
+  }
+
+  /**
+   * Transfer SIZ tokens using ARC-0059 (handles opt-in automatically)
+   */
+  private async transferViaArc59(params: TokenTransferParams): Promise<TransferResult> {
+    try {
+      console.log(`🔄 Transferring ${params.amount} SIZ tokens via ARC-0059 to ${params.receiverAddress}`);
+      
+      const txId = await this.arc59Client!.sendAsset({
+        receiver: params.receiverAddress,
+        assetId: this.assetId,
+        amount: BigInt(params.amount)
+      });
+      
+      console.log(`✅ ARC-0059 transfer successful. Transaction ID: ${txId}`);
+      
+      return {
+        success: true,
+        txId,
+        confirmedTxn: { txId }
+      };
+      
+    } catch (error) {
+      console.error('❌ ARC-0059 transfer failed:', error);
+      return {
+        success: false,
+        error: `ARC-0059 transfer failed: ${(error as Error).message}`
+      };
+    }
+  }
+
+  /**
+   * Direct transfer SIZ tokens (original method)
+   */
+  private async transferDirect(params: TokenTransferParams): Promise<TransferResult> {
     try {
       // Validate receiver address
       if (!isValidAlgorandAddress(params.receiverAddress)) {
@@ -226,7 +318,7 @@ export class SizTokenTransferService {
       const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: this.centralWalletAddress,
         to: params.receiverAddress,
-        assetIndex: this.assetId,
+        assetIndex: Number(this.assetId),
         amount: params.amount,
         suggestedParams,
       } as any);
@@ -267,7 +359,7 @@ export class SizTokenTransferService {
       return `Your wallet needs at least ${optInStatus.minBalanceRequired} ALGO to opt into SIZ tokens. Current balance: ${optInStatus.alogBalance?.toFixed(4) || 'Unknown'} ALGO. Please add more ALGO to your wallet.`;
     }
 
-    return `To receive SIZ tokens, you need to opt into the SIZ asset. This requires a small transaction fee (about 0.001 ALGO) and increases your minimum balance by 0.1 ALGO. You can opt-in using any Algorand wallet (Pera, MyAlgo, Defly, etc.) by adding the SIZ token asset ID: ${this.assetId}. After opt-in, refresh this page to verify your wallet is ready.`;
+    return `To receive SIZ tokens, you need to opt into the SIZ asset. This requires a small transaction fee (about 0.001 ALGO) and increases your minimum balance by 0.1 ALGO. You can opt-in using any Algorand wallet (Pera, MyAlgo, Defly, etc.) by adding the SIZ token asset ID: ${this.assetId.toString()}. After opt-in, refresh this page to verify your wallet is ready.`;
   }
 
   /**

@@ -8,7 +8,10 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:arc59:setup": "npx ts-node scripts/test-arc59-simple.ts",
+    "test:arc59:working": "npx ts-node scripts/test-arc59-working.ts",
+    "test:arc59:final": "npx ts-node scripts/test-arc59-final.ts"
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",
@@ -39,6 +42,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
     "ethers": "^5",
     "express": "^5.1.0",
     "framer-motion": "^12.6.3",
@@ -74,6 +78,7 @@
     "prettier": "^3.3.3",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.12",
+    "ts-node": "^10.9.2",
     "typescript": "5.5.2",
     "util": "^0.12.5"
   }
