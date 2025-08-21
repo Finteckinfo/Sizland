@@ -34,6 +34,17 @@ The Stripe integration enables users to purchase SIZ tokens using credit cards, 
    - User interface for selecting token amount and email
    - Real-time pricing calculation
    - Stripe checkout integration
+   - Wallet readiness validation before purchase
+
+2. **Wallet Readiness Check** (`src/components/ui/wallet-readiness-check.tsx`)
+   - Verifies wallet can receive SIZ tokens
+   - Checks opt-in status and ALGO balance
+   - Provides clear setup instructions
+
+3. **Opt-In Instructions** (`src/components/ui/opt-in-instructions.tsx`)
+   - Step-by-step guide for wallet configuration
+   - Wallet-specific instructions (Pera, MyAlgo, etc.)
+   - Asset verification and copy functionality
 
 2. **Server Actions** (`src/app/actions/stripe.ts`)
    - Secure checkout session creation
@@ -238,6 +249,32 @@ stripe listen --forward-to localhost:3000/api/stripe-webhook
 - **Success**: `4242 4242 4242 4242`
 - **Decline**: `4000 0000 0000 0002`
 - **3D Secure**: `4000 0025 0000 3155`
+
+## 🚨 Asset Opt-In Requirements
+
+**Critical:** Users must opt into the SIZ token asset before they can receive tokens.
+
+### What Happens Without Opt-In
+- Token transfers will fail
+- Users won't receive purchased tokens
+- Payment remains in "pending_opt_in" status
+
+### Opt-In Process
+1. **Pre-Purchase Check** - Form validates wallet readiness
+2. **Clear Instructions** - Step-by-step guidance provided
+3. **Asset ID Display** - Easy copy-paste functionality
+4. **Wallet-Specific Help** - Instructions for Pera, MyAlgo, etc.
+5. **Verification** - Link to AlgoExplorer for asset details
+
+### Technical Requirements
+- Minimum 0.1 ALGO balance for asset opt-in
+- Transaction fee (~0.001 ALGO) for opt-in transaction
+- One-time setup per wallet address
+
+### Components Added
+- **WalletReadinessCheck** - Verifies wallet can receive SIZ tokens
+- **OptInInstructions** - Step-by-step guide for wallet configuration
+- **Enhanced TokenPurchaseForm** - Includes wallet readiness validation
 
 ## 🚀 Deployment
 

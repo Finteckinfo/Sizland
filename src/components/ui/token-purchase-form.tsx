@@ -8,6 +8,7 @@ import { calculateTokenPrice, validateTokenAmount, formatCurrency } from '@/lib/
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 
+
 interface TokenPurchaseFormProps {
   className?: string;
 }
@@ -19,6 +20,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+
   const [pricing, setPricing] = useState<{
     pricePerToken: number;
     subtotal: number;
@@ -50,12 +52,16 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
     setSuccess('');
   };
 
+
+
   // Handle Stripe checkout
   const handleStripeCheckout = async () => {
     if (!activeAccount?.address) {
       setError('Please connect your wallet first');
       return;
     }
+
+
 
     if (!userEmail.trim()) {
       setError('Please enter your email address');
@@ -184,6 +190,8 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
           We'll send your purchase confirmation to this email
         </p>
       </div>
+
+
 
       {/* Pricing Breakdown */}
       {pricing && (

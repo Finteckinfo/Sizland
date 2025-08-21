@@ -52,6 +52,9 @@ CREATE TYPE payment_status_enum AS ENUM (
     'pending',
     'processing',
     'paid',
+    'pending_token_transfer',
+    'pending_opt_in',
+    'completed',
     'failed',
     'canceled',
     'expired'
@@ -63,7 +66,8 @@ CREATE TYPE token_transfer_status_enum AS ENUM (
     'processing',
     'completed',
     'failed',
-    'skipped'
+    'skipped',
+    'pending_opt_in'
 );
 
 -- Update the payment_transactions table to use enums safely

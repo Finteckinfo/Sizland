@@ -310,16 +310,44 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       } else {
         // Transfer failed
         console.error('SIZ token transfer failed:', transferResult.error);
-        await paymentDB.updateTokenTransferStatus(
-          paymentTransaction.id,
-          'failed',
-          undefined,
-          transferResult.error
-        );
-        await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', `Token transfer failed: ${transferResult.error}`);
         
-        // Release reserved tokens
-        await paymentDB.releaseReservedTokens(paymentTransaction.id);
+        // Check if this is an opt-in issue
+        if (transferResult.requiresOptIn) {
+          console.log('Transfer failed due to opt-in requirement:', {
+            paymentReference: data.paymentReference,
+            userWalletAddress: data.userWalletAddress,
+            optInInstructions: transferResult.optInInstructions,
+          });
+          
+          // Update status to indicate opt-in is required
+          await paymentDB.updateTokenTransferStatus(
+            paymentTransaction.id,
+            'pending_opt_in',
+            undefined,
+            'User wallet not opted into SIZ token'
+          );
+          await paymentDB.updatePaymentStatus(
+            paymentTransaction.id, 
+            'pending_opt_in', 
+            'Payment successful but wallet not opted into SIZ token. User must opt-in to receive tokens.'
+          );
+          
+          // TODO: Send email notification to user with opt-in instructions
+          // This could be implemented with a separate email service
+          
+        } else {
+          // Other transfer failure
+          await paymentDB.updateTokenTransferStatus(
+            paymentTransaction.id,
+            'failed',
+            undefined,
+            transferResult.error
+          );
+          await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', `Token transfer failed: ${transferResult.error}`);
+          
+          // Release reserved tokens
+          await paymentDB.releaseReservedTokens(paymentTransaction.id);
+        }
       }
 
     } catch (transferError) {

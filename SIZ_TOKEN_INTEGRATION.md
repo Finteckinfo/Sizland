@@ -86,7 +86,26 @@ The integration uses these key tables:
 3. Webhook verifies signature
 4. Processes payment completion
 
-### 3. Token Transfer
+### 3. Asset Opt-In Validation
+
+**Critical Requirement:** Before tokens can be transferred, the customer's wallet must be opted into the SIZ token asset.
+
+1. **Pre-Purchase Check:**
+   - Wallet readiness verification before allowing purchase
+   - Clear instructions if wallet is not opted in
+   - Asset ID provided for easy wallet configuration
+
+2. **Opt-In Requirements:**
+   - Customer needs at least 0.1 ALGO for minimum balance
+   - Transaction fee of ~0.001 ALGO for opt-in
+   - One-time setup per wallet address
+
+3. **User Guidance:**
+   - Step-by-step opt-in instructions
+   - Wallet-specific guidance (Pera, MyAlgo, etc.)
+   - Asset verification on AlgoExplorer
+
+### 4. Token Transfer
 
 1. **Validation Checks:**
    - Payment not already processed (idempotency)

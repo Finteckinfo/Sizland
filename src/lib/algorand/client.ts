@@ -14,5 +14,3 @@ export const algodClient = new algosdk.Algodv2(
   process.env.ALGORAND_NETWORK_URL,
   ''
 );
-
-
