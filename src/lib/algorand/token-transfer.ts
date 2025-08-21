@@ -13,6 +13,16 @@ export interface TransferResult {
   txId?: string;
   error?: string;
   confirmedTxn?: any;
+  requiresOptIn?: boolean;
+  optInInstructions?: string;
+}
+
+export interface OptInStatus {
+  isOptedIn: boolean;
+  canOptIn: boolean;
+  error?: string;
+  alogBalance?: number;
+  minBalanceRequired?: number;
 }
 
 export class SizTokenTransferService {
@@ -93,20 +103,39 @@ export class SizTokenTransferService {
   }
 
   /**
-   * Check if the receiver has opted into the SIZ token
+   * Check if the receiver has opted into the SIZ token and can opt-in if needed
    */
-  async checkReceiverOptIn(receiverAddress: string): Promise<{ isOptedIn: boolean; error?: string }> {
+  async checkReceiverOptIn(receiverAddress: string): Promise<OptInStatus> {
     try {
       if (!isValidAlgorandAddress(receiverAddress)) {
-        return { isOptedIn: false, error: 'Invalid Algorand address format' };
+        return { 
+          isOptedIn: false, 
+          canOptIn: false, 
+          error: 'Invalid Algorand address format' 
+        };
       }
 
       const accountInfo = await algodClient.accountInformation(receiverAddress).do();
       const assetHolding = accountInfo.assets?.find((asset: any) => asset.assetId === this.assetId);
+      const isOptedIn = !!assetHolding;
       
-      return { isOptedIn: !!assetHolding };
+      // Check if user can opt-in (has sufficient ALGO for minimum balance + fees)
+      const alogBalance = Number(accountInfo.amount) / 1e6; // Convert from microAlgos
+      const minBalanceRequired = 0.1; // 0.1 ALGO required for asset opt-in
+      const canOptIn = alogBalance >= minBalanceRequired;
+      
+      return { 
+        isOptedIn, 
+        canOptIn,
+        alogBalance,
+        minBalanceRequired
+      };
     } catch (error) {
-      return { isOptedIn: false, error: `Failed to check opt-in status: ${error}` };
+      return { 
+        isOptedIn: false, 
+        canOptIn: false, 
+        error: `Failed to check opt-in status: ${error}` 
+      };
     }
   }
 
@@ -169,12 +198,15 @@ export class SizTokenTransferService {
         };
       }
 
-      // Check receiver opt-in status
+      // Check receiver opt-in status with detailed information
       const optInCheck = await this.checkReceiverOptIn(params.receiverAddress);
       if (!optInCheck.isOptedIn) {
+        const optInInstructions = this.generateOptInInstructions(params.receiverAddress, optInCheck);
         return { 
           success: false, 
-          error: `Receiver ${params.receiverAddress} has not opted into SIZ token` 
+          error: `Receiver ${params.receiverAddress} has not opted into SIZ token`,
+          requiresOptIn: true,
+          optInInstructions
         };
       }
 
@@ -221,6 +253,21 @@ export class SizTokenTransferService {
         error: error instanceof Error ? error.message : 'Unknown error occurred during transfer',
       };
     }
+  }
+
+  /**
+   * Generate opt-in instructions for users
+   */
+  generateOptInInstructions(receiverAddress: string, optInStatus: OptInStatus): string {
+    if (optInStatus.isOptedIn) {
+      return 'Your wallet is already opted into SIZ tokens. You can receive tokens immediately.';
+    }
+
+    if (!optInStatus.canOptIn) {
+      return `Your wallet needs at least ${optInStatus.minBalanceRequired} ALGO to opt into SIZ tokens. Current balance: ${optInStatus.alogBalance?.toFixed(4) || 'Unknown'} ALGO. Please add more ALGO to your wallet.`;
+    }
+
+    return `To receive SIZ tokens, you need to opt into the SIZ asset. This requires a small transaction fee (about 0.001 ALGO) and increases your minimum balance by 0.1 ALGO. You can opt-in using any Algorand wallet (Pera, MyAlgo, Defly, etc.) by adding the SIZ token asset ID: ${this.assetId}. After opt-in, refresh this page to verify your wallet is ready.`;
   }
 
   /**
