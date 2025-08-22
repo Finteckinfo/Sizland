@@ -219,16 +219,14 @@ export class PaymentDatabase {
     try {
       const query = `
         INSERT INTO webhook_events (
-          stripe_event_id, event_type, event_data, processing_status
-        ) VALUES ($1, $2, $3, $4)
+          stripe_event_id, event_type
+        ) VALUES ($1, $2)
         RETURNING *
       `;
       
       const result = await this.pool.query(query, [
         stripeEventId, 
-        eventType, 
-        eventData || {}, 
-        'pending'
+        eventType
       ]);
       return result.rows[0];
     } catch (error) {
@@ -318,7 +316,7 @@ export class PaymentDatabase {
   async checkTokenInventory(amount: number): Promise<{ available: boolean; current_balance: number }> {
     try {
       const query = `
-        SELECT available_supply 
+        SELECT available_balance 
         FROM token_inventory 
         WHERE asset_id = $1
       `;
@@ -329,7 +327,7 @@ export class PaymentDatabase {
         return { available: false, current_balance: 0 };
       }
       
-      const currentBalance = result.rows[0].available_supply;
+      const currentBalance = result.rows[0].available_balance;
       return {
         available: currentBalance >= amount,
         current_balance: currentBalance,
@@ -348,9 +346,9 @@ export class PaymentDatabase {
       const query = `
         UPDATE token_inventory 
         SET 
-          available_supply = available_supply - $1,
-          reserved_supply = reserved_supply + $1,
-          last_updated = NOW()
+          available_balance = available_balance - $1,
+          reserved_balance = reserved_balance + $1,
+          updated_at = NOW()
         WHERE asset_id = $2
       `;
       
@@ -381,9 +379,9 @@ export class PaymentDatabase {
       const query = `
         UPDATE token_inventory 
         SET 
-          available_supply = available_supply + $1,
-          reserved_supply = reserved_supply - $1,
-          last_updated = NOW()
+          available_balance = available_balance + $1,
+          reserved_balance = reserved_balance - $1,
+          updated_at = NOW()
         WHERE asset_id = $2
       `;
       
@@ -405,12 +403,12 @@ export class PaymentDatabase {
     try {
       if (operation === 'credit') {
         const query = `
-          INSERT INTO user_wallet_balances (user_wallet_address, network, asset_id, asset_name, balance, last_updated)
+          INSERT INTO user_wallet_balances (wallet_address, network, asset_id, asset_name, balance, created_at)
           VALUES ($1, $2, $3, $4, $5, NOW())
-          ON CONFLICT (user_wallet_address, network, asset_id)
+          ON CONFLICT (wallet_address, network, asset_id)
           DO UPDATE SET 
             balance = user_wallet_balances.balance + $5,
-            last_updated = NOW()
+            updated_at = NOW()
         `;
         
         await this.pool.query(query, [
@@ -425,8 +423,8 @@ export class PaymentDatabase {
           UPDATE user_wallet_balances 
           SET 
             balance = balance - $1,
-            last_updated = NOW()
-          WHERE user_wallet_address = $2 AND network = $3 AND asset_id = $4
+            updated_at = NOW()
+          WHERE wallet_address = $2 AND network = $3 AND asset_id = $4
         `;
         
         await this.pool.query(query, [
@@ -474,8 +472,8 @@ export class PaymentDatabase {
       const query = `
         SELECT 
           COUNT(*) as total_events,
-          COUNT(CASE WHEN processing_status = 'processed' THEN 1 END) as processed_events,
-          COUNT(CASE WHEN processing_status != 'processed' THEN 1 END) as unprocessed_events
+          COUNT(CASE WHEN processed = TRUE THEN 1 END) as processed_events,
+          COUNT(CASE WHEN processed = FALSE THEN 1 END) as unprocessed_events
         FROM webhook_events
       `;
       
@@ -486,7 +484,7 @@ export class PaymentDatabase {
         SELECT event_type, COUNT(*) as count
         FROM webhook_events 
         GROUP BY event_type
-        ORDER BY MAX(processed_at) DESC 
+        ORDER BY MAX(created_at) DESC 
         LIMIT 5
       `;
       
@@ -510,9 +508,9 @@ export class PaymentDatabase {
     try {
       const query = `
         SELECT 
-          id, stripe_event_id, event_type, processing_status, processed_at
+          id, stripe_event_id, event_type, processed, created_at, processed_at
         FROM webhook_events 
-        ORDER BY processed_at DESC 
+        ORDER BY created_at DESC 
         LIMIT $1
       `;
       

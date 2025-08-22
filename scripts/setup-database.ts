@@ -266,42 +266,50 @@ async function setupDatabase() {
       console.log('✅ token_transfers table created');
     }
     
-    // Insert initial SIZ token inventory if it doesn't exist
-    const inventoryCheck = await client.query(`
-      SELECT COUNT(*) FROM token_inventory WHERE asset_id = $1
-    `, [process.env.SIZ_TOKEN_ASSET_ID || '2905622564']);
+    // Insert initial SIZ token inventory
+    console.log('📝 Inserting initial SIZ token inventory...');
     
-    if (parseInt(inventoryCheck.rows[0].count) === 0) {
-      console.log('📝 Inserting initial SIZ token inventory...');
-      await client.query(`
+    // First, get the actual central wallet SIZ token balance
+    const centralWalletAddress = process.env.CENTRAL_WALLET_ADDRESS;
+    if (!centralWalletAddress) {
+      throw new Error('CENTRAL_WALLET_ADDRESS environment variable is required');
+    }
+    
+    // Check if inventory already exists
+    const existingInventory = await pool.query(`
+      SELECT COUNT(*) as count FROM token_inventory WHERE asset_id = $1
+    `, [process.env.SIZ_TOKEN_ASSET_ID]);
+    
+    if (parseInt(existingInventory.rows[0].count) === 0) {
+      // Insert new inventory
+      const insertInventoryQuery = `
         INSERT INTO token_inventory (
-          network, asset_id, asset_name, total_supply, available_supply, central_wallet_address
-        ) VALUES ($1, $2, $3, $4, $5, $6)
-      `, [
-        'algorand_mainnet',
-        process.env.SIZ_TOKEN_ASSET_ID || '2905622564',
+          network, asset_id, asset_name, total_supply, available_balance, 
+          reserved_balance, central_wallet_address
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `;
+      
+      // Start with a reasonable placeholder value (will be updated with actual balance)
+      const initialBalance = 1000000; // 1 million tokens as placeholder
+      
+      await pool.query(insertInventoryQuery, [
+        'algorand',
+        process.env.SIZ_TOKEN_ASSET_ID,
         'SIZ Token',
-        '1000000000', // 1 billion tokens
-        '1000000000', // All available initially
-        process.env.CENTRAL_WALLET_ADDRESS || ''
+        initialBalance,
+        initialBalance,
+        0, // reserved_balance starts at 0
+        centralWalletAddress
       ]);
       
       console.log('✅ Initial SIZ token inventory inserted');
     } else {
-      console.log('📊 SIZ token inventory already exists, checking current balance...');
-      const currentInventory = await client.query(`
-        SELECT available_supply, reserved_supply FROM token_inventory WHERE asset_id = $1
-      `, [process.env.SIZ_TOKEN_ASSET_ID || '2905622564']);
-      
-      if (currentInventory.rows.length > 0) {
-        console.log('📋 Current inventory:', {
-          available: currentInventory.rows[0].available_supply,
-          reserved: currentInventory.rows[0].reserved_supply
-        });
-      }
+      console.log('📊 SIZ token inventory already exists');
     }
     
-    console.log('🎉 Database setup completed successfully!');
+    console.log(`   Asset ID: ${process.env.SIZ_TOKEN_ASSET_ID}`);
+    console.log(`   Central Wallet: ${centralWalletAddress}`);
+    console.log('   Note: Balance will be updated with actual amount when token transfer service runs');
     
   } catch (error) {
     console.error('❌ Database setup failed:', error);
