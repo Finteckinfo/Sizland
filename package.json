@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "format": "prettier --write .",
+    "test:arc59": "npx tsx scripts/test-arc59-integration.ts",
+    "debug:arc59": "npx tsx scripts/debug-arc59-params.ts",
     "test:arc59:setup": "npx ts-node scripts/test-arc59-simple.ts",
     "test:arc59:working": "npx ts-node scripts/test-arc59-working.ts",
     "test:arc59:final": "npx ts-node scripts/test-arc59-final.ts"
