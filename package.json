@@ -16,7 +16,8 @@
     "test:arc59:final": "npx ts-node scripts/test-arc59-final.ts",
     "setup:db": "npx tsx scripts/setup-database.ts",
     "test:payment": "npx tsx scripts/test-payment-flow.ts",
-    "debug:production": "npx tsx scripts/debug-production-payment.ts"
+    "debug:production": "npx tsx scripts/debug-production-payment.ts",
+    "debug:webhook": "npx tsx scripts/debug-webhook-integration.ts"
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",

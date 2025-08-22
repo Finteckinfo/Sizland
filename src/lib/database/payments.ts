@@ -215,15 +215,21 @@ export class PaymentDatabase {
   /**
    * Record webhook event
    */
-  async recordWebhookEvent(stripeEventId: string, eventType: string): Promise<WebhookEvent> {
+  async recordWebhookEvent(stripeEventId: string, eventType: string, eventData?: any): Promise<WebhookEvent> {
     try {
       const query = `
-        INSERT INTO webhook_events (stripe_event_id, event_type)
-        VALUES ($1, $2)
+        INSERT INTO webhook_events (
+          stripe_event_id, event_type, event_data, processing_status
+        ) VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
       
-      const result = await this.pool.query(query, [stripeEventId, eventType]);
+      const result = await this.pool.query(query, [
+        stripeEventId, 
+        eventType, 
+        eventData || {}, 
+        'pending'
+      ]);
       return result.rows[0];
     } catch (error) {
       console.error('Error recording webhook event:', error);
@@ -451,6 +457,91 @@ export class PaymentDatabase {
       await this.pool.query('DELETE FROM payment_transactions WHERE id = $1', [paymentId]);
     } catch (error) {
       console.error('Error deleting test payment transaction:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get webhook event statistics
+   */
+  async getWebhookEventStatistics(): Promise<{
+    total_events: number;
+    processed_events: number;
+    unprocessed_events: number;
+    recent_event_types: string[];
+  }> {
+    try {
+      const query = `
+        SELECT 
+          COUNT(*) as total_events,
+          COUNT(CASE WHEN processing_status = 'processed' THEN 1 END) as processed_events,
+          COUNT(CASE WHEN processing_status != 'processed' THEN 1 END) as unprocessed_events
+        FROM webhook_events
+      `;
+      
+      const result = await this.pool.query(query);
+      
+      // Get recent event types
+      const eventTypesQuery = `
+        SELECT event_type, COUNT(*) as count
+        FROM webhook_events 
+        GROUP BY event_type
+        ORDER BY MAX(processed_at) DESC 
+        LIMIT 5
+      `;
+      
+      const eventTypesResult = await this.pool.query(eventTypesQuery);
+      const recentEventTypes = eventTypesResult.rows.map((row: any) => row.event_type);
+      
+      return {
+        ...result.rows[0],
+        recent_event_types: recentEventTypes
+      };
+    } catch (error) {
+      console.error('Error getting webhook event statistics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get recent webhook events
+   */
+  async getRecentWebhookEvents(limit: number = 10): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          id, stripe_event_id, event_type, processing_status, processed_at
+        FROM webhook_events 
+        ORDER BY processed_at DESC 
+        LIMIT $1
+      `;
+      
+      const result = await this.pool.query(query, [limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting recent webhook events:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get recent payment transactions
+   */
+  async getRecentPaymentTransactions(limit: number = 10): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          id, payment_reference, payment_status, token_transfer_status, 
+          token_amount, total_amount, user_wallet_address, created_at
+        FROM payment_transactions 
+        ORDER BY created_at DESC 
+        LIMIT $1
+      `;
+      
+      const result = await this.pool.query(query, [limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting recent payment transactions:', error);
       throw error;
     }
   }

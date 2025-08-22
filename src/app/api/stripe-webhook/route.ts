@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // Record webhook event for audit trail
-    await paymentDB.recordWebhookEvent(event.id, event.type);
+    await paymentDB.recordWebhookEvent(event.id, event.type, event.data);
     
     switch (event.type) {
       case 'checkout.session.completed':
