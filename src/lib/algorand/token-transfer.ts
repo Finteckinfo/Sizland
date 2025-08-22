@@ -152,13 +152,32 @@ export class SizTokenTransferService {
       }
 
       const accountInfo = await algodClient.accountInformation(this.getDerivedCentralWalletAddress()).do();
-      const assetHolding = accountInfo.assets?.find((asset: any) => asset.assetId === Number(this.assetId));
+      
+      // Debug: Log all assets in the wallet
+      console.log('🔍 Debug: All assets in central wallet for balance check:');
+      const allAssets = accountInfo.assets || [];
+      allAssets.forEach((asset: any) => {
+        console.log(`   Asset ID: ${asset.assetId} (${typeof asset.assetId}), Amount: ${asset.amount}`);
+      });
+      console.log(`🔍 Looking for SIZ asset ID: ${this.assetId} (${typeof this.assetId})`);
+      
+      // Find SIZ asset with improved comparison
+      const assetHolding = allAssets.find((asset: any) => {
+        const assetIdNum = Number(asset.assetId);
+        const targetAssetIdNum = Number(this.assetId);
+        const match = assetIdNum === targetAssetIdNum;
+        console.log(`   Balance check - Comparing: ${assetIdNum} === ${targetAssetIdNum} = ${match}`);
+        return match;
+      });
       
       if (!assetHolding) {
         return { hasBalance: false, balance: 0, error: 'Central wallet has not opted into SIZ token' };
       }
 
-      return { hasBalance: true, balance: Number(assetHolding.amount) };
+      const balance = Number(assetHolding.amount);
+      console.log(`🔍 SIZ token balance found: ${balance}`);
+      
+      return { hasBalance: true, balance };
     } catch (error) {
       return { hasBalance: false, balance: 0, error: `Failed to check balance: ${error}` };
     }
@@ -197,10 +216,33 @@ export class SizTokenTransferService {
       const algoBalance = BigInt(accountInfo.amount);
       const minBalance = BigInt(accountInfo.minBalance);
       
-      // Check SIZ token status
-      const sizAsset = accountInfo.assets?.find((asset: any) => asset.assetId === Number(this.assetId));
+      // Debug: Log all assets in the wallet
+      console.log('🔍 Debug: All assets in central wallet:');
+      const allAssets = accountInfo.assets || [];
+      allAssets.forEach((asset: any) => {
+        console.log(`   Asset ID: ${asset.assetId} (${typeof asset.assetId}), Amount: ${asset.amount}`);
+      });
+      console.log(`🔍 Looking for SIZ asset ID: ${this.assetId} (${typeof this.assetId})`);
+      
+      // Check SIZ token status with improved comparison
+      const sizAsset = allAssets.find((asset: any) => {
+        // Convert both to numbers for comparison to avoid BigInt/Number mismatch
+        const assetIdNum = Number(asset.assetId);
+        const targetAssetIdNum = Number(this.assetId);
+        const match = assetIdNum === targetAssetIdNum;
+        console.log(`   Comparing: ${assetIdNum} === ${targetAssetIdNum} = ${match}`);
+        return match;
+      });
+      
       const isOptedIntoSiz = !!sizAsset;
       const sizBalance = sizAsset ? Number(sizAsset.amount) : 0;
+      
+      console.log(`🔍 SIZ token detection result:`, {
+        found: !!sizAsset,
+        assetId: sizAsset?.assetId,
+        amount: sizAsset?.amount,
+        balance: sizBalance
+      });
       
       // Calculate available ALGO for operations (excluding minimum balance)
       const availableAlgo = algoBalance - minBalance;
