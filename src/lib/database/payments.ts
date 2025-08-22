@@ -1,13 +1,48 @@
 import { Pool } from 'pg';
+import dotenv from 'dotenv';
 
-// Database configuration
+// Load environment variables
+dotenv.config();
+
+// Database configuration with SSL fallback
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DB_SSL !== 'disable' ? { rejectUnauthorized: false } : false,
+  ssl: process.env.DB_SSL === 'disable' ? false : { rejectUnauthorized: false },
+  // Add connection timeout and retry options
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 20,
+  // Add fallback for non-SSL connections
+  ...(process.env.DB_SSL === 'disable' && {
+    ssl: false
+  })
 };
 
 // Create connection pool
 const pool = new Pool(dbConfig);
+
+// Test connection on startup
+pool.on('connect', (client) => {
+  console.log('✅ Database client connected');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ Database pool error:', err);
+});
+
+// Test connection function
+async function testConnection() {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    console.log('✅ Database connection test successful');
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection test failed:', error);
+    return false;
+  }
+}
 
 // Interfaces
 export interface PaymentTransaction {
@@ -15,12 +50,14 @@ export interface PaymentTransaction {
   payment_reference: string;
   stripe_payment_intent_id: string;
   stripe_session_id?: string;
-  amount: number;
+  subtotal: number;
+  processing_fee: number;
+  total_amount: number;
   currency: string;
   token_amount: number;
   price_per_token: number;
   user_wallet_address: string;
-  customer_email?: string;
+  user_email?: string;
   payment_status: string;
   token_transfer_status: string;
   created_at: Date;
@@ -95,9 +132,10 @@ export class PaymentDatabase {
       const query = `
         INSERT INTO payment_transactions (
           payment_reference, stripe_payment_intent_id, stripe_session_id, 
-          amount, currency, token_amount, price_per_token, 
-          user_wallet_address, customer_email, payment_status, token_transfer_status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          subtotal, processing_fee, total_amount, currency, token_amount, price_per_token, 
+          user_wallet_address, user_email, payment_status, token_transfer_status,
+          network, product_type
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *
       `;
       
@@ -105,14 +143,18 @@ export class PaymentDatabase {
         data.payment_reference,
         data.stripe_payment_intent_id,
         data.stripe_session_id,
-        data.amount,
+        data.subtotal,
+        data.processing_fee,
+        data.total_amount,
         data.currency,
         data.token_amount,
         data.price_per_token,
         data.user_wallet_address,
-        data.customer_email,
+        data.user_email,
         data.payment_status,
         data.token_transfer_status,
+        'algorand', // network
+        'siz_token' // product_type
       ];
       
       const result = await this.pool.query(query, values);
@@ -156,7 +198,7 @@ export class PaymentDatabase {
       const query = `
         UPDATE payment_transactions 
         SET token_transfer_status = $1, updated_at = NOW()
-        ${transactionId ? ', token_transaction_id = $3' : ''}
+        ${transactionId ? ', token_transfer_tx_id = $3' : ''}
         ${errorMessage ? ', token_transfer_error = $4' : ''}
         WHERE id = $2
       `;
@@ -199,8 +241,8 @@ export class PaymentDatabase {
       const query = `
         INSERT INTO token_transfers (
           payment_transaction_id, from_address, to_address, 
-          asset_id, amount, transaction_id, status, error_message
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          asset_id, asset_name, amount, network, transaction_hash, status, error_message
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
       `;
       
@@ -209,8 +251,10 @@ export class PaymentDatabase {
         data.from_address,
         data.to_address,
         data.asset_id,
+        'SIZ Token', // asset_name
         data.amount,
-        data.transaction_id,
+        'algorand', // network
+        data.transaction_id, // transaction_hash
         data.status,
         data.error_message,
       ];
@@ -270,7 +314,7 @@ export class PaymentDatabase {
   async checkTokenInventory(amount: number): Promise<{ available: boolean; current_balance: number }> {
     try {
       const query = `
-        SELECT available_balance 
+        SELECT available_supply 
         FROM token_inventory 
         WHERE asset_id = $1
       `;
@@ -281,7 +325,7 @@ export class PaymentDatabase {
         return { available: false, current_balance: 0 };
       }
       
-      const currentBalance = result.rows[0].available_balance;
+      const currentBalance = result.rows[0].available_supply;
       return {
         available: currentBalance >= amount,
         current_balance: currentBalance,
@@ -300,9 +344,9 @@ export class PaymentDatabase {
       const query = `
         UPDATE token_inventory 
         SET 
-          available_balance = available_balance - $1,
-          reserved_balance = reserved_balance + $1,
-          updated_at = NOW()
+          available_supply = available_supply - $1,
+          reserved_supply = reserved_supply + $1,
+          last_updated = NOW()
         WHERE asset_id = $2
       `;
       
@@ -333,9 +377,9 @@ export class PaymentDatabase {
       const query = `
         UPDATE token_inventory 
         SET 
-          available_balance = available_balance + $1,
-          reserved_balance = reserved_balance - $1,
-          updated_at = NOW()
+          available_supply = available_supply + $1,
+          reserved_supply = reserved_supply - $1,
+          last_updated = NOW()
         WHERE asset_id = $2
       `;
       
@@ -357,25 +401,36 @@ export class PaymentDatabase {
     try {
       if (operation === 'credit') {
         const query = `
-          INSERT INTO user_wallet_balances (wallet_address, asset_id, balance, updated_at)
-          VALUES ($1, $2, $3, NOW())
-          ON CONFLICT (wallet_address, asset_id)
+          INSERT INTO user_wallet_balances (wallet_address, network, asset_id, asset_name, balance, updated_at)
+          VALUES ($1, $2, $3, $4, $5, NOW())
+          ON CONFLICT (wallet_address, network, asset_id)
           DO UPDATE SET 
-            balance = user_wallet_balances.balance + $3,
+            balance = user_wallet_balances.balance + $5,
             updated_at = NOW()
         `;
         
-        await this.pool.query(query, [walletAddress, process.env.SIZ_TOKEN_ASSET_ID, amount]);
+        await this.pool.query(query, [
+          walletAddress, 
+          'algorand', 
+          process.env.SIZ_TOKEN_ASSET_ID, 
+          'SIZ Token',
+          amount
+        ]);
       } else {
         const query = `
           UPDATE user_wallet_balances 
           SET 
             balance = balance - $1,
             updated_at = NOW()
-          WHERE wallet_address = $2 AND asset_id = $3
+          WHERE wallet_address = $2 AND network = $3 AND asset_id = $4
         `;
         
-        await this.pool.query(query, [amount, walletAddress, process.env.SIZ_TOKEN_ASSET_ID]);
+        await this.pool.query(query, [
+          amount, 
+          walletAddress, 
+          'algorand',
+          process.env.SIZ_TOKEN_ASSET_ID
+        ]);
       }
     } catch (error) {
       console.error('Error updating user wallet balance:', error);
@@ -388,6 +443,18 @@ export class PaymentDatabase {
    */
   async close(): Promise<void> {
     await this.pool.end();
+  }
+
+  /**
+   * Delete test payment transaction (for testing purposes only)
+   */
+  async deleteTestPaymentTransaction(paymentId: string): Promise<void> {
+    try {
+      await this.pool.query('DELETE FROM payment_transactions WHERE id = $1', [paymentId]);
+    } catch (error) {
+      console.error('Error deleting test payment transaction:', error);
+      throw error;
+    }
   }
 }
 

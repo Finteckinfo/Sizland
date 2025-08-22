@@ -11,7 +11,14 @@ export async function POST(req: NextRequest) {
   const headersList = await headers();
   const signature = headersList.get('stripe-signature');
 
+  console.log('🔔 Stripe webhook received:', {
+    timestamp: new Date().toISOString(),
+    signature: signature ? 'Present' : 'Missing',
+    bodyLength: body.length
+  });
+
   if (!signature) {
+    console.error('❌ Missing stripe-signature header');
     return NextResponse.json(
       { error: 'Missing stripe-signature header' },
       { status: 400 }
@@ -27,8 +34,15 @@ export async function POST(req: NextRequest) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
+    
+    console.log('✅ Webhook signature verified:', {
+      eventType: event.type,
+      eventId: event.id,
+      timestamp: new Date().toISOString()
+    });
+    
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    console.error('❌ Webhook signature verification failed:', err);
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
@@ -36,30 +50,50 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Record webhook event for audit trail
+    await paymentDB.recordWebhookEvent(event.id, event.type);
+    
     switch (event.type) {
       case 'checkout.session.completed':
+        console.log('🛒 Processing checkout.session.completed event');
         await handleCheckoutSessionCompleted(event.data.object);
         break;
       
       case 'payment_intent.succeeded':
+        console.log('💳 Processing payment_intent.succeeded event');
         await handlePaymentIntentSucceeded(event.data.object);
         break;
       
       case 'payment_intent.payment_failed':
+        console.log('❌ Processing payment_intent.payment_failed event');
         await handlePaymentIntentFailed(event.data.object);
         break;
       
       case 'checkout.session.expired':
+        console.log('⏰ Processing checkout.session.expired event');
         await handleCheckoutSessionExpired(event.data.object);
         break;
       
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
+
+    console.log('✅ Webhook processed successfully:', {
+      eventType: event.type,
+      eventId: event.id,
+      timestamp: new Date().toISOString()
+    });
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('❌ Error processing webhook:', {
+      eventType: event.type,
+      eventId: event.id,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
@@ -216,52 +250,79 @@ interface PaymentProcessingData {
 }
 
 async function processSuccessfulPayment(data: PaymentProcessingData) {
-  console.log('Processing successful payment:', data.paymentReference);
+  console.log('🚀 Processing successful payment:', {
+    paymentReference: data.paymentReference,
+    tokenAmount: data.tokenAmount,
+    userWalletAddress: data.userWalletAddress,
+    amount: data.amount,
+    currency: data.currency,
+    timestamp: new Date().toISOString()
+  });
   
   try {
     // 1. Check idempotency - verify payment hasn't been processed before
+    console.log('🔍 Step 1: Checking payment idempotency...');
     const idempotencyCheck = await paymentDB.checkPaymentIdempotency(data.paymentReference);
+    console.log('📊 Idempotency check result:', idempotencyCheck);
+    
     if (idempotencyCheck.found && idempotencyCheck.current_status === 'completed') {
-      console.log('Payment already processed:', data.paymentReference);
+      console.log('⚠️ Payment already processed:', data.paymentReference);
       return;
     }
 
     // 2. Create or update payment transaction record
+    console.log('📝 Step 2: Creating payment transaction record...');
     const paymentTransaction = await paymentDB.createPaymentTransaction({
       payment_reference: data.paymentReference,
       stripe_payment_intent_id: data.paymentIntentId,
       stripe_session_id: data.sessionId || undefined,
-      amount: data.amount,
+      subtotal: data.amount,
+      processing_fee: 0,
+      total_amount: data.amount,
       currency: data.currency,
       token_amount: data.tokenAmount,
       price_per_token: data.pricePerToken,
       user_wallet_address: data.userWalletAddress,
-      customer_email: data.customerEmail,
-      payment_status: 'pending_token_transfer',
+      user_email: data.customerEmail,
+      payment_status: 'pending',
       token_transfer_status: 'pending',
+    });
+    
+    console.log('✅ Payment transaction created:', {
+      transactionId: paymentTransaction.id,
+      paymentReference: paymentTransaction.payment_reference
     });
 
     // 3. Validate user wallet address
+    console.log('🔍 Step 3: Validating user wallet address...');
     if (!data.userWalletAddress) {
-      console.error('No user wallet address provided for payment:', data.paymentReference);
+      console.error('❌ No user wallet address provided for payment:', data.paymentReference);
       await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'No wallet address provided');
       return;
     }
+    
+    console.log('✅ User wallet address validated:', data.userWalletAddress);
 
     // 4. Check token inventory and reserve tokens
+    console.log('🔍 Step 4: Checking token inventory...');
     const inventoryCheck = await paymentDB.checkTokenInventory(data.tokenAmount);
+    console.log('📊 Inventory check result:', inventoryCheck);
+    
     if (!inventoryCheck.available) {
-      console.error('Insufficient token inventory for payment:', data.paymentReference);
+      console.error('❌ Insufficient token inventory for payment:', data.paymentReference);
       await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'Insufficient token inventory');
       return;
     }
 
     // Reserve tokens for this transaction
+    console.log('🔒 Reserving tokens for transaction...');
     await paymentDB.reserveTokens(data.tokenAmount, paymentTransaction.id);
+    console.log('✅ Tokens reserved successfully');
 
     try {
       // 5. Transfer SIZ tokens from central wallet to user wallet
-      console.log('Initiating SIZ token transfer:', {
+      console.log('🚀 Step 5: Initiating SIZ token transfer...');
+      console.log('📋 Transfer details:', {
         to: data.userWalletAddress,
         amount: data.tokenAmount,
         paymentId: paymentTransaction.id,
@@ -273,30 +334,36 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
         paymentId: paymentTransaction.id,
       });
 
+      console.log('📊 Transfer result:', transferResult);
+
       if (transferResult.success && transferResult.txId) {
         // 6. Update database with successful transfer
+        console.log('✅ Step 6: Updating database with successful transfer...');
         await paymentDB.updateTokenTransferStatus(
           paymentTransaction.id,
           'completed',
           transferResult.txId
         );
-        await paymentDB.updatePaymentStatus(paymentTransaction.id, 'completed', 'Tokens transferred successfully');
+        await paymentDB.updatePaymentStatus(paymentTransaction.id, 'paid', 'Tokens transferred successfully');
         
         // 7. Update user wallet balance
+        console.log('💰 Step 7: Updating user wallet balance...');
         await paymentDB.updateUserWalletBalance(
           data.userWalletAddress,
           data.tokenAmount,
           'credit'
         );
 
-        console.log('SIZ token transfer completed successfully:', {
+        console.log('🎉 SIZ token transfer completed successfully:', {
           paymentReference: data.paymentReference,
           txId: transferResult.txId,
           tokenAmount: data.tokenAmount,
           userWalletAddress: data.userWalletAddress,
+          timestamp: new Date().toISOString()
         });
 
         // 8. Record successful token transfer
+        console.log('📝 Step 8: Recording token transfer...');
         await paymentDB.recordTokenTransfer({
           payment_transaction_id: paymentTransaction.id,
           from_address: process.env.CENTRAL_WALLET_ADDRESS!,
@@ -306,14 +373,16 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
           transaction_id: transferResult.txId,
           status: 'completed',
         });
+        
+        console.log('✅ Token transfer recorded successfully');
 
       } else {
         // Transfer failed
-        console.error('SIZ token transfer failed:', transferResult.error);
+        console.error('❌ SIZ token transfer failed:', transferResult.error);
         
         // Check if this is an opt-in issue
         if (transferResult.requiresOptIn) {
-          console.log('Transfer failed due to opt-in requirement:', {
+          console.log('⚠️ Transfer failed due to opt-in requirement:', {
             paymentReference: data.paymentReference,
             userWalletAddress: data.userWalletAddress,
             optInInstructions: transferResult.optInInstructions,
@@ -322,21 +391,21 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
           // Update status to indicate opt-in is required
           await paymentDB.updateTokenTransferStatus(
             paymentTransaction.id,
-            'pending_opt_in',
+            'pending',
             undefined,
             'User wallet not opted into SIZ token'
           );
           await paymentDB.updatePaymentStatus(
             paymentTransaction.id, 
-            'pending_opt_in', 
+            'processing', 
             'Payment successful but wallet not opted into SIZ token. User must opt-in to receive tokens.'
           );
           
-          // TODO: Send email notification to user with opt-in instructions
-          // This could be implemented with a separate email service
+          console.log('📝 Payment status updated to pending_opt_in');
           
         } else {
           // Other transfer failure
+          console.error('❌ Other transfer failure, updating status...');
           await paymentDB.updateTokenTransferStatus(
             paymentTransaction.id,
             'failed',
@@ -346,12 +415,19 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
           await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', `Token transfer failed: ${transferResult.error}`);
           
           // Release reserved tokens
+          console.log('🔓 Releasing reserved tokens...');
           await paymentDB.releaseReservedTokens(paymentTransaction.id);
+          console.log('✅ Reserved tokens released');
         }
       }
 
     } catch (transferError) {
-      console.error('Error during token transfer:', transferError);
+      console.error('❌ Error during token transfer:', {
+        error: transferError instanceof Error ? transferError.message : String(transferError),
+        stack: transferError instanceof Error ? transferError.stack : undefined,
+        paymentId: paymentTransaction.id,
+        timestamp: new Date().toISOString()
+      });
       
       // Update database with failure
       await paymentDB.updateTokenTransferStatus(
@@ -363,13 +439,20 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'Token transfer error occurred');
       
       // Release reserved tokens
+      console.log('🔓 Releasing reserved tokens due to transfer error...');
       await paymentDB.releaseReservedTokens(paymentTransaction.id);
+      console.log('✅ Reserved tokens released');
       
       throw transferError;
     }
 
   } catch (error) {
-    console.error('Error processing payment:', error);
+    console.error('❌ Error processing payment:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      paymentReference: data.paymentReference,
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
 }
