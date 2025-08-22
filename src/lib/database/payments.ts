@@ -173,12 +173,10 @@ export class PaymentDatabase {
       const query = `
         UPDATE payment_transactions 
         SET payment_status = $1, updated_at = NOW()
-        ${notes ? ', notes = $3' : ''}
         WHERE id = $2
       `;
       
-      const values = notes ? [status, paymentId, notes] : [status, paymentId];
-      await this.pool.query(query, values);
+      await this.pool.query(query, [status, paymentId]);
     } catch (error) {
       console.error('Error updating payment status:', error);
       throw error;
@@ -294,9 +292,9 @@ export class PaymentDatabase {
       const query = `
         SELECT 
           COUNT(*) as total_payments,
-          COUNT(CASE WHEN payment_status = 'completed' THEN 1 END) as successful_payments,
+          COUNT(CASE WHEN payment_status = 'paid' THEN 1 END) as successful_payments,
           COUNT(CASE WHEN payment_status = 'failed' THEN 1 END) as failed_payments,
-          COALESCE(SUM(CASE WHEN payment_status = 'completed' THEN token_amount END), 0) as total_tokens_sold
+          COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN token_amount END), 0) as total_tokens_sold
         FROM payment_transactions
       `;
       
@@ -401,12 +399,12 @@ export class PaymentDatabase {
     try {
       if (operation === 'credit') {
         const query = `
-          INSERT INTO user_wallet_balances (wallet_address, network, asset_id, asset_name, balance, updated_at)
+          INSERT INTO user_wallet_balances (user_wallet_address, network, asset_id, asset_name, balance, last_updated)
           VALUES ($1, $2, $3, $4, $5, NOW())
-          ON CONFLICT (wallet_address, network, asset_id)
+          ON CONFLICT (user_wallet_address, network, asset_id)
           DO UPDATE SET 
             balance = user_wallet_balances.balance + $5,
-            updated_at = NOW()
+            last_updated = NOW()
         `;
         
         await this.pool.query(query, [
@@ -421,8 +419,8 @@ export class PaymentDatabase {
           UPDATE user_wallet_balances 
           SET 
             balance = balance - $1,
-            updated_at = NOW()
-          WHERE wallet_address = $2 AND network = $3 AND asset_id = $4
+            last_updated = NOW()
+          WHERE user_wallet_address = $2 AND network = $3 AND asset_id = $4
         `;
         
         await this.pool.query(query, [
