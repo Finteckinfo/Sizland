@@ -17,7 +17,9 @@
     "setup:db": "npx tsx scripts/setup-database.ts",
     "test:payment": "npx tsx scripts/test-payment-flow.ts",
     "debug:production": "npx tsx scripts/debug-production-payment.ts",
-    "debug:webhook": "npx tsx scripts/debug-webhook-integration.ts"
+    "debug:webhook": "npx tsx scripts/debug-webhook-integration.ts",
+    "debug:production:webhook": "npx tsx scripts/debug-production-webhook.ts",
+    "check:db": "npx tsx scripts/check-database-urls.ts"
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",
