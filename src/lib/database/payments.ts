@@ -313,28 +313,30 @@ export class PaymentDatabase {
   /**
    * Check token inventory availability
    */
-  async checkTokenInventory(amount: number): Promise<{ available: boolean; current_balance: number }> {
+  async checkTokenInventory(amount: number, network: string = 'algorand'): Promise<{ available: boolean; current_balance: number }> {
     try {
       const query = `
         SELECT available_balance 
         FROM token_inventory 
-        WHERE asset_id = $1
+        WHERE asset_id = $1 AND network = $2
       `;
       
-      const result = await this.pool.query(query, [process.env.SIZ_TOKEN_ASSET_ID]);
+      const result = await this.pool.query(query, [process.env.SIZ_TOKEN_ASSET_ID, network]);
       
       if (result.rows.length === 0) {
+        console.warn(`No token inventory found for asset ${process.env.SIZ_TOKEN_ASSET_ID} on network ${network}`);
         return { available: false, current_balance: 0 };
       }
       
       const currentBalance = result.rows[0].available_balance;
-      return {
-        available: currentBalance >= amount,
-        current_balance: currentBalance,
-      };
+      const available = currentBalance >= amount;
+      
+      console.log(`Token inventory check: ${amount} tokens requested, ${currentBalance} available, ${available ? 'SUFFICIENT' : 'INSUFFICIENT'}`);
+      
+      return { available, current_balance: currentBalance };
     } catch (error) {
       console.error('Error checking token inventory:', error);
-      throw error;
+      return { available: false, current_balance: 0 };
     }
   }
 

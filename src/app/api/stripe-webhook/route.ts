@@ -305,7 +305,7 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
 
     // 4. Check token inventory and reserve tokens
     console.log('🔍 Step 4: Checking token inventory...');
-    const inventoryCheck = await paymentDB.checkTokenInventory(data.tokenAmount);
+    const inventoryCheck = await paymentDB.checkTokenInventory(data.tokenAmount, data.network || 'algorand');
     console.log('📊 Inventory check result:', inventoryCheck);
     
     if (!inventoryCheck.available) {

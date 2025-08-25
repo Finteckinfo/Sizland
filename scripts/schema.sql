@@ -110,18 +110,22 @@ CREATE INDEX idx_webhook_events_processed_at ON webhook_events(processed_at);
 CREATE TABLE token_inventory (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     network VARCHAR(50) NOT NULL,
-    asset_id BIGINT NOT NULL,
+    asset_id VARCHAR(50) NOT NULL, -- Changed from BIGINT to VARCHAR to match environment variable
     asset_name VARCHAR(100) NOT NULL,
     total_supply DECIMAL(20,0) NOT NULL,
-    available_supply DECIMAL(20,0) NOT NULL,
-    reserved_supply DECIMAL(20,0) DEFAULT 0,
+    available_balance DECIMAL(20,0) NOT NULL, -- Changed from available_supply to available_balance
+    reserved_balance DECIMAL(20,0) DEFAULT 0, -- Changed from reserved_supply to reserved_balance
     central_wallet_address VARCHAR(255) NOT NULL,
-    last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Indexes for token inventory
 CREATE INDEX idx_token_inventory_network_asset_id ON token_inventory(network, asset_id);
-CREATE INDEX idx_token_inventory_central_wallet_address ON token_inventory(central_wallet_address);
+CREATE INDEX idx_token_inventory_central_wallet ON token_inventory(central_wallet_address);
+
+-- Add unique constraint to token_inventory
+ALTER TABLE token_inventory ADD CONSTRAINT unique_network_asset_id UNIQUE (network, asset_id);
 
 -- User wallet balances table
 CREATE TABLE user_wallet_balances (
@@ -171,7 +175,7 @@ INSERT INTO token_inventory (
     asset_id, 
     asset_name, 
     total_supply, 
-    available_supply, 
+    available_balance, 
     central_wallet_address
 ) VALUES (
     'algorand_testnet',
@@ -198,9 +202,17 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Apply updated_at trigger to payment_transactions
+-- Create triggers for updated_at columns
 CREATE TRIGGER update_payment_transactions_updated_at 
     BEFORE UPDATE ON payment_transactions 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_token_inventory_updated_at 
+    BEFORE UPDATE ON token_inventory 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_wallet_balances_updated_at 
+    BEFORE UPDATE ON user_wallet_balances 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Create function to check payment idempotency

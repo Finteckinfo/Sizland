@@ -15,6 +15,8 @@
     "test:arc59:working": "npx ts-node scripts/test-arc59-working.ts",
     "test:arc59:final": "npx ts-node scripts/test-arc59-final.ts",
     "setup:db": "npx tsx scripts/setup-database.ts",
+    "init:inventory": "npx tsx scripts/setup-database.ts",
+    "fix:schema": "npx tsx scripts/fix-schema.ts",
     "test:payment": "npx tsx scripts/test-payment-flow.ts",
     "debug:production": "npx tsx scripts/debug-production-payment.ts",
     "debug:webhook": "npx tsx scripts/debug-webhook-integration.ts",

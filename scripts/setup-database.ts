@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -34,288 +36,151 @@ async function testConnection() {
   }
 }
 
-async function setupDatabase() {
-  console.log('🔧 Setting up database for SIZ token payments...');
-  
-  // Test connection first
-  if (!(await testConnection())) {
-    console.error('❌ Cannot proceed without database connection');
-    return;
-  }
-  
-  const client = await pool.connect();
+/**
+ * Initialize token inventory with environment variables
+ */
+async function initializeTokenInventory() {
+  console.log('🔧 Initializing token inventory...');
   
   try {
-    // Check if tables exist
-    const tableCheckQuery = `
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_name IN (
-        'payment_transactions', 
-        'webhook_events', 
-        'token_inventory', 
-        'user_wallet_balances', 
-        'token_transfers'
-      )
-    `;
-    
-    const tableCheck = await client.query(tableCheckQuery);
-    const existingTables = tableCheck.rows.map(row => row.table_name);
-    
-    console.log('📊 Existing tables:', existingTables);
-    
-    // Check the actual schema of existing tables to understand column names
-    if (existingTables.includes('token_inventory')) {
-      console.log('🔍 Checking token_inventory table schema...');
-      const schemaCheck = await client.query(`
-        SELECT column_name, data_type 
-        FROM information_schema.columns 
-        WHERE table_name = 'token_inventory' 
-        ORDER BY ordinal_position
-      `);
-      console.log('📋 token_inventory columns:', schemaCheck.rows);
-    }
-    
-    if (existingTables.includes('payment_transactions')) {
-      console.log('🔍 Checking payment_transactions table schema...');
-      const schemaCheck = await client.query(`
-        SELECT column_name, data_type 
-        FROM information_schema.columns 
-        WHERE table_name = 'payment_transactions' 
-        ORDER BY ordinal_position
-      `);
-      console.log('📋 payment_transactions columns:', schemaCheck.rows);
-      
-      // Check enum values for status columns
-      console.log('🔍 Checking enum values for status columns...');
-      try {
-        const enumCheck = await client.query(`
-          SELECT unnest(enum_range(NULL::payment_status_enum)) as payment_status_values
-        `);
-        console.log('📋 Valid payment_status values:', enumCheck.rows.map(r => r.payment_status_values));
-      } catch (e) {
-        console.log('⚠️ Could not check payment_status enum values:', e);
-      }
-      
-      try {
-        const enumCheck = await client.query(`
-          SELECT unnest(enum_range(NULL::token_transfer_status_enum)) as token_transfer_status_values
-        `);
-        console.log('📋 Valid token_transfer_status values:', enumCheck.rows.map(r => r.token_transfer_status_values));
-      } catch (e) {
-        console.log('⚠️ Could not check token_transfer_status enum values:', e);
-      }
-    }
-    
-    // Create payment_transactions table if it doesn't exist
-    if (!existingTables.includes('payment_transactions')) {
-      console.log('📝 Creating payment_transactions table...');
-      await client.query(`
-        CREATE TABLE payment_transactions (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          payment_reference VARCHAR(100) UNIQUE NOT NULL,
-          stripe_session_id VARCHAR(255),
-          stripe_payment_intent_id VARCHAR(255),
-          user_wallet_address VARCHAR(255) NOT NULL,
-          user_email VARCHAR(255),
-          token_amount INTEGER NOT NULL,
-          price_per_token DECIMAL(10,6) NOT NULL,
-          subtotal DECIMAL(10,2) NOT NULL,
-          processing_fee DECIMAL(10,2) NOT NULL,
-          total_amount DECIMAL(10,2) NOT NULL,
-          currency VARCHAR(3) DEFAULT 'USD',
-          payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
-          payment_method VARCHAR(100),
-          network VARCHAR(50) DEFAULT 'algorand',
-          product_type VARCHAR(50) DEFAULT 'siz_token',
-          token_transfer_status VARCHAR(50) DEFAULT 'pending',
-          token_transfer_tx_id VARCHAR(255),
-          token_transfer_error TEXT,
-          metadata JSONB,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          paid_at TIMESTAMP WITH TIME ZONE,
-          tokens_transferred_at TIMESTAMP WITH TIME ZONE
-        )
-      `);
-      
-      // Create indexes
-      await client.query(`
-        CREATE INDEX idx_payment_transactions_payment_reference ON payment_transactions(payment_reference);
-        CREATE INDEX idx_payment_transactions_stripe_session_id ON payment_transactions(stripe_session_id);
-        CREATE INDEX idx_payment_transactions_stripe_payment_intent_id ON payment_transactions(stripe_payment_intent_id);
-        CREATE INDEX idx_payment_transactions_user_wallet_address ON payment_transactions(user_wallet_address);
-        CREATE INDEX idx_payment_transactions_payment_status ON payment_transactions(payment_status);
-        CREATE INDEX idx_payment_transactions_token_transfer_status ON payment_transactions(token_transfer_status);
-      `);
-      
-      console.log('✅ payment_transactions table created');
-    }
-    
-    // Create webhook_events table if it doesn't exist
-    if (!existingTables.includes('webhook_events')) {
-      console.log('📝 Creating webhook_events table...');
-      await client.query(`
-        CREATE TABLE webhook_events (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          stripe_event_id VARCHAR(255) UNIQUE NOT NULL,
-          payment_reference VARCHAR(100),
-          event_type VARCHAR(100) NOT NULL,
-          processed BOOLEAN DEFAULT FALSE,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          processed_at TIMESTAMP WITH TIME ZONE
-        )
-      `);
-      
-      // Create indexes
-      await client.query(`
-        CREATE INDEX idx_webhook_events_stripe_event_id ON webhook_events(stripe_event_id);
-        CREATE INDEX idx_webhook_events_event_type ON webhook_events(event_type);
-        CREATE INDEX idx_webhook_events_payment_reference ON webhook_events(payment_reference);
-        CREATE INDEX idx_webhook_events_processed_at ON webhook_events(processed_at);
-      `);
-      
-      console.log('✅ webhook_events table created');
-    }
-    
-    // Create token_inventory table if it doesn't exist
-    if (!existingTables.includes('token_inventory')) {
-      console.log('📝 Creating token_inventory table...');
-      await client.query(`
-        CREATE TABLE token_inventory (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          network VARCHAR(50) NOT NULL,
-          asset_id BIGINT NOT NULL,
-          asset_name VARCHAR(100) NOT NULL,
-          total_supply DECIMAL(20,0) NOT NULL,
-          available_balance DECIMAL(20,0) NOT NULL,
-          reserved_balance DECIMAL(20,0) DEFAULT 0,
-          central_wallet_address VARCHAR(255) NOT NULL,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        )
-      `);
-      
-      // Create indexes
-      await client.query(`
-        CREATE INDEX idx_token_inventory_network_asset_id ON token_inventory(network, asset_id);
-        CREATE INDEX idx_token_inventory_central_wallet_address ON token_inventory(central_wallet_address);
-      `);
-      
-      console.log('✅ token_inventory table created');
-    }
-    
-    // Create user_wallet_balances table if it doesn't exist
-    if (!existingTables.includes('user_wallet_balances')) {
-      console.log('📝 Creating user_wallet_balances table...');
-      await client.query(`
-        CREATE TABLE user_wallet_balances (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          wallet_address VARCHAR(255) NOT NULL,
-          network VARCHAR(50) NOT NULL,
-          asset_id BIGINT NOT NULL,
-          asset_name VARCHAR(100) NOT NULL,
-          balance DECIMAL(20,0) NOT NULL DEFAULT 0,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          UNIQUE(wallet_address, network, asset_id)
-        )
-      `);
-      
-      // Create indexes
-      await client.query(`
-        CREATE INDEX idx_user_wallet_balances_wallet_address ON user_wallet_balances(wallet_address);
-        CREATE INDEX idx_user_wallet_balances_network_asset_id ON user_wallet_balances(network, asset_id);
-      `);
-      
-      console.log('✅ user_wallet_balances table created');
-    }
-    
-    // Create token_transfers table if it doesn't exist
-    if (!existingTables.includes('token_transfers')) {
-      console.log('📝 Creating token_transfers table...');
-      await client.query(`
-        CREATE TABLE token_transfers (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          payment_transaction_id UUID REFERENCES payment_transactions(id),
-          from_address VARCHAR(255) NOT NULL,
-          to_address VARCHAR(255) NOT NULL,
-          asset_id BIGINT NOT NULL,
-          asset_name VARCHAR(100) NOT NULL,
-          amount DECIMAL(20,0) NOT NULL,
-          network VARCHAR(255) NOT NULL,
-          transaction_hash VARCHAR(255),
-          block_number BIGINT,
-          status VARCHAR(50) DEFAULT 'pending',
-          error_message TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          completed_at TIMESTAMP WITH TIME ZONE
-        )
-      `);
-      
-      // Create indexes
-      await client.query(`
-        CREATE INDEX idx_token_transfers_payment_transaction_id ON token_transfers(payment_transaction_id);
-        CREATE INDEX idx_token_transfers_from_address ON token_transfers(from_address);
-        CREATE INDEX idx_token_transfers_to_address ON token_transfers(to_address);
-        CREATE INDEX idx_token_transfers_transaction_hash ON token_transfers(transaction_hash);
-        CREATE INDEX idx_token_transfers_status ON token_transfers(status);
-      `);
-      
-      console.log('✅ token_transfers table created');
-    }
-    
-    // Insert initial SIZ token inventory
-    console.log('📝 Inserting initial SIZ token inventory...');
-    
-    // First, get the actual central wallet SIZ token balance
+    const assetId = process.env.SIZ_TOKEN_ASSET_ID;
     const centralWalletAddress = process.env.CENTRAL_WALLET_ADDRESS;
-    if (!centralWalletAddress) {
-      throw new Error('CENTRAL_WALLET_ADDRESS environment variable is required');
+    const rawNetwork = (process.env.ALGORAND_NETWORK || '').toLowerCase();
+    const network = rawNetwork.includes('main') ? 'algorand' : rawNetwork.includes('test') ? 'algorand_testnet' : 'algorand';
+
+    // Ensure token_inventory table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS token_inventory (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network VARCHAR(50) NOT NULL,
+        asset_id VARCHAR(50) NOT NULL,
+        asset_name VARCHAR(100) NOT NULL,
+        total_supply DECIMAL(20,0) NOT NULL,
+        available_balance DECIMAL(20,0) NOT NULL,
+        reserved_balance DECIMAL(20,0) DEFAULT 0,
+        central_wallet_address VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(network, asset_id)
+      );
+    `);
+
+    if (!assetId || !centralWalletAddress) {
+      console.error('❌ Missing required environment variables:');
+      console.error('   SIZ_TOKEN_ASSET_ID:', assetId ? 'SET' : 'MISSING');
+      console.error('   CENTRAL_WALLET_ADDRESS:', centralWalletAddress ? 'SET' : 'MISSING');
+      return false;
     }
     
-    // Check if inventory already exists
-    const existingInventory = await pool.query(`
-      SELECT COUNT(*) as count FROM token_inventory WHERE asset_id = $1
-    `, [process.env.SIZ_TOKEN_ASSET_ID]);
-    
-    if (parseInt(existingInventory.rows[0].count) === 0) {
-      // Insert new inventory
-      const insertInventoryQuery = `
-        INSERT INTO token_inventory (
-          network, asset_id, asset_name, total_supply, available_balance, 
-          reserved_balance, central_wallet_address
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      `;
-      
-      // Start with a reasonable placeholder value (will be updated with actual balance)
-      const initialBalance = 1000000; // 1 million tokens as placeholder
-      
-      await pool.query(insertInventoryQuery, [
-        'algorand',
-        process.env.SIZ_TOKEN_ASSET_ID,
-        'SIZ Token',
-        initialBalance,
-        initialBalance,
-        0, // reserved_balance starts at 0
-        centralWalletAddress
-      ]);
-      
-      console.log('✅ Initial SIZ token inventory inserted');
-    } else {
-      console.log('📊 SIZ token inventory already exists');
-    }
-    
-    console.log(`   Asset ID: ${process.env.SIZ_TOKEN_ASSET_ID}`);
+    console.log('📋 Environment variables:');
+    console.log(`   Asset ID: ${assetId}`);
     console.log(`   Central Wallet: ${centralWalletAddress}`);
-    console.log('   Note: Balance will be updated with actual amount when token transfer service runs');
+    console.log(`   Network: ${network}`);
+    
+    // Check if token inventory already exists
+    const existingCheck = await pool.query(`
+      SELECT id FROM token_inventory 
+      WHERE asset_id = $1 AND network = $2
+    `, [assetId, network]);
+    
+    if (existingCheck.rows.length > 0) {
+      console.log('✅ Token inventory already exists, updating...');
+      
+      // Update existing inventory
+      await pool.query(`
+        UPDATE token_inventory 
+        SET 
+          asset_name = 'SIZ Token',
+          total_supply = 1000000,
+          available_balance = 1000000,
+          reserved_balance = 0,
+          central_wallet_address = $1,
+          updated_at = NOW()
+        WHERE asset_id = $2 AND network = $3
+      `, [centralWalletAddress, assetId, network]);
+      
+      console.log('✅ Token inventory updated successfully');
+    } else {
+      console.log('📝 Creating new token inventory...');
+      
+      // Create new token inventory
+      await pool.query(`
+        INSERT INTO token_inventory (
+          network, asset_id, asset_name, total_supply, 
+          available_balance, reserved_balance, central_wallet_address
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `, [network, assetId, 'SIZ Token', 1000000, 1000000, 0, centralWalletAddress]);
+      
+      console.log('✅ Token inventory created successfully');
+    }
+    
+    return true;
     
   } catch (error) {
-    console.error('❌ Database setup failed:', error);
+    console.error('❌ Error initializing token inventory:', error);
+    return false;
+  }
+}
+
+/**
+ * Create database schema
+ */
+async function createSchema(client: any) {
+  console.log('📝 Creating database schema...');
+  
+  try {
+    // Create schema from SQL file
+    const schemaPath = path.join(__dirname, 'schema.sql');
+    const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
+    
+    // Split SQL into individual statements and execute
+    const statements = schemaSQL
+      .split(';')
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+    
+    for (const statement of statements) {
+      if (statement.trim()) {
+        try {
+          await client.query(statement);
+        } catch (error) {
+          // Ignore errors for statements that might already exist
+          if (!error.message.includes('already exists') && !error.message.includes('duplicate key')) {
+            console.warn('⚠️ Statement execution warning:', error.message);
+          }
+        }
+      }
+    }
+    
+    console.log('✅ Database schema created successfully');
+    
+  } catch (error) {
+    console.error('❌ Error creating schema:', error);
     throw error;
-  } finally {
+  }
+}
+
+async function setupDatabase() {
+  console.log('🚀 Setting up database...\n');
+  
+  try {
+    // Test database connection
+    const client = await pool.connect();
+    console.log('✅ Database connection successful\n');
+    
+    // Create schema
+    await createSchema(client);
+    
+    // Initialize token inventory
+    await initializeTokenInventory();
+    
     client.release();
+    console.log('\n🎉 Database setup completed successfully!');
+    
+  } catch (error) {
+    console.error('\n❌ Database setup failed:', error);
+    process.exit(1);
+  } finally {
     await pool.end();
   }
 }
