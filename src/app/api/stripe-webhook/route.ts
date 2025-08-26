@@ -387,6 +387,9 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
             paymentReference: data.paymentReference,
             userWalletAddress: data.userWalletAddress,
             optInInstructions: transferResult.optInInstructions,
+            requiresUserAction: transferResult.requiresUserAction,
+            actionRequired: transferResult.actionRequired,
+            instructions: transferResult.instructions,
           });
           
           // Update status to indicate opt-in is required
@@ -394,12 +397,12 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
             paymentTransaction.id,
             'pending',
             undefined,
-            'User wallet not opted into SIZ token'
+            transferResult.instructions || 'User wallet not opted into SIZ token'
           );
           await paymentDB.updatePaymentStatus(
             paymentTransaction.id, 
             'processing', 
-            'Payment successful but wallet not opted into SIZ token. User must opt-in to receive tokens.'
+            `Payment successful but wallet not opted into SIZ token. ${transferResult.actionRequired === 'add-algo' ? 'User needs more ALGO balance.' : 'User must opt-in to receive tokens.'}`
           );
           
           console.log('📝 Payment status updated to pending_opt_in');

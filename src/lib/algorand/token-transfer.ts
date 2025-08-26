@@ -847,69 +847,77 @@ export class SizTokenTransferService {
   }
 
   /**
-   * Hybrid transfer approach: Try direct first, fallback to ARC-0059 if needed
-   * This provides the best balance of simplicity and functionality
+   * Production-ready hybrid transfer approach for real user transactions
+   * This handles the reality that users need to sign their own transactions
    */
   async transferSizTokensHybrid(params: TokenTransferParams): Promise<TransferResult> {
     try {
-      console.log(`🚀 Starting hybrid transfer approach for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`🚀 Starting production hybrid transfer for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`   Asset ID: ${this.assetId}`);
+      console.log(`   Payment ID: ${params.paymentId}`);
       
-      // First, try direct transfer
-      console.log('\n📋 Attempting direct transfer first...');
-      try {
-        const directResult = await this.transferSizTokensDirect(params);
-        if (directResult.success) {
-          console.log('✅ Direct transfer successful!');
-          return directResult;
-        }
-        
-        // Direct transfer failed but not due to opt-in
-        if (!directResult.requiresOptIn) {
-          console.log('❌ Direct transfer failed for non-opt-in reason');
-          return directResult;
-        }
-        
-        console.log('⚠️ Direct transfer failed due to opt-in requirement, trying ARC-0059...');
-        
-      } catch (directError) {
-        console.log('⚠️ Direct transfer failed, trying ARC-0059...');
+      // Step 1: Check if user wallet is already opted into SIZ tokens
+      console.log('\n📋 Step 1: Checking user wallet opt-in status...');
+      const optInStatus = await this.checkReceiverOptIn(params.receiverAddress);
+      
+      if (optInStatus.isOptedIn) {
+        console.log('✅ User wallet already opted into SIZ tokens - proceeding with direct transfer...');
+        return await this.executeDirectTransfer(params);
       }
       
-      // Fallback to ARC-0059 if available
-      if (this.arc59Client) {
-        console.log('\n📋 Falling back to ARC-0059...');
-        try {
-          const arc59Result = await this.transferViaArc59(params);
-          if (arc59Result.success) {
-            console.log('✅ ARC-0059 fallback successful!');
-            return arc59Result;
-          } else {
-            console.log('⚠️ ARC-0059 fallback failed, providing opt-in guidance');
-            // Return the opt-in requirement with clear instructions
-            return {
-              success: false,
-              error: 'Both direct transfer and ARC-0059 fallback failed',
-              requiresOptIn: true,
-              optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet. This is required to receive your tokens.`
-            };
-          }
-        } catch (arc59Error) {
-          console.log('⚠️ ARC-0059 fallback encountered an error:', arc59Error instanceof Error ? arc59Error.message : 'Unknown error');
-          // Continue to provide opt-in guidance
-        }
+      // Step 2: User wallet is not opted in - this requires user action
+      console.log('\n⚠️ Step 2: User wallet not opted into SIZ tokens');
+      console.log(`   User wallet: ${params.receiverAddress}`);
+      console.log(`   Current ALGO balance: ${optInStatus.alogBalance} ALGO`);
+      console.log(`   Required for opt-in: ${optInStatus.minBalanceRequired} ALGO`);
+      
+      if (!optInStatus.canOptIn) {
+        console.log('❌ User wallet has insufficient ALGO for opt-in');
+        return {
+          success: false,
+          error: `User wallet has insufficient ALGO balance for SIZ token opt-in. Required: ${optInStatus.minBalanceRequired} ALGO, Current: ${optInStatus.alogBalance} ALGO`,
+          requiresOptIn: true,
+          requiresUserAction: true,
+          actionRequired: 'add-algo',
+          instructions: `Please add at least ${optInStatus.minBalanceRequired} ALGO to your wallet to complete the SIZ token opt-in. Current balance: ${optInStatus.alogBalance} ALGO.`
+        };
       }
       
-      // No ARC-0059 available or it failed, return opt-in requirement
-      console.log('❌ No working transfer method available');
+      // Step 3: User can opt in but needs to do it manually
+      console.log('✅ User wallet has sufficient ALGO for opt-in');
+      console.log('ℹ️ User must manually opt into SIZ tokens using their wallet');
+      
       return {
         success: false,
-        error: 'User wallet not opted into SIZ tokens and no working fallback available',
+        error: 'User wallet not opted into SIZ tokens',
         requiresOptIn: true,
-        optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet before receiving the transfer. This is required for all token transfers.`
+        requiresUserAction: true,
+        actionRequired: 'opt-in',
+        instructions: `To receive your SIZ tokens, please opt into the SIZ asset in your wallet:\n\n` +
+                     `1. Open your Algorand wallet (Pera, Defly, MyAlgo, etc.)\n` +
+                     `2. Add the SIZ token asset with ID: ${this.assetId}\n` +
+                     `3. Complete the opt-in transaction (requires ~0.001 ALGO fee)\n` +
+                     `4. Return to this page to complete your token purchase\n\n` +
+                     `Your wallet has sufficient ALGO balance (${optInStatus.alogBalance} ALGO) to complete this process.`,
+        optInInstructions: `Opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet to receive your tokens.`
       };
       
     } catch (error) {
-      console.error('❌ Hybrid transfer failed:', error);
+      console.error('❌ Production hybrid transfer failed:', error);
+      
+      // Check if this is an opt-in related error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('not opted in') || errorMessage.includes('opted in')) {
+        return {
+          success: false,
+          error: 'User wallet not opted into SIZ tokens',
+          requiresOptIn: true,
+          requiresUserAction: true,
+          actionRequired: 'opt-in',
+          instructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet before receiving the transfer.`
+        };
+      }
+      
       throw error;
     }
   }

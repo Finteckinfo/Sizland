@@ -83,7 +83,7 @@ export interface TokenTransfer {
   status: string;
   error_message?: string;
   created_at: Date;
-  updated_at: Date;
+  completed_at?: Date;
 }
 
 export class PaymentDatabase {
@@ -239,7 +239,7 @@ export class PaymentDatabase {
   /**
    * Record token transfer
    */
-  async recordTokenTransfer(data: Omit<TokenTransfer, 'id' | 'created_at' | 'completed_at'>): Promise<TokenTransfer> {
+  async recordTokenTransfer(data: Omit<TokenTransfer, 'id' | 'created_at'>): Promise<TokenTransfer> {
     try {
       const query = `
         INSERT INTO token_transfers (
