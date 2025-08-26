@@ -328,7 +328,8 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
         paymentId: paymentTransaction.id,
       });
 
-      const transferResult = await sizTokenTransferService.transferSizTokens({
+      // Use the new hybrid transfer approach: try direct first, fallback to ARC-0059
+      const transferResult = await sizTokenTransferService.transferSizTokensHybrid({
         receiverAddress: data.userWalletAddress,
         amount: data.tokenAmount,
         paymentId: paymentTransaction.id,

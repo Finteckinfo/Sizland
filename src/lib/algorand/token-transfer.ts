@@ -17,6 +17,10 @@ export interface TransferResult {
   confirmedTxn?: any;
   requiresOptIn?: boolean;
   optInInstructions?: string;
+  requiresUserAction?: boolean;
+  actionRequired?: string;
+  instructions?: string;
+  message?: string;
 }
 
 export interface OptInStatus {
@@ -342,7 +346,8 @@ export class SizTokenTransferService {
             };
           }
         } catch (inboxError) {
-          console.warn('Failed to check ARC-0059 inbox balance:', inboxError);
+          // Gracefully handle inbox check errors - this is expected for new users
+          console.log(`ℹ️ Inbox check failed for ${receiverAddress} (expected for new users):`, inboxError instanceof Error ? inboxError.message : 'Unknown error');
         }
       }
       
@@ -620,8 +625,24 @@ export class SizTokenTransferService {
       return { wasFrozen: true, unfreezeTxId: response.txid };
       
     } catch (error) {
-      console.error(`❌ Failed to check/unfreeze asset for ${address}:`, error);
-      throw new Error(`Asset freeze check/unfreeze failed: ${(error as Error).message}`);
+      // Handle specific error cases gracefully
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('account asset info not found') || errorMessage.includes('404')) {
+        // This is expected for addresses that haven't opted into the asset
+        console.log(`ℹ️ Address ${address} has not opted into SIZ token (expected for new users)`);
+        return { wasFrozen: false };
+      }
+      
+      if (errorMessage.includes('account not found') || errorMessage.includes('404')) {
+        // This is expected for test addresses or non-existent accounts
+        console.log(`ℹ️ Address ${address} not found (expected for test addresses)`);
+        return { wasFrozen: false };
+      }
+      
+      // Log other errors but don't fail the transfer
+      console.warn(`⚠️ Asset freeze check failed for ${address}:`, errorMessage);
+      return { wasFrozen: false };
     }
   }
 
@@ -707,6 +728,193 @@ export class SizTokenTransferService {
   }
 
   /**
+   * Fallback method: Simple direct token transfer with opt-in handling
+   * This is the recommended approach for reliable token transfers
+   */
+  async transferSizTokensDirect(params: TokenTransferParams): Promise<TransferResult> {
+    try {
+      console.log(`🚀 Starting direct transfer of ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`   Asset ID: ${this.assetId}`);
+      console.log(`   Payment ID: ${params.paymentId}`);
+      
+      // Step 1: Check if receiver is already opted into SIZ tokens
+      console.log('\n📋 Step 1: Checking receiver opt-in status...');
+      const optInStatus = await this.checkReceiverOptIn(params.receiverAddress);
+      
+      if (optInStatus.isOptedIn) {
+        console.log('✅ Receiver already opted into SIZ tokens, proceeding with direct transfer...');
+        return await this.executeDirectTransfer(params);
+      }
+      
+      // Step 2: Receiver is not opted in - handle opt-in requirements
+      console.log('\n📋 Step 2: Receiver not opted in, handling opt-in requirements...');
+      
+      if (!optInStatus.canOptIn) {
+        const errorMessage = `Receiver wallet ${params.receiverAddress} has insufficient ALGO balance (${optInStatus.alogBalance} ALGO) to opt into SIZ tokens. Minimum required: ${optInStatus.minBalanceRequired} ALGO`;
+        console.error('❌ Insufficient ALGO for opt-in:', errorMessage);
+        
+        return {
+          success: false,
+          error: errorMessage,
+          requiresOptIn: true,
+          optInInstructions: `User needs ${optInStatus.minBalanceRequired} ALGO to opt into SIZ tokens. Current balance: ${optInStatus.alogBalance} ALGO`
+        };
+      }
+      
+      // Step 3: Receiver can opt in but needs guidance
+      console.log('⚠️ Receiver can opt in but needs to do so manually');
+      console.log(`   Current balance: ${optInStatus.alogBalance} ALGO`);
+      console.log(`   Required for opt-in: ${optInStatus.minBalanceRequired} ALGO`);
+      
+      return {
+        success: false,
+        error: 'User wallet not opted into SIZ tokens',
+        requiresOptIn: true,
+        optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet. You have sufficient ALGO balance (${optInStatus.alogBalance} ALGO) to complete the opt-in.`
+      };
+      
+    } catch (error) {
+      console.error('❌ Direct transfer failed:', error);
+      
+      // Check if this is an opt-in related error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('not opted in') || errorMessage.includes('opted in')) {
+        return {
+          success: false,
+          error: 'User wallet not opted into SIZ tokens',
+          requiresOptIn: true,
+          optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet before receiving the transfer.`
+        };
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Execute direct token transfer (receiver must be opted in)
+   */
+  private async executeDirectTransfer(params: TokenTransferParams): Promise<TransferResult> {
+    try {
+      console.log('🔄 Executing direct SIZ token transfer...');
+      
+      // Get central wallet account
+      const centralAccount = algosdk.mnemonicToSecretKey(this.centralWalletMnemonic);
+      console.log(`   Central wallet: ${centralAccount.addr}`);
+      
+      // Get suggested transaction parameters
+      const suggestedParams = await algodClient.getTransactionParams().do();
+      console.log(`   Fee: ${suggestedParams.fee} microALGO`);
+      console.log(`   First valid round: ${suggestedParams.firstValid}`);
+      console.log(`   Last valid round: ${suggestedParams.lastValid}`);
+      
+      // Create asset transfer transaction
+      const transferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        sender: centralAccount.addr,
+        receiver: params.receiverAddress,
+        assetIndex: Number(this.assetId),
+        amount: params.amount,
+        suggestedParams,
+      });
+      
+      console.log('✅ Asset transfer transaction created');
+      
+      // Sign the transaction
+      const signedTxn = algosdk.signTransaction(transferTxn, centralAccount.sk);
+      console.log('✅ Transaction signed');
+      
+      // Submit the transaction
+      console.log('📡 Submitting transaction to network...');
+      const response = await algodClient.sendRawTransaction(signedTxn.blob).do();
+      const txId = response.txid;
+      console.log(`✅ Transaction submitted! TxId: ${txId}`);
+      
+      // Wait for confirmation
+      console.log('⏳ Waiting for transaction confirmation...');
+      const confirmation = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      console.log(`✅ Transaction confirmed! Block: ${confirmation.confirmedRound}`);
+      
+      return {
+        success: true,
+        txId: txId,
+        requiresOptIn: false
+      };
+      
+    } catch (error) {
+      console.error('❌ Direct transfer execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Hybrid transfer approach: Try direct first, fallback to ARC-0059 if needed
+   * This provides the best balance of simplicity and functionality
+   */
+  async transferSizTokensHybrid(params: TokenTransferParams): Promise<TransferResult> {
+    try {
+      console.log(`🚀 Starting hybrid transfer approach for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      
+      // First, try direct transfer
+      console.log('\n📋 Attempting direct transfer first...');
+      try {
+        const directResult = await this.transferSizTokensDirect(params);
+        if (directResult.success) {
+          console.log('✅ Direct transfer successful!');
+          return directResult;
+        }
+        
+        // Direct transfer failed but not due to opt-in
+        if (!directResult.requiresOptIn) {
+          console.log('❌ Direct transfer failed for non-opt-in reason');
+          return directResult;
+        }
+        
+        console.log('⚠️ Direct transfer failed due to opt-in requirement, trying ARC-0059...');
+        
+      } catch (directError) {
+        console.log('⚠️ Direct transfer failed, trying ARC-0059...');
+      }
+      
+      // Fallback to ARC-0059 if available
+      if (this.arc59Client) {
+        console.log('\n📋 Falling back to ARC-0059...');
+        try {
+          const arc59Result = await this.transferViaArc59(params);
+          if (arc59Result.success) {
+            console.log('✅ ARC-0059 fallback successful!');
+            return arc59Result;
+          } else {
+            console.log('⚠️ ARC-0059 fallback failed, providing opt-in guidance');
+            // Return the opt-in requirement with clear instructions
+            return {
+              success: false,
+              error: 'Both direct transfer and ARC-0059 fallback failed',
+              requiresOptIn: true,
+              optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet. This is required to receive your tokens.`
+            };
+          }
+        } catch (arc59Error) {
+          console.log('⚠️ ARC-0059 fallback encountered an error:', arc59Error instanceof Error ? arc59Error.message : 'Unknown error');
+          // Continue to provide opt-in guidance
+        }
+      }
+      
+      // No ARC-0059 available or it failed, return opt-in requirement
+      console.log('❌ No working transfer method available');
+      return {
+        success: false,
+        error: 'User wallet not opted into SIZ tokens and no working fallback available',
+        requiresOptIn: true,
+        optInInstructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet before receiving the transfer. This is required for all token transfers.`
+      };
+      
+    } catch (error) {
+      console.error('❌ Hybrid transfer failed:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Generate opt-in instructions for users
    */
   generateOptInInstructions(receiverAddress: string, optInStatus: OptInStatus): string {
@@ -730,6 +938,258 @@ export class SizTokenTransferService {
       return txn;
     } catch (error) {
       throw new Error(`Failed to get transaction details: ${error}`);
+    }
+  }
+
+  /**
+   * Production-ready token transfer flow following Algorand best practices
+   * 1. Fund recipient MBR if needed
+   * 2. Check opt-in status
+   * 3. Handle opt-in if required
+   * 4. Transfer tokens
+   */
+  async transferSizTokensProduction(params: TokenTransferParams): Promise<TransferResult> {
+    try {
+      console.log(`🚀 Starting production token transfer flow for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`   Asset ID: ${this.assetId}`);
+      console.log(`   Payment ID: ${params.paymentId}`);
+
+      // Step 1: Check current opt-in status and balance
+      console.log('\n📋 Step 1: Checking recipient status...');
+      const status = await this.checkOptInAndBalance(params.receiverAddress);
+      console.log('   Status:', status);
+
+      // Step 2: Fund recipient MBR if needed
+      if (status.requiredFunding > 0) {
+        console.log(`\n💰 Step 2: Funding recipient with ${status.requiredFunding} microAlgos for MBR...`);
+        const fundingResult = await this.fundRecipientMBR(params.receiverAddress, status.requiredFunding);
+        console.log(`   Funding successful: ${fundingResult.txId}`);
+        
+        // Wait for funding to be confirmed before proceeding
+        await this.waitForConfirmation(fundingResult.txId);
+      } else {
+        console.log('\n💰 Step 2: Recipient already has sufficient balance for MBR');
+      }
+
+      // Step 3: Check opt-in status again after funding
+      const updatedStatus = await this.checkOptInAndBalance(params.receiverAddress);
+      console.log('\n📋 Step 3: Updated status after funding:', updatedStatus);
+
+      // Step 4: Handle opt-in if required
+      if (!updatedStatus.isOptedIn) {
+        console.log('\n🔐 Step 4: Recipient needs to opt-in to SIZ tokens');
+        console.log('   Note: In production, this would be signed by the user\'s connected wallet');
+        console.log('   For testing, we\'ll use the provided mnemonic');
+        
+        // In production, this would be a user action
+        // For testing, we can simulate it if we have the user's mnemonic
+        if (process.env.TEST_USER_MNEMONIC) {
+          console.log('   Using test user mnemonic for opt-in...');
+          const optInResult = await this.recipientOptInASA(params.receiverAddress, process.env.TEST_USER_MNEMONIC);
+          console.log(`   Opt-in successful: ${optInResult.txId}`);
+          await this.waitForConfirmation(optInResult.txId);
+        } else {
+          console.log('   ⚠️  No test user mnemonic provided - user must opt-in manually');
+          return {
+            success: false,
+            error: 'User must opt-in to SIZ tokens before transfer can proceed',
+            requiresUserAction: true,
+            actionRequired: 'opt-in',
+            instructions: 'Please opt-in to SIZ tokens using your wallet before completing the transfer'
+          };
+        }
+      } else {
+        console.log('\n🔐 Step 4: Recipient already opted into SIZ tokens');
+      }
+
+      // Step 5: Transfer SIZ tokens
+      console.log('\n🚀 Step 5: Executing SIZ token transfer...');
+      const transferResult = await this.directASATransfer(params.receiverAddress, params.amount);
+      console.log(`   Transfer successful: ${transferResult.txId}`);
+
+      // Wait for transfer confirmation
+      await this.waitForConfirmation(transferResult.txId);
+
+      console.log('✅ Production token transfer flow completed successfully!');
+      
+      return {
+        success: true,
+        txId: transferResult.txId,
+        message: 'SIZ tokens transferred successfully'
+      };
+
+    } catch (error) {
+      console.error('❌ Production token transfer flow failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        requiresUserAction: false
+      };
+    }
+  }
+
+  /**
+   * Check recipient opt-in status and balance requirements
+   */
+  private async checkOptInAndBalance(receiverAddress: string): Promise<{
+    isOptedIn: boolean;
+    hasEnoughForOptIn: boolean;
+    requiredFunding: number;
+  }> {
+    try {
+      const acctInfo = await algodClient.accountInformation(receiverAddress).do();
+      const asset = acctInfo.assets?.find((a: any) => a['asset-id'] === Number(this.assetId));
+      const isOptedIn = !!asset;
+      
+      // Calculate minimum balance requirement
+      const currentAssetCount = acctInfo.assets?.length || 0;
+      const newAssetCount = isOptedIn ? currentAssetCount : currentAssetCount + 1;
+      const minBalance = 100_000 + (newAssetCount * 100_000); // Base + per-asset MBR
+      
+      const hasEnoughForOptIn = Number(acctInfo.amount) >= minBalance;
+      const requiredFunding = hasEnoughForOptIn ? 0 : minBalance - Number(acctInfo.amount);
+      
+      return { isOptedIn, hasEnoughForOptIn, requiredFunding };
+    } catch (error) {
+      console.error('Error checking opt-in status:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fund recipient with ALGO for MBR requirements
+   */
+  private async fundRecipientMBR(receiverAddress: string, amountMicroAlgos: number): Promise<{
+    txId: string;
+    confirmedRound: number;
+  }> {
+    try {
+      const centralAccount = algosdk.mnemonicToSecretKey(this.centralWalletMnemonic);
+      const sender = centralAccount.addr.toString();
+
+      // Validate addresses
+      if (!algosdk.isValidAddress(sender)) throw new Error('Invalid central wallet address');
+      if (!algosdk.isValidAddress(receiverAddress)) throw new Error('Invalid receiver address');
+
+      // Check if receiver already has enough balance (idempotency)
+      const acctInfo = await algodClient.accountInformation(receiverAddress).do();
+      if (Number(acctInfo.amount) >= amountMicroAlgos) {
+        console.log('   Recipient already has sufficient balance');
+        return { txId: '', confirmedRound: 0 };
+      }
+
+      const params = await algodClient.getTransactionParams().do();
+      params.flatFee = true;
+      params.fee = BigInt(1000);
+
+      const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        sender: sender,
+        receiver: receiverAddress,
+        amount: BigInt(amountMicroAlgos),
+        suggestedParams: params,
+      });
+
+      const signed = algosdk.signTransaction(payTxn, centralAccount.sk);
+      const response = await algodClient.sendRawTransaction(signed.blob).do();
+      const txId = response.txid;
+      
+      // Wait for confirmation and return proper data
+      const confirmed = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      return { txId, confirmedRound: Number(confirmed.confirmedRound) || 0 };
+    } catch (error) {
+      console.error('Error funding recipient MBR:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Recipient opts into SIZ tokens (signed by recipient)
+   */
+  private async recipientOptInASA(receiverAddress: string, receiverMnemonic: string): Promise<{
+    txId: string;
+    confirmedRound: number;
+  }> {
+    try {
+      const acct = algosdk.mnemonicToSecretKey(receiverMnemonic);
+      const from = acct.addr.toString();
+
+      // Verify the mnemonic matches the receiver address
+      if (from !== receiverAddress) {
+        throw new Error('Receiver mnemonic does not match receiver address');
+      }
+
+      const params = await algodClient.getTransactionParams().do();
+      params.flatFee = true;
+      params.fee = BigInt(1000);
+
+      const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        sender: from,
+        receiver: from,
+        assetIndex: Number(this.assetId),
+        amount: BigInt(0),
+        suggestedParams: params,
+      });
+
+      const signed = algosdk.signTransaction(optInTxn, acct.sk);
+      const response = await algodClient.sendRawTransaction(signed.blob).do();
+      const txId = response.txid;
+      
+      // Wait for confirmation and return proper data
+      const confirmed = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      return { txId, confirmedRound: Number(confirmed.confirmedRound) || 0 };
+    } catch (error) {
+      console.error('Error in recipient opt-in:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Direct ASA transfer after opt-in
+   */
+  private async directASATransfer(receiverAddress: string, amount: number): Promise<{
+    txId: string;
+    confirmedRound: number;
+  }> {
+    try {
+      const centralAccount = algosdk.mnemonicToSecretKey(this.centralWalletMnemonic);
+      const from = centralAccount.addr.toString();
+
+      const params = await algodClient.getTransactionParams().do();
+      params.flatFee = true;
+      params.fee = BigInt(1000);
+
+      const axferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        sender: from,
+        receiver: receiverAddress,
+        assetIndex: Number(this.assetId),
+        amount: BigInt(amount),
+        suggestedParams: params,
+      });
+
+      const signed = algosdk.signTransaction(axferTxn, centralAccount.sk);
+      const response = await algodClient.sendRawTransaction(signed.blob).do();
+      const txId = response.txid;
+      
+      // Wait for confirmation and return proper data
+      const confirmed = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      return { txId, confirmedRound: Number(confirmed.confirmedRound) || 0 };
+    } catch (error) {
+      console.error('Error in direct ASA transfer:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Wait for transaction confirmation
+   */
+  private async waitForConfirmation(txId: string): Promise<void> {
+    try {
+      console.log(`   Waiting for transaction ${txId} confirmation...`);
+      const confirmed = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      console.log(`   Transaction confirmed at round ${confirmed.confirmedRound}`);
+    } catch (error) {
+      console.error('Error waiting for confirmation:', error);
+      throw error;
     }
   }
 }
