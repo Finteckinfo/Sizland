@@ -219,14 +219,15 @@ export class PaymentDatabase {
     try {
       const query = `
         INSERT INTO webhook_events (
-          stripe_event_id, event_type
-        ) VALUES ($1, $2)
+          stripe_event_id, event_type, event_data
+        ) VALUES ($1, $2, $3)
         RETURNING *
       `;
       
       const result = await this.pool.query(query, [
         stripeEventId, 
-        eventType
+        eventType,
+        eventData ? JSON.stringify(eventData) : null
       ]);
       return result.rows[0];
     } catch (error) {
@@ -238,7 +239,7 @@ export class PaymentDatabase {
   /**
    * Record token transfer
    */
-  async recordTokenTransfer(data: Omit<TokenTransfer, 'id' | 'created_at' | 'updated_at'>): Promise<TokenTransfer> {
+  async recordTokenTransfer(data: Omit<TokenTransfer, 'id' | 'created_at' | 'completed_at'>): Promise<TokenTransfer> {
     try {
       const query = `
         INSERT INTO token_transfers (
@@ -405,12 +406,12 @@ export class PaymentDatabase {
     try {
       if (operation === 'credit') {
         const query = `
-          INSERT INTO user_wallet_balances (wallet_address, network, asset_id, asset_name, balance, created_at)
+          INSERT INTO user_wallet_balances (user_wallet_address, network, asset_id, asset_name, balance, last_updated)
           VALUES ($1, $2, $3, $4, $5, NOW())
-          ON CONFLICT (wallet_address, network, asset_id)
+          ON CONFLICT (user_wallet_address, network, asset_id)
           DO UPDATE SET 
             balance = user_wallet_balances.balance + $5,
-            updated_at = NOW()
+            last_updated = NOW()
         `;
         
         await this.pool.query(query, [
@@ -425,8 +426,8 @@ export class PaymentDatabase {
           UPDATE user_wallet_balances 
           SET 
             balance = balance - $1,
-            updated_at = NOW()
-          WHERE wallet_address = $2 AND network = $3 AND asset_id = $4
+            last_updated = NOW()
+          WHERE user_wallet_address = $2 AND network = $3 AND asset_id = $4
         `;
         
         await this.pool.query(query, [
@@ -474,8 +475,8 @@ export class PaymentDatabase {
       const query = `
         SELECT 
           COUNT(*) as total_events,
-          COUNT(CASE WHEN processed = TRUE THEN 1 END) as processed_events,
-          COUNT(CASE WHEN processed = FALSE THEN 1 END) as unprocessed_events
+          COUNT(CASE WHEN processing_status = 'processed' THEN 1 END) as processed_events,
+          COUNT(CASE WHEN processing_status != 'processed' THEN 1 END) as unprocessed_events
         FROM webhook_events
       `;
       
@@ -486,7 +487,7 @@ export class PaymentDatabase {
         SELECT event_type, COUNT(*) as count
         FROM webhook_events 
         GROUP BY event_type
-        ORDER BY MAX(created_at) DESC 
+        ORDER BY MAX(processed_at) DESC 
         LIMIT 5
       `;
       

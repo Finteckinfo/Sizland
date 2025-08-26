@@ -22,8 +22,10 @@
     "debug:webhook": "npx tsx scripts/debug-webhook-integration.ts",
     "debug:production:webhook": "npx tsx scripts/debug-production-webhook.ts",
     "check:db": "npx tsx scripts/check-database-urls.ts",
-    "test:simple-transfer": "npx tsx scripts/test-simple-transfer.ts",
-    "test:direct-transfer": "npx tsx scripts/test-direct-transfer.ts"
+                "test:simple-transfer": "npx tsx scripts/test-simple-transfer.ts",
+            "test:direct-transfer": "npx tsx scripts/test-direct-transfer.ts",
+            "test:webhook-flow": "npx tsx scripts/test-webhook-flow.ts",
+            "create:tables": "npx tsx scripts/create-missing-tables.ts"
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",
