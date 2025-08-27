@@ -193,17 +193,26 @@ export class PaymentDatabase {
     errorMessage?: string
   ): Promise<void> {
     try {
-      const query = `
+      let query = `
         UPDATE payment_transactions 
         SET token_transfer_status = $1, updated_at = NOW()
-        ${transactionId ? ', token_transfer_tx_id = $3' : ''}
-        ${errorMessage ? ', token_transfer_error = $4' : ''}
-        WHERE id = $2
       `;
       
       let values: any[] = [status, paymentId];
-      if (transactionId) values.push(transactionId);
-      if (errorMessage) values.push(errorMessage);
+      let paramIndex = 3;
+      
+      if (transactionId) {
+        query += `, token_transfer_tx_id = $${paramIndex}`;
+        values.push(transactionId);
+        paramIndex++;
+      }
+      
+      if (errorMessage) {
+        query += `, token_transfer_error = $${paramIndex}`;
+        values.push(errorMessage);
+      }
+      
+      query += ` WHERE id = $2`;
       
       await this.pool.query(query, values);
     } catch (error) {
@@ -510,7 +519,7 @@ export class PaymentDatabase {
     try {
       const query = `
         SELECT 
-          id, stripe_event_id, event_type, processed, created_at, processed_at
+          id, stripe_event_id, event_type, processed, created_at
         FROM webhook_events 
         ORDER BY created_at DESC 
         LIMIT $1

@@ -27,6 +27,8 @@
             "test:webhook-flow": "npx tsx scripts/test-webhook-flow.ts",
             "test:production-flow": "npx tsx scripts/test-production-flow.ts",
             "debug:webhook-complete": "npx tsx scripts/debug-webhook-complete.ts",
+            "test:complete-webhook": "npx tsx scripts/test-complete-webhook-flow.ts",
+            "test:algo-funding-arc59": "npx tsx scripts/test-algo-funding-arc59.ts",
             "fix:webhook-table": "npx tsx scripts/fix-webhook-table.ts",
             "create:tables": "npx tsx scripts/create-missing-tables.ts"
   },

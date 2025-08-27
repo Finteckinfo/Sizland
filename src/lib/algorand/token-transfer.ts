@@ -1,7 +1,10 @@
 import algosdk from 'algosdk';
+import * as algokit from '@algorandfoundation/algokit-utils';
 import { algodClient } from './client';
 import { decodePrivateKey, isValidAlgorandAddress } from './utils';
-import { Arc59Client } from './arc59/client';
+
+import { fundReceiverIfNeeded } from './funding';
+import { sendSizViaArc59, claimSizFromInbox } from './arc59-send';
 import dotenv from 'dotenv';
 
 export interface TokenTransferParams {
@@ -35,7 +38,7 @@ export class SizTokenTransferService {
   private _assetId: bigint | null = null;
   private _centralWalletMnemonic: string | null = null;
   private _arc59AppId: number | null = null;
-  private _arc59Client: Arc59Client | null = null;
+  private _arc59Client: any | null = null;
 
   constructor() {
     // Lazy initialization - don't validate environment variables here
@@ -72,13 +75,10 @@ export class SizTokenTransferService {
     return this._arc59AppId;
   }
 
-  private get arc59Client(): Arc59Client {
+  private get arc59Client(): any {
     if (!this._arc59Client) {
-      this._arc59Client = new Arc59Client({
-        appId: this.arc59AppId,
-        sender: this.getDerivedCentralWalletAddress(),
-        signer: this.getCentralWalletSigner()
-      });
+      // ARC-0059 client is now handled by the new implementation
+      this._arc59Client = null;
     }
     return this._arc59Client;
   }
@@ -348,6 +348,7 @@ export class SizTokenTransferService {
         } catch (inboxError) {
           // Gracefully handle inbox check errors - this is expected for new users
           console.log(`ℹ️ Inbox check failed for ${receiverAddress} (expected for new users):`, inboxError instanceof Error ? inboxError.message : 'Unknown error');
+          // Don't throw the error - just continue with normal opt-in check
         }
       }
       
@@ -847,78 +848,154 @@ export class SizTokenTransferService {
   }
 
   /**
-   * Production-ready hybrid transfer approach for real user transactions
-   * This handles the reality that users need to sign their own transactions
+   * Production-ready hybrid transfer approach using ALGO funding + ARC-0059
+   * This autonomously funds the user wallet and sends tokens via ARC-0059 inbox
    */
   async transferSizTokensHybrid(params: TokenTransferParams): Promise<TransferResult> {
     try {
-      console.log(`🚀 Starting production hybrid transfer for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`🚀 Starting ALGO funding + ARC-0059 transfer for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
       console.log(`   Asset ID: ${this.assetId}`);
       console.log(`   Payment ID: ${params.paymentId}`);
       
+      // Initialize AlgoKit client using recommended mainnet factory
+      const algorand = algokit.AlgorandClient.mainNet();
+
+      // Get central wallet account
+      const centralWalletMnemonic = process.env.CENTRAL_WALLET_MNEMONIC;
+      if (!centralWalletMnemonic) {
+        throw new Error('CENTRAL_WALLET_MNEMONIC not found in environment variables');
+      }
+      const centralAccount = algosdk.mnemonicToSecretKey(centralWalletMnemonic);
+
+      
+
       // Step 1: Check if user wallet is already opted into SIZ tokens
       console.log('\n📋 Step 1: Checking user wallet opt-in status...');
-      const optInStatus = await this.checkReceiverOptIn(params.receiverAddress);
+      let optInStatus;
+      try {
+        optInStatus = await this.checkReceiverOptIn(params.receiverAddress);
+      } catch (optInError) {
+        console.log('⚠️ Error checking opt-in status, proceeding with funding + ARC-0059:', optInError instanceof Error ? optInError.message : 'Unknown error');
+        optInStatus = {
+          isOptedIn: false,
+          canOptIn: false,
+          alogBalance: 0,
+          minBalanceRequired: 0.1,
+          error: 'Could not determine opt-in status'
+        };
+      }
       
+      // If user is already opted in, use direct transfer for efficiency
       if (optInStatus.isOptedIn) {
         console.log('✅ User wallet already opted into SIZ tokens - proceeding with direct transfer...');
         return await this.executeDirectTransfer(params);
       }
       
-      // Step 2: User wallet is not opted in - this requires user action
-      console.log('\n⚠️ Step 2: User wallet not opted into SIZ tokens');
-      console.log(`   User wallet: ${params.receiverAddress}`);
-      console.log(`   Current ALGO balance: ${optInStatus.alogBalance} ALGO`);
-      console.log(`   Required for opt-in: ${optInStatus.minBalanceRequired} ALGO`);
-      
-      if (!optInStatus.canOptIn) {
-        console.log('❌ User wallet has insufficient ALGO for opt-in');
+                    // Step 2: Fund user wallet with ALGO for opt-in/claiming
+              console.log('\n💰 Step 2: Funding user wallet with ALGO...');
+              const fundingResult = await fundReceiverIfNeeded({
+                algorand: algorand as any, // Type assertion for compatibility
+                receiver: params.receiverAddress,
+                centralAccount,
+                minSpendableAlgo: algokit.algos(0.1), // This parameter is now ignored, using TARGET_TOTAL instead
+              });
+
+      if (!fundingResult.success) {
+        console.log('❌ ALGO funding failed:', fundingResult.error);
         return {
           success: false,
-          error: `User wallet has insufficient ALGO balance for SIZ token opt-in. Required: ${optInStatus.minBalanceRequired} ALGO, Current: ${optInStatus.alogBalance} ALGO`,
+          error: `Failed to fund user wallet: ${fundingResult.error}`,
           requiresOptIn: true,
           requiresUserAction: true,
           actionRequired: 'add-algo',
-          instructions: `Please add at least ${optInStatus.minBalanceRequired} ALGO to your wallet to complete the SIZ token opt-in. Current balance: ${optInStatus.alogBalance} ALGO.`
+          instructions: `Unable to automatically fund your wallet. Please add at least 0.1 ALGO to your wallet to receive SIZ tokens.`
         };
       }
-      
-      // Step 3: User can opt in but needs to do it manually
-      console.log('✅ User wallet has sufficient ALGO for opt-in');
-      console.log('ℹ️ User must manually opt into SIZ tokens using their wallet');
-      
-      return {
-        success: false,
-        error: 'User wallet not opted into SIZ tokens',
-        requiresOptIn: true,
-        requiresUserAction: true,
-        actionRequired: 'opt-in',
-        instructions: `To receive your SIZ tokens, please opt into the SIZ asset in your wallet:\n\n` +
-                     `1. Open your Algorand wallet (Pera, Defly, MyAlgo, etc.)\n` +
-                     `2. Add the SIZ token asset with ID: ${this.assetId}\n` +
-                     `3. Complete the opt-in transaction (requires ~0.001 ALGO fee)\n` +
-                     `4. Return to this page to complete your token purchase\n\n` +
-                     `Your wallet has sufficient ALGO balance (${optInStatus.alogBalance} ALGO) to complete this process.`,
-        optInInstructions: `Opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet to receive your tokens.`
-      };
+
+      if (fundingResult.funded) {
+        console.log(`✅ User wallet funded with ${fundingResult.amount} ALGO`);
+      } else {
+        console.log('✅ User wallet already has sufficient ALGO balance');
+      }
+
+                    // Step 3: Send SIZ tokens via ARC-0059 inbox
+              console.log('\n🚀 Step 3: Sending SIZ tokens via ARC-0059...');
+              const arc59Result = await sendSizViaArc59({
+                algorand: algorand as any, // Type assertion for compatibility
+                sender: centralAccount.addr.toString(),
+                receiver: params.receiverAddress,
+                assetId: BigInt(this.assetId),
+                amount: BigInt(params.amount),
+              });
+
+              if (!arc59Result.success) {
+                console.log('❌ ARC-0059 send failed:', arc59Result.error);
+                return {
+                  success: false,
+                  error: `Failed to send tokens via ARC-0059: ${arc59Result.error}`,
+                  requiresOptIn: true,
+                  requiresUserAction: true,
+                  actionRequired: 'retry',
+                  instructions: `Token transfer failed. Please try again or contact support.`
+                };
+              }
+
+              console.log('✅ SIZ tokens sent successfully via ARC-0059!');
+              console.log(`   Transaction ID: ${arc59Result.txId}`);
+              console.log(`   Inbox Address: ${arc59Result.inboxAddress}`);
+
+              // Step 4: Autonomously claim tokens for the receiver
+              console.log('\n🎯 Step 4: Autonomously claiming tokens from inbox...');
+              const claimResult = await claimSizFromInbox({
+                algorand: algorand as any, // Type assertion for compatibility
+                receiver: params.receiverAddress,
+                assetId: BigInt(this.assetId),
+              });
+
+              if (!claimResult.success) {
+                console.log('⚠️ Autonomous claim failed:', claimResult.error);
+                console.log('   Tokens are still in the inbox and can be claimed manually');
+                
+                return {
+                  success: true, // Send was successful, claim failed
+                  txId: arc59Result.txId,
+                  requiresOptIn: false,
+                  requiresUserAction: true,
+                  actionRequired: 'claim',
+                  instructions: `🎉 Your SIZ tokens have been sent to your ARC-0059 inbox!\n\n` +
+                    `To claim your tokens:\n` +
+                    `1. Open your Algorand wallet (Pera, Defly, MyAlgo, etc.)\n` +
+                    `2. Look for "Claimable Assets" or "Inbox" section\n` +
+                    `3. Find SIZ tokens and claim them to your wallet\n` +
+                    `4. You may need to opt into SIZ tokens first (Asset ID: ${this.assetId})\n\n` +
+                    `Your wallet has been funded with ALGO to complete the claim process.`,
+                  optInInstructions: `Claim your SIZ tokens from your ARC-0059 inbox. Your wallet has been funded with ALGO for the claim process.`
+                };
+              }
+
+              console.log('✅ SIZ tokens claimed successfully!');
+              console.log(`   Claim Transaction ID: ${claimResult.txId}`);
+
+              return {
+                success: true,
+                txId: arc59Result.txId,
+                requiresOptIn: false,
+                requiresUserAction: false,
+                instructions: `🎉 Your SIZ tokens have been successfully transferred and claimed to your wallet!`
+              };
       
     } catch (error) {
-      console.error('❌ Production hybrid transfer failed:', error);
+      console.error('❌ ALGO funding + ARC-0059 transfer failed:', error);
       
-      // Check if this is an opt-in related error
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('not opted in') || errorMessage.includes('opted in')) {
-        return {
-          success: false,
-          error: 'User wallet not opted into SIZ tokens',
-          requiresOptIn: true,
-          requiresUserAction: true,
-          actionRequired: 'opt-in',
-          instructions: `Please opt into SIZ tokens (Asset ID: ${this.assetId}) in your wallet before receiving the transfer.`
-        };
-      }
-      
-      throw error;
+      return {
+        success: false,
+        error: `Transfer failed: ${errorMessage}`,
+        requiresOptIn: true,
+        requiresUserAction: true,
+        actionRequired: 'retry',
+        instructions: `Token transfer failed. Please try again or contact support. Error: ${errorMessage}`
+      };
     }
   }
 

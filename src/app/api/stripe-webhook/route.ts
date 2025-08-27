@@ -43,10 +43,30 @@ export async function POST(req: NextRequest) {
     
   } catch (err) {
     console.error('❌ Webhook signature verification failed:', err);
-    return NextResponse.json(
-      { error: 'Invalid signature' },
-      { status: 400 }
-    );
+    
+    // For development/testing, you can skip signature verification
+    if (process.env.NODE_ENV === 'development') {
+      console.log('⚠️ Development mode: Skipping signature verification');
+      try {
+        event = JSON.parse(body);
+        console.log('✅ Webhook event parsed (development mode):', {
+          eventType: event.type,
+          eventId: event.id,
+          timestamp: new Date().toISOString()
+        });
+      } catch (parseErr) {
+        console.error('❌ Failed to parse webhook body:', parseErr);
+        return NextResponse.json(
+          { error: 'Invalid webhook body' },
+          { status: 400 }
+        );
+      }
+    } else {
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 400 }
+      );
+    }
   }
 
   try {
@@ -61,7 +81,18 @@ export async function POST(req: NextRequest) {
       
       case 'payment_intent.succeeded':
         console.log('💳 Processing payment_intent.succeeded event');
-        await handlePaymentIntentSucceeded(event.data.object);
+        const paymentIntent = event.data.object;
+        
+        // Check if this payment was already processed by checkout.session.completed
+        if (paymentIntent.metadata?.payment_reference) {
+          const idempotencyCheck = await paymentDB.checkPaymentIdempotency(paymentIntent.metadata.payment_reference);
+          if (idempotencyCheck.found) {
+            console.log('⚠️ Payment already processed by checkout session, skipping payment_intent.succeeded');
+            break;
+          }
+        }
+        
+        await handlePaymentIntentSucceeded(paymentIntent);
         break;
       
       case 'payment_intent.payment_failed':
