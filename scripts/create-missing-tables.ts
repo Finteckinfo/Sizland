@@ -63,13 +63,8 @@ async function createMissingTables() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         stripe_event_id VARCHAR(255) UNIQUE NOT NULL,
         event_type VARCHAR(100) NOT NULL,
-        payment_reference VARCHAR(100),
-        stripe_session_id VARCHAR(255),
-        stripe_payment_intent_id VARCHAR(255),
-        event_data JSONB NOT NULL,
-        processed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        processing_status VARCHAR(50) DEFAULT 'processed',
-        error_message TEXT
+        processed BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
     console.log('✅ webhook_events table created');

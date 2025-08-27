@@ -215,19 +215,18 @@ export class PaymentDatabase {
   /**
    * Record webhook event
    */
-  async recordWebhookEvent(stripeEventId: string, eventType: string, eventData?: any): Promise<WebhookEvent> {
+  async recordWebhookEvent(stripeEventId: string, eventType: string): Promise<WebhookEvent> {
     try {
       const query = `
         INSERT INTO webhook_events (
-          stripe_event_id, event_type, event_data
-        ) VALUES ($1, $2, $3)
+          stripe_event_id, event_type
+        ) VALUES ($1, $2)
         RETURNING *
       `;
       
       const result = await this.pool.query(query, [
         stripeEventId, 
-        eventType,
-        eventData ? JSON.stringify(eventData) : null
+        eventType
       ]);
       return result.rows[0];
     } catch (error) {

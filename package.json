@@ -26,6 +26,8 @@
             "test:direct-transfer": "npx tsx scripts/test-direct-transfer.ts",
             "test:webhook-flow": "npx tsx scripts/test-webhook-flow.ts",
             "test:production-flow": "npx tsx scripts/test-production-flow.ts",
+            "debug:webhook-complete": "npx tsx scripts/debug-webhook-complete.ts",
+            "fix:webhook-table": "npx tsx scripts/fix-webhook-table.ts",
             "create:tables": "npx tsx scripts/create-missing-tables.ts"
   },
   "dependencies": {
