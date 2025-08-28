@@ -52,7 +52,47 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
     const senderSigner = algosdk.makeBasicAccountTransactionSigner(senderAccount);
 
     // Register the signer with AlgorandClient BEFORE creating the typed client
-    algorand.account.setSignerFromAccount({ addr: sender, signer: senderSigner });
+    algorand.account.setSignerFromAccount({ addr: sender as unknown as algosdk.Address, signer: senderSigner });
+    
+    // Register the freeze manager signer for asset unfreeze operations
+    const freezeManagerMnemonic = process.env.UNFREEZE_ACCOUNT_MNEMONIC;
+    if (freezeManagerMnemonic) {
+      const freezeManagerAccount = algosdk.mnemonicToSecretKey(freezeManagerMnemonic);
+      const freezeManagerSigner = algosdk.makeBasicAccountTransactionSigner(freezeManagerAccount);
+      algorand.account.setSignerFromAccount({ 
+        addr: process.env.UNFREEZE_ACCOUNT_ADDRESS! as unknown as algosdk.Address, 
+        signer: freezeManagerSigner 
+      });
+      console.log(`   🔑 Registered freeze manager signer: ${process.env.UNFREEZE_ACCOUNT_ADDRESS}`);
+      
+      // Debug: Check freeze manager's current asset status
+      try {
+        const freezeManagerInfo = await algorand.account.getInformation(process.env.UNFREEZE_ACCOUNT_ADDRESS!);
+        const hasSizAsset = freezeManagerInfo.assets?.some((asset: any) => BigInt(asset.assetId) === assetId);
+        console.log(`   🔍 Freeze manager asset status check:`);
+        console.log(`      Address: ${process.env.UNFREEZE_ACCOUNT_ADDRESS}`);
+        console.log(`      Has SIZ asset (${assetId}): ${hasSizAsset}`);
+        if (freezeManagerInfo.assets) {
+          console.log(`      Total assets: ${freezeManagerInfo.assets.length}`);
+          freezeManagerInfo.assets.forEach((asset: any) => {
+            console.log(`      Asset ${asset.assetId}: ${asset.amount} (frozen: ${asset.isFrozen})`);
+          });
+          
+          // Additional debug: Check if SIZ asset exists with exact comparison
+          const sizAsset = freezeManagerInfo.assets?.find((asset: any) => BigInt(asset.assetId) === assetId);
+          if (sizAsset) {
+            console.log(`   ✅ Found SIZ asset in freeze manager:`);
+            console.log(`      Asset ID: ${sizAsset.assetId}`);
+            console.log(`      Balance: ${sizAsset.amount}`);
+            console.log(`      Frozen: ${sizAsset.isFrozen}`);
+          } else {
+            console.log(`   ❌ SIZ asset NOT found in freeze manager assets array`);
+          }
+        }
+      } catch (error) {
+        console.log(`   ⚠️ Could not check freeze manager asset status: ${error}`);
+      }
+    }
 
     // Get ARC-0059 typed client for mainnet app ID 2449590623
     const appClient = new Arc59Client({
@@ -102,8 +142,62 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
       console.log('   ✅ Direct transfer successful!');
       return {
         success: true,
-        txId: directTransfer.transactionId,
+        txId: directTransfer.txIds[0],
       };
+    }
+
+    // Check recipient's current asset status (even if not opted in)
+    console.log('   🔍 Checking recipient asset status...');
+    try {
+      const receiverInfo = await algorand.account.getInformation(receiver);
+      const hasSizAsset = receiverInfo.assets?.some((asset: any) => BigInt(asset.assetId) === assetId);
+      if (hasSizAsset) {
+        const sizAsset = receiverInfo.assets?.find((asset: any) => BigInt(asset.assetId) === assetId);
+        console.log(`   ⚠️ Recipient already has SIZ asset:`);
+        console.log(`      Asset ID: ${sizAsset?.assetId}`);
+        console.log(`      Balance: ${sizAsset?.amount}`);
+        console.log(`      Frozen: ${sizAsset?.isFrozen}`);
+        
+        if (sizAsset?.isFrozen) {
+          console.log(`   🚨 Recipient's SIZ asset is FROZEN - this will cause ARC-0059 to fail`);
+          console.log(`   💡 Since recipient already has SIZ asset, using direct transfer instead of ARC-0059`);
+          
+          // Use direct transfer since recipient is already opted in
+          const directTransfer = await algorand.send.assetTransfer({ 
+            sender, 
+            receiver, 
+            assetId, 
+            amount: amount 
+          });
+          
+          console.log(`   ✅ Direct transfer successful! Transaction ID: ${directTransfer.txIds[0]}`);
+          return {
+            success: true,
+            txId: directTransfer.txIds[0],
+            inboxAddress: receiver, // Direct transfer, no inbox needed
+          };
+        } else {
+          console.log(`   ✅ Recipient's SIZ asset is not frozen - using direct transfer instead of ARC-0059`);
+          const directTransfer = await algorand.send.assetTransfer({ 
+            sender, 
+            receiver, 
+            assetId, 
+            amount: amount 
+          });
+          
+          console.log(`   ✅ Direct transfer successful! Transaction ID: ${directTransfer.txIds[0]}`);
+          return {
+            success: true,
+            txId: directTransfer.txIds[0],
+            inboxAddress: receiver, // Direct transfer, no inbox needed
+          };
+        }
+      } else {
+        console.log(`   ✅ Recipient does not have SIZ asset - proceeding with ARC-0059`);
+      }
+    } catch (error) {
+      console.log(`   ⚠️ Could not check recipient asset status: ${error}`);
+      console.log(`   💡 Proceeding with ARC-0059 flow as fallback`);
     }
 
     // Step 3: Build ARC-0059 send transaction
@@ -127,6 +221,43 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
       composer.arc59OptRouterIn({ args: { asa: assetId } });
     }
 
+    // Add asset opt-in for freeze manager if needed (freeze manager must hold the asset to perform freeze/unfreeze)
+    console.log('   🔐 Adding asset opt-in for freeze manager...');
+    
+    // Check if freeze manager is already opted in
+    let freezeManagerOptedIn = false;
+    try {
+      const freezeManagerInfo = await algorand.account.getInformation(process.env.UNFREEZE_ACCOUNT_ADDRESS!);
+      freezeManagerOptedIn = freezeManagerInfo.assets?.some((asset: any) => BigInt(asset.assetId) === assetId) || false;
+      console.log(`   🔍 Freeze manager opt-in status: ${freezeManagerOptedIn ? 'Already opted in' : 'Not opted in'}`);
+    } catch (error) {
+      console.log(`   ⚠️ Could not check freeze manager opt-in status: ${error}`);
+    }
+    
+    if (!freezeManagerOptedIn) {
+      console.log('   🔐 Creating asset opt-in transaction for freeze manager...');
+      const freezeManagerOptInTxn = await algorand.createTransaction.assetOptIn({
+        sender: process.env.UNFREEZE_ACCOUNT_ADDRESS!,
+        assetId: assetId,
+      });
+      composer.addTransaction(freezeManagerOptInTxn);
+      console.log('   ✅ Added freeze manager opt-in transaction to group');
+    } else {
+      console.log('   ✅ Freeze manager already opted in to SIZ asset');
+    }
+
+    // Add asset unfreeze for the recipient (to prevent "asset frozen in recipient" error)
+    // NOTE: This transaction is not needed for ARC-0059 flows where the recipient isn't opted in
+    // The recipient will receive tokens in their inbox and can claim them later by opting in
+    console.log('   🔓 Skipping asset unfreeze - recipient not opted in to SIZ asset');
+    // const unfreezeTxn = await algorand.createTransaction.assetFreeze({
+    //   sender: process.env.UNFREEZE_ACCOUNT_ADDRESS!, // Use freeze manager address
+    //   assetId: assetId,
+    //   account: receiver,
+    //   frozen: false, // Unfreeze the recipient
+    // });
+    // composer.addTransaction(unfreezeTxn);
+
     // Get inbox address using direct method call (not simulation)
     const boxes = [algosdk.decodeAddress(receiver).publicKey];
     console.log(`   📦 Using receiver's public key for box reference: ${Buffer.from(boxes[0]).toString('hex')}`);
@@ -134,14 +265,15 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
     // Try to get inbox address using direct call
     let inboxAddress = receiver; // Default to receiver if no inbox exists
     try {
-      const inboxResult = await appClient.arc59GetInbox({
-        args: { receiver }
-      });
-      if (inboxResult.return && inboxResult.return !== 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ') {
-        inboxAddress = inboxResult.return;
-        console.log(`   📦 Found existing inbox: ${inboxAddress}`);
+      const inboxSim = await appClient
+        .newGroup()
+        .arc59GetInbox({ args: { receiver }, boxReferences: boxes })
+        .simulate({ allowUnnamedResources: true });
+      if (inboxSim.returns[0] && inboxSim.returns[0] !== 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ') {
+        inboxAddress = inboxSim.returns[0]!;
+        console.log(`   📦 Inbox address: ${inboxAddress}`);
       } else {
-        console.log(`   📦 No existing inbox found, will be created during send`);
+        console.log('   📦 Inbox not returned in simulate, will be created during send');
       }
     } catch (error) {
       console.log(`   📦 Could not get inbox address, will be created during send: ${error}`);
@@ -163,22 +295,16 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
   algokit.Config.configure({ populateAppCallResources: false });
 
   composer.arc59SendAsset({
-    args: {
-      axfer,
-      receiver,
-      additionalReceiverFunds: receiverAlgoNeededForClaim
-    },
-    sendParams: { fee: algokit.microAlgos(1000 + 1000 * Number(totalItxns)) }, // Official pattern: base fee + inner txns
+    args: { axfer, receiver, additionalReceiverFunds: receiverAlgoNeededForClaim },
     boxReferences: boxes,
-    accounts: [receiver], // Include receiver account reference
-    assets: [Number(assetId)], // Include asset reference
+    accountReferences: inboxAddress ? [receiver, inboxAddress] : [receiver],
+    assetReferences: [assetId],
+    staticFee: algokit.microAlgos(1000 + 1000 * Number(totalItxns)),
   });
 
   // Execute the transaction
   console.log('   ⚡ Executing ARC-0059 send transaction...');
-  
   const result = await composer.send();
-
   // Re-enable resource population
   algokit.Config.configure({ populateAppCallResources: true });
 
@@ -249,16 +375,16 @@ export async function claimSizFromInbox(params: {
       console.log('   🔐 Adding asset opt-in transaction...');
       const optInTxn = await algorand.createTransaction.assetOptIn({
         sender: receiver,
-        assetId: Number(assetId),
+        assetId,
       });
-      composer.addTransaction({ txn: optInTxn, signer: receiverSigner });
+      composer.addTransaction(optInTxn);
     }
 
     // Add ARC-0059 claim transaction
     console.log('   🎯 Adding ARC-0059 claim transaction...');
     composer.arc59Claim({
       args: { asa: assetId },
-      sendParams: { fee: algokit.microAlgos(2000) } // 2 transactions worth of fees
+      staticFee: algokit.microAlgos(2000)
     });
 
     // Execute the claim transaction
@@ -308,7 +434,7 @@ export async function getInboxAddress(params: {
     const inboxResult = await appClient.newGroup().arc59GetInbox({
       args: { receiver }
     }).simulate();
-    const inboxAddress = inboxResult.returns[0];
+    const inboxAddress = inboxResult.returns[0] ?? null;
     
     console.log(`📦 Inbox address for ${receiver}: ${inboxAddress}`);
     return inboxAddress;
