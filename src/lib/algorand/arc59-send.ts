@@ -31,9 +31,24 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
   const { algorand, sender, receiver, assetId, amount } = params;
 
   try {
+    // CRITICAL FIX: Validate receiver address integrity
+    if (!receiver || receiver.length !== 58) {
+      console.error('❌ [ARC59] CRITICAL: Invalid receiver address in ARC-0059 send:', {
+        address: receiver,
+        length: receiver?.length || 0,
+        expectedLength: 58
+      });
+      return {
+        success: false,
+        error: `Invalid receiver address length: ${receiver?.length || 0} (expected 58)`
+      };
+    }
+
     console.log(`🚀 Starting ARC-0059 transfer for ${amount} SIZ tokens to ${receiver}`);
     console.log(`   Asset ID: ${assetId}`);
     console.log(`   Sender: ${sender}`);
+    console.log(`   Receiver Address Length: ${receiver.length} (should be 58)`);
+    console.log(`   Is Correct Length: ${receiver.length === 58}`);
 
     // Get ARC-0059 app ID from environment
     const arc59AppId = process.env.ARC59_APP_ID;
@@ -107,6 +122,12 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
 
     // Step 1: Query send requirements
     console.log('   📋 Step 1: Querying ARC-0059 send requirements...');
+    console.log(`   🔍 [ARC59] About to call arc59GetSendAssetInfo with:`);
+    console.log(`      Receiver: ${receiver}`);
+    console.log(`      Receiver Length: ${receiver.length} (should be 58)`);
+    console.log(`      Asset ID: ${assetId}`);
+    console.log(`      Is Correct Length: ${receiver.length === 58}`);
+    
     const sendAssetInfoResult = await appClient.send.arc59GetSendAssetInfo({
       args: {
         receiver,
@@ -405,6 +426,90 @@ export async function claimSizFromInbox(params: {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown claim error'
     };
+  }
+}
+
+/**
+ * Claim SIZ tokens from ARC-0059 inbox using connected wallet
+ * This follows the ARC-0059 reference implementation pattern
+ */
+export async function claimSizFromInboxWithWallet(params: {
+  algorand: algokit.AlgorandClient;
+  receiver: string;
+  assetId: bigint;
+  walletSigner: algosdk.TransactionSigner;
+}): Promise<{ success: boolean; txId?: string; error?: string }> {
+  const { algorand, receiver, assetId, walletSigner } = params;
+
+  try {
+    console.log(`🎯 Starting wallet-based claim for ${assetId} SIZ tokens from inbox`);
+    console.log(`   Receiver: ${receiver}`);
+
+    // Get ARC-0059 app ID from environment
+    const arc59AppId = process.env.ARC59_APP_ID;
+    if (!arc59AppId) {
+      throw new Error('ARC59_APP_ID not found in environment variables');
+    }
+
+    // Register the wallet signer with AlgoKit client BEFORE creating the typed client
+    // This is the same pattern used in the working sendSizViaArc59 function
+    algorand.account.setSignerFromAccount({ 
+      addr: receiver as unknown as algosdk.Address, 
+      signer: walletSigner 
+    });
+    console.log(`   🔑 Registered wallet signer for address: ${receiver}`);
+
+    // Get ARC-0059 typed client
+    const appClient = new Arc59Client({
+      algorand,
+      appId: BigInt(arc59AppId),
+      defaultSender: receiver
+    });
+
+    console.log('   🔧 Building claim transaction...');
+
+    // Check if receiver needs to opt-in first
+    let claimerOptedIn = false;
+    try {
+      const accountInfo = await algorand.account.getInformation(receiver);
+      const hasAsset = accountInfo.assets?.some((asset: any) => BigInt(asset.assetId) === assetId);
+      claimerOptedIn = hasAsset || false;
+      console.log(`   ✅ Claimer opt-in status: ${claimerOptedIn ? 'Already opted in' : 'Not opted in'}`);
+    } catch (e) {
+      console.log('   🔐 Claimer needs to opt-in to SIZ asset');
+    }
+
+    // Create the transaction composer
+    const claimComposer = appClient.newGroup();
+
+    // If not opted-in, add an opt-in transaction
+    if (!claimerOptedIn) {
+      console.log('   🔐 Adding asset opt-in transaction...');
+      const optInTxn = await algorand.createTransaction.assetOptIn({
+        sender: receiver,
+        assetId,
+      });
+      claimComposer.addTransaction(optInTxn);
+      console.log('   ✅ Added opt-in transaction to group');
+    }
+
+    // Add ARC-0059 claim transaction
+    console.log('   🎯 Adding ARC-0059 claim transaction...');
+    claimComposer.arc59Claim({ 
+      args: { asa: assetId },
+      staticFee: algokit.microAlgos(3000) // Fixed fee for claim
+    });
+    
+    // Execute the claim transaction group
+    console.log('   ⚡ Executing claim transaction group...');
+    const claimResult = await claimComposer.send();
+
+    console.log('   ✅ ARC-0059 claim transaction successful!');
+    return { success: true, txId: claimResult.txIds[0] };
+
+  } catch (error) {
+    console.error('   ❌ Claim failed:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown claim error' };
   }
 }
 

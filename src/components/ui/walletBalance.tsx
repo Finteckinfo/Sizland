@@ -5,7 +5,7 @@ import { useWallet } from '@txnlab/use-wallet-react';
 import { Typography } from './typography';
 import { Button } from './button';
 import { ConnectWalletButton } from './connect-button';
-import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon } from 'lucide-react';
+import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon, DownloadIcon, CheckCircleIcon } from 'lucide-react';
 import algosdk from 'algosdk';
 import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
 
@@ -23,6 +23,17 @@ interface AccountInfo {
   assets: Asset[];
 }
 
+interface PendingPayment {
+  id: string;
+  tokenAmount: number;
+  paymentStatus: string;
+  tokenTransferStatus: string;
+  createdAt: string;
+  status: string;
+  message: string;
+  canClaim: boolean;
+}
+
 export const WalletBalance: React.FC = () => {
   const { activeAccount, activeWallet, algodClient } = useWallet();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
@@ -31,6 +42,37 @@ export const WalletBalance: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('mainnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
+  const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
+
+  // Get URL parameters for success state
+  const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
+  const [isProcessingSuccess, setIsProcessingSuccess] = useState(false);
+
+  // Check URL parameters on mount and when component updates
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const success = params.get('success');
+      const tokens = params.get('tokens');
+      
+      if (success === 'true' && tokens) {
+        setUrlParams({ success, tokens });
+        setIsProcessingSuccess(true);
+        
+        // Simulate processing delay for better UX
+        setTimeout(() => {
+          setIsProcessingSuccess(false);
+          // Refresh payments to get latest status
+          if (activeAccount?.address) {
+            fetchPendingPayments();
+          }
+        }, 2000);
+      }
+    }
+  }, [activeAccount?.address]);
 
   // Get the SIZ asset ID for the selected network
   const getSizAssetId = (network: Network) => {
@@ -47,6 +89,55 @@ export const WalletBalance: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch pending payments for the connected wallet
+  const fetchPendingPayments = async () => {
+    if (!activeAccount?.address) return;
+
+    try {
+      const response = await fetch(`/api/payments/pending?walletAddress=${activeAccount.address}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPendingPayments(data.payments || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+    }
+  };
+
+  // Handle claim functionality
+  const handleClaim = async () => {
+    if (!activeAccount?.address || pendingPayments.length === 0) return;
+
+    setClaimLoading(true);
+    setClaimError(null);
+    setClaimSuccess(null);
+
+    try {
+      // Check if there are any payments that can be claimed
+      const claimablePayments = pendingPayments.filter(payment => payment.canClaim);
+      
+      if (claimablePayments.length === 0) {
+        setClaimError('No tokens are ready to claim yet. Please wait for the transaction to be confirmed.');
+        return;
+      }
+
+      // For now, show a helpful message since wallet signing is not yet implemented
+      setClaimSuccess('🎉 Claim functionality is coming soon! Your tokens are being processed automatically. Check back in a few minutes to see them in your wallet.');
+      
+      // TODO: Implement proper wallet signing when the wallet integration is complete
+      // The current implementation would require proper wallet signing support
+      
+      // Refresh pending payments to show updated status
+      await fetchPendingPayments();
+      
+    } catch (error) {
+      console.error('Error claiming tokens:', error);
+      setClaimError(error instanceof Error ? error.message : 'Unknown error occurred');
+    } finally {
+      setClaimLoading(false);
+    }
+  };
 
   // Fetch account information using AlgoKit
   const fetchAccountInfo = async () => {
@@ -140,8 +231,10 @@ export const WalletBalance: React.FC = () => {
   useEffect(() => {
     if (mounted && activeAccount?.address) {
       fetchAccountInfo();
+      fetchPendingPayments();
     } else {
       setAccountInfo(null);
+      setPendingPayments([]);
     }
   }, [mounted, activeAccount?.address, selectedNetwork]);
 
@@ -149,6 +242,7 @@ export const WalletBalance: React.FC = () => {
   useEffect(() => {
     if (mounted && activeAccount?.address && !accountInfo) {
       fetchAccountInfo();
+      fetchPendingPayments();
     }
   }, [mounted, activeAccount?.address]);
 
@@ -160,6 +254,7 @@ export const WalletBalance: React.FC = () => {
     // Clear current account info to force refresh with new network
     setAccountInfo(null);
     setError(null);
+    setPendingPayments([]);
   };
 
   // Calculate balances with proper number handling
@@ -180,6 +275,17 @@ export const WalletBalance: React.FC = () => {
     const divisor = Math.pow(10, decimals);
     return formatNumber(amount / divisor, decimals);
   };
+
+  // Format SIZ token amount (divide by 100 for 2 decimal places)
+  const formatSizTokenAmount = (amount: number) => {
+    return (amount / 100).toFixed(2);
+  };
+
+  // Get only the most recent payment for cleaner UI
+  const mostRecentPayment = pendingPayments.length > 0 ? pendingPayments[0] : null;
+  
+  // Calculate total tokens from all payments for summary
+  const totalTokens = pendingPayments.reduce((sum, p) => sum + p.tokenAmount, 0);
 
   // Don't render anything until mounted on client
   if (!mounted) {
@@ -225,6 +331,46 @@ export const WalletBalance: React.FC = () => {
           <Typography variant="h3">Wallet Balance</Typography>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          {/* Claim Button - Only show when there are claimable payments */}
+          {pendingPayments.filter(p => p.canClaim).length > 0 && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleClaim}
+              disabled={claimLoading}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
+            >
+              <DownloadIcon className="h-4 w-4" />
+                             {claimLoading ? 'Claiming...' : `Claim ${formatSizTokenAmount(pendingPayments.filter(p => p.canClaim).reduce((sum, p) => sum + p.tokenAmount, 0))} SIZ`}
+            </Button>
+          )}
+
+          {/* Completed Direct Transfer Button - Show when direct transfers are completed */}
+          {pendingPayments.filter(p => p.status === 'completed').length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={true}
+              className="flex items-center gap-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 cursor-not-allowed"
+            >
+              <CheckCircleIcon className="h-4 w-4" />
+              Completed
+            </Button>
+          )}
+
+          {/* Pending Status Button - Show when payments are being processed but not yet claimable */}
+          {pendingPayments.filter(p => !p.canClaim && p.status !== 'completed').length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={true}
+              className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            >
+              <AlertCircleIcon className="h-4 w-4" />
+              Processing...
+            </Button>
+          )}
+
           {/* Network Selector */}
           <div className="relative w-full sm:w-auto">
             <Button
@@ -273,6 +419,73 @@ export const WalletBalance: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Success Processing Loader */}
+      {isProcessingSuccess && (
+        <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+            <div>
+              <Typography variant="paragraph" className="text-green-700 dark:text-green-300 font-medium">
+                🎉 Payment Successful! Processing {urlParams.tokens} SIZ tokens...
+              </Typography>
+              <Typography variant="small" className="text-green-600 dark:text-green-400">
+                Your tokens are being transferred to your wallet. This may take a few moments.
+              </Typography>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Claim Status Messages */}
+      {claimSuccess && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+          <Typography variant="paragraph" className="text-green-700 dark:text-green-300">
+            {claimSuccess}
+          </Typography>
+        </div>
+      )}
+
+      {claimError && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+          <Typography variant="paragraph" className="text-red-700 dark:text-red-300">
+            {claimError}
+          </Typography>
+        </div>
+      )}
+
+      {/* Payment Status - Show different content based on payment state */}
+      {mostRecentPayment && (
+        <>
+          {/* Show congratulatory message when payment is completed */}
+          {(mostRecentPayment.status === 'completed' || mostRecentPayment.paymentStatus === 'completed') && (
+            <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 rounded-lg">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🎉</div>
+                <Typography variant="h4" className="text-green-700 dark:text-green-300 font-bold mb-2">
+                  Congratulations!
+                </Typography>
+                <Typography variant="paragraph" className="text-green-600 dark:text-green-400 mb-3">
+                  You've successfully purchased {formatSizTokenAmount(mostRecentPayment.tokenAmount)} SIZ tokens!
+                </Typography>
+                <Typography variant="small" className="text-green-500 dark:text-green-400 mb-4">
+                  Your tokens have been transferred directly to your wallet. You can now use them for trading, staking, or any other SIZ token activities.
+                </Typography>
+                
+                {/* Call to action */}
+                <div className="bg-white dark:bg-green-800/30 rounded-lg p-3 border border-green-200 dark:border-green-600">
+                  <Typography variant="small" className="text-green-600 dark:text-green-300 font-medium mb-2">
+                    💡 Want to grow your SIZ portfolio?
+                  </Typography>
+                  <Typography variant="small" className="text-green-500 dark:text-green-400">
+                    Head back to the main page to purchase more tokens and expand your investment!
+                  </Typography>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Wallet Info */}
       <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -335,9 +548,9 @@ export const WalletBalance: React.FC = () => {
                       </Typography>
                     </div>
                     <div className="text-left sm:text-right">
-                      <Typography variant="h4" className="font-bold text-green-600 dark:text-green-400">
-                        {formatAssetAmount(asset.amount, asset.decimals)} {asset.unitName || 'SIZ'}
-                      </Typography>
+                                             <Typography variant="h4" className="font-bold text-green-600 dark:text-green-400">
+                         {formatSizTokenAmount(asset.amount)} {asset.unitName || 'SIZ'}
+                       </Typography>
                       <Typography variant="small" className="text-gray-500">
                         SIZ Token Balance
                       </Typography>

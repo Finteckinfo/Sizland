@@ -1,6 +1,6 @@
 export const SIZ_ASSET_IDS = {
   testnet: 739030083,
-  mainnet: 2905622564,
+  mainnet: 3186560531,
 } as const;
 
 export const ALGORAND_NETWORKS = {

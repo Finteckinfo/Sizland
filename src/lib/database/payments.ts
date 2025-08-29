@@ -554,6 +554,89 @@ export class PaymentDatabase {
       throw error;
     }
   }
+
+  /**
+   * Get pending payments for a specific wallet address
+   * Updated to include ARC-0059 inbox statuses and direct transfers
+   */
+  async getPendingPaymentsByWallet(walletAddress: string): Promise<{
+    id: string;
+    tokenAmount: number;
+    paymentStatus: string;
+    tokenTransferStatus: string;
+    createdAt: string;
+  }[]> {
+    try {
+      const query = `
+        SELECT 
+          id,
+          token_amount as "tokenAmount",
+          payment_status as "paymentStatus",
+          token_transfer_status as "tokenTransferStatus",
+          created_at as "createdAt"
+        FROM payment_transactions 
+        WHERE user_wallet_address = $1 
+        AND payment_status IN ('paid', 'processing', 'monitoring', 'completed')
+        AND token_transfer_status IN ('pending', 'failed', 'in_inbox', 'ready_to_claim', 'direct_transferred')
+        ORDER BY created_at DESC
+      `;
+      
+      const result = await this.pool.query(query, [walletAddress]);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        tokenAmount: row.tokenAmount,
+        paymentStatus: row.paymentStatus,
+        tokenTransferStatus: row.tokenTransferStatus,
+        createdAt: row.createdAt
+      }));
+    } catch (error) {
+      console.error('Error fetching pending payments by wallet:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a transfer has already been processed for a specific payment
+   * This prevents duplicate transfers when webhooks are retried
+   * FIXED: Now payment-specific, not wallet-specific - allows multiple transfers to same wallet
+   */
+  async checkTransferIdempotency(transferIdempotencyKey: string): Promise<{
+    found: boolean;
+    status?: string;
+    txId?: string;
+    timestamp?: string;
+  }> {
+    try {
+      const query = `
+        SELECT 
+          token_transfer_status as status,
+          token_transfer_tx_id as "txId",
+          updated_at as timestamp
+        FROM payment_transactions 
+        WHERE payment_reference = $1
+        AND token_transfer_status IN ('direct_transferred', 'in_inbox', 'ready_to_claim', 'claimed')
+        ORDER BY updated_at DESC
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [transferIdempotencyKey]);
+      
+      if (result.rows.length > 0) {
+        return {
+          found: true,
+          status: result.rows[0].status,
+          txId: result.rows[0].txId,
+          timestamp: result.rows[0].timestamp
+        };
+      }
+      
+      return { found: false };
+    } catch (error) {
+      console.error('Error checking transfer idempotency:', error);
+      return { found: false };
+    }
+  }
 }
 
 // Export singleton instance

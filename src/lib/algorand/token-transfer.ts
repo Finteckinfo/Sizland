@@ -4,18 +4,20 @@ import { algodClient } from './client';
 import { decodePrivateKey, isValidAlgorandAddress } from './utils';
 
 import { fundReceiverIfNeeded } from './funding';
-import { sendSizViaArc59, claimSizFromInbox } from './arc59-send';
+import { sendSizViaArc59, claimSizFromInbox, claimSizFromInboxWithWallet } from './arc59-send';
 import dotenv from 'dotenv';
 
 export interface TokenTransferParams {
   receiverAddress: string;
   amount: number;
   paymentId: string;
+  walletSigner?: algosdk.TransactionSigner; // Optional wallet signer for claiming tokens
 }
 
 export interface TransferResult {
   success: boolean;
   txId?: string;
+  claimTxId?: string; // Transaction ID for the claim operation
   error?: string;
   confirmedTxn?: any;
   requiresOptIn?: boolean;
@@ -315,7 +317,24 @@ export class SizTokenTransferService {
    */
   async checkReceiverOptIn(receiverAddress: string): Promise<OptInStatus> {
     try {
+      // CRITICAL FIX: Validate wallet address integrity
+      if (!receiverAddress || receiverAddress.length !== 58) {
+        console.error('❌ [OPT-IN] CRITICAL: Invalid wallet address in opt-in check:', {
+          address: receiverAddress,
+          length: receiverAddress?.length || 0,
+          expectedLength: 58
+        });
+        return { 
+          isOptedIn: false, 
+          canOptIn: false, 
+          error: `Invalid wallet address length: ${receiverAddress?.length || 0} (expected 58)` 
+        };
+      }
+
+      console.log(`🔍 [OPT-IN] Checking opt-in status for address: ${receiverAddress} (length: ${receiverAddress.length})`);
+      
       if (!isValidAlgorandAddress(receiverAddress)) {
+        console.error('❌ [OPT-IN] Invalid Algorand address format:', receiverAddress);
         return { 
           isOptedIn: false, 
           canOptIn: false, 
@@ -324,8 +343,12 @@ export class SizTokenTransferService {
       }
 
       const accountInfo = await algodClient.accountInformation(receiverAddress).do();
+      console.log(`✅ [OPT-IN] Account info retrieved for: ${receiverAddress}`);
+      
       const assetHolding = accountInfo.assets?.find((asset: any) => asset.assetId === this.assetId);
       const isOptedIn = !!assetHolding;
+      
+      console.log(`📊 [OPT-IN] Opt-in status: ${isOptedIn}, Asset ID: ${this.assetId}, Found: ${!!assetHolding}`);
       
       // Check if user can opt-in (has sufficient ALGO for minimum balance + fees)
       const alogBalance = Number(accountInfo.amount) / 1e6; // Convert from microAlgos
@@ -797,8 +820,28 @@ export class SizTokenTransferService {
    */
   private async executeDirectTransfer(params: TokenTransferParams): Promise<TransferResult> {
     try {
-      console.log('🔄 Executing direct SIZ token transfer...');
+      // CRITICAL FIX: Validate wallet address integrity
+      if (!params.receiverAddress || params.receiverAddress.length !== 58) {
+        console.error('❌ [DIRECT] CRITICAL: Invalid wallet address in direct transfer:', {
+          address: params.receiverAddress,
+          length: params.receiverAddress?.length || 0,
+          expectedLength: 58
+        });
+        return {
+          success: false,
+          error: `Invalid wallet address length: ${params.receiverAddress?.length || 0} (expected 58)`,
+          requiresOptIn: false
+        };
+      }
+
+      console.log(`🚀 [DIRECT] Executing direct transfer for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
+      console.log(`   Wallet Address Length: ${params.receiverAddress.length} (should be 58)`);
+      console.log(`   Asset ID: ${this.assetId}`);
+      console.log(`   Payment ID: ${params.paymentId}`);
       
+      // Initialize AlgoKit client
+      const algorand = algokit.AlgorandClient.mainNet();
+
       // Get central wallet account
       const centralAccount = algosdk.mnemonicToSecretKey(this.centralWalletMnemonic);
       console.log(`   Central wallet: ${centralAccount.addr}`);
@@ -853,9 +896,25 @@ export class SizTokenTransferService {
    */
   async transferSizTokensHybrid(params: TokenTransferParams): Promise<TransferResult> {
     try {
+      // CRITICAL FIX: Validate wallet address integrity at the start
+      if (!params.receiverAddress || params.receiverAddress.length !== 58) {
+        console.error('❌ [HYBRID] CRITICAL: Invalid wallet address received:', {
+          address: params.receiverAddress,
+          length: params.receiverAddress?.length || 0,
+          expectedLength: 58,
+          isCorrect: params.receiverAddress?.length === 58
+        });
+        return {
+          success: false,
+          error: `Invalid wallet address length: ${params.receiverAddress?.length || 0} (expected 58)`,
+          requiresOptIn: false
+        };
+      }
+
       console.log(`🚀 Starting ALGO funding + ARC-0059 transfer for ${params.amount} SIZ tokens to ${params.receiverAddress}`);
       console.log(`   Asset ID: ${this.assetId}`);
       console.log(`   Payment ID: ${params.paymentId}`);
+      console.log(`   Wallet Address Length: ${params.receiverAddress.length} (should be 58)`);
       
       // Initialize AlgoKit client using recommended mainnet factory
       const algorand = algokit.AlgorandClient.mainNet();
@@ -920,6 +979,10 @@ export class SizTokenTransferService {
 
                     // Step 3: Send SIZ tokens via ARC-0059 inbox
               console.log('\n🚀 Step 3: Sending SIZ tokens via ARC-0059...');
+              console.log(`   Receiver Address: ${params.receiverAddress}`);
+              console.log(`   Address Length: ${params.receiverAddress.length} (should be 58)`);
+              console.log(`   Is Correct Length: ${params.receiverAddress.length === 58}`);
+              
               const arc59Result = await sendSizViaArc59({
                 algorand: algorand as any, // Type assertion for compatibility
                 sender: centralAccount.addr.toString(),
@@ -944,20 +1007,41 @@ export class SizTokenTransferService {
               console.log(`   Transaction ID: ${arc59Result.txId}`);
               console.log(`   Inbox Address: ${arc59Result.inboxAddress}`);
 
-              // Step 4: Autonomously claim tokens for the receiver
-              console.log('\n🎯 Step 4: Autonomously claiming tokens from inbox...');
-              const claimResult = await claimSizFromInbox({
-                algorand: algorand as any, // Type assertion for compatibility
-                receiver: params.receiverAddress,
-                assetId: BigInt(this.assetId),
-              });
+              // Step 4: Attempt to claim tokens if wallet signer is provided
+              let claimResult: { success: boolean; txId?: string; error?: string } | null = null;
+              
+              if (params.walletSigner) {
+                console.log('\n🎯 Step 4: Attempting to claim tokens from inbox using connected wallet...');
+                try {
+                  claimResult = await claimSizFromInboxWithWallet({
+                    algorand: algorand as any, // Type assertion for compatibility
+                    receiver: params.receiverAddress,
+                    assetId: BigInt(this.assetId),
+                    walletSigner: params.walletSigner
+                  });
+                  
+                  if (claimResult.success) {
+                    console.log('✅ Tokens claimed successfully using connected wallet!');
+                    console.log(`   Claim Transaction ID: ${claimResult.txId}`);
+                  } else {
+                    console.log('⚠️ Wallet-based claim failed:', claimResult.error);
+                  }
+                } catch (error) {
+                  console.log('⚠️ Wallet-based claim attempt failed:', error);
+                  claimResult = { success: false, error: error instanceof Error ? error.message : 'Unknown claim error' };
+                }
+              } else {
+                console.log('\nℹ️ Step 4: No wallet signer provided - skipping autonomous claim');
+                console.log('   User will need to claim tokens manually from their ARC-0059 inbox');
+              }
 
-              if (!claimResult.success) {
-                console.log('⚠️ Autonomous claim failed:', claimResult.error);
+              if (!claimResult || !claimResult.success) {
+                const errorMessage = claimResult?.error || 'No wallet signer provided';
+                console.log('⚠️ Claim failed or not attempted:', errorMessage);
                 console.log('   Tokens are still in the inbox and can be claimed manually');
                 
                 return {
-                  success: true, // Send was successful, claim failed
+                  success: true, // Send was successful, claim failed or not attempted
                   txId: arc59Result.txId,
                   requiresOptIn: false,
                   requiresUserAction: true,
@@ -973,12 +1057,13 @@ export class SizTokenTransferService {
                 };
               }
 
-              console.log('✅ SIZ tokens claimed successfully!');
+              console.log('✅ SIZ tokens claimed successfully using connected wallet!');
               console.log(`   Claim Transaction ID: ${claimResult.txId}`);
 
               return {
                 success: true,
                 txId: arc59Result.txId,
+                claimTxId: claimResult.txId,
                 requiresOptIn: false,
                 requiresUserAction: false,
                 instructions: `🎉 Your SIZ tokens have been successfully transferred and claimed to your wallet!`

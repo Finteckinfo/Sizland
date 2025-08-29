@@ -379,6 +379,16 @@ export abstract class Arc59ParamsFactory {
    * @returns An `AppClientMethodCallParams` object for the call
    */
   static arc59GetSendAssetInfo(params: CallParams<Arc59Args['obj']['arc59_getSendAssetInfo(address,uint64)(uint64,uint64,bool,bool,uint64,uint64)'] | Arc59Args['tuple']['arc59_getSendAssetInfo(address,uint64)(uint64,uint64,bool,bool,uint64,uint64)']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
+    // CRITICAL FIX: Debug receiver parameter to identify truncation
+    const receiver = Array.isArray(params.args) ? params.args[0] : params.args.receiver;
+    const asset = Array.isArray(params.args) ? params.args[1] : params.args.asset;
+    
+    console.log(`🔍 [ARC59-FACTORY] arc59GetSendAssetInfo called with:`);
+    console.log(`   Receiver: ${receiver}`);
+    console.log(`   Receiver Length: ${receiver?.length || 0} (should be 58)`);
+    console.log(`   Asset: ${asset}`);
+    console.log(`   Is Correct Length: ${receiver?.length === 58}`);
+    
     return {
       ...params,
       method: 'arc59_getSendAssetInfo(address,uint64)(uint64,uint64,bool,bool,uint64,uint64)' as const,

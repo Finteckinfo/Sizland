@@ -29,6 +29,7 @@
             "debug:webhook-complete": "npx tsx scripts/debug-webhook-complete.ts",
             "test:complete-webhook": "npx tsx scripts/test-complete-webhook-flow.ts",
             "test:algo-funding-arc59": "npx tsx scripts/test-algo-funding-arc59.ts",
+            "test:wallet-claim": "npx tsx scripts/test-wallet-claim.ts",
             "fix:webhook-table": "npx tsx scripts/fix-webhook-table.ts",
             "create:tables": "npx tsx scripts/create-missing-tables.ts"
   },
