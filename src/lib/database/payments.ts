@@ -604,6 +604,60 @@ export class PaymentDatabase {
   }
 
   /**
+   * Get ALL payments for a specific wallet address (any status)
+   */
+  async getAllPaymentsByWallet(walletAddress: string): Promise<PaymentTransaction[]> {
+    try {
+      const query = `
+        SELECT * FROM payment_transactions 
+        WHERE user_wallet_address = $1 
+        ORDER BY created_at DESC
+      `;
+      
+      const result = await this.pool.query(query, [walletAddress]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching all payments by wallet:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user wallet balance
+   */
+  async getUserWalletBalance(walletAddress: string): Promise<{
+    balance: number;
+    assetName: string;
+    lastUpdated: Date;
+  } | null> {
+    try {
+      const query = `
+        SELECT balance, asset_name, last_updated
+        FROM user_wallet_balances 
+        WHERE user_wallet_address = $1 AND network = 'algorand' AND asset_id = $2
+      `;
+      
+      const result = await this.pool.query(query, [
+        walletAddress, 
+        process.env.SIZ_TOKEN_ASSET_ID
+      ]);
+      
+      if (result.rows.length === 0) {
+        return null;
+      }
+      
+      return {
+        balance: result.rows[0].balance,
+        assetName: result.rows[0].asset_name,
+        lastUpdated: result.rows[0].last_updated
+      };
+    } catch (error) {
+      console.error('Error getting user wallet balance:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get pending payments for a specific wallet address
    * Updated to include ARC-0059 inbox statuses and direct transfers
    * Enhanced with connection retry logic

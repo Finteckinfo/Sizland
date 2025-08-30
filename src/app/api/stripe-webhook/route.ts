@@ -190,23 +190,52 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
     await paymentDB.reserveTokens(data.tokenAmount, paymentTransaction.id);
 
     // Transfer SIZ tokens using existing service
+    console.log('🚀 [WEBHOOK] Starting token transfer for payment:', data.paymentReference);
+    console.log('   Receiver:', data.userWalletAddress);
+    console.log('   Amount:', data.tokenAmount);
+    console.log('   Payment ID:', paymentTransaction.id);
+    
     const transferResult = await sizTokenTransferService.transferSizTokensHybrid({
       receiverAddress: data.userWalletAddress,
       amount: data.tokenAmount,
       paymentId: paymentTransaction.id,
     });
+    
+    console.log('📊 [WEBHOOK] Transfer result received:', {
+      success: transferResult.success,
+      txId: transferResult.txId,
+      transferMethod: transferResult.transferMethod,
+      requiresUserAction: transferResult.requiresUserAction,
+      actionRequired: transferResult.actionRequired,
+      error: transferResult.error
+    });
 
     if (transferResult.success && transferResult.txId) {
-      // Determine transfer status based on method
+      // Determine transfer status based on method and result
       let transferStatus: string;
       let paymentStatus: string;
+      
+      console.log('🔍 [WEBHOOK] Transfer result details:', {
+        success: transferResult.success,
+        txId: transferResult.txId,
+        transferMethod: transferResult.transferMethod,
+        requiresUserAction: transferResult.requiresUserAction,
+        actionRequired: transferResult.actionRequired
+      });
       
       if (transferResult.transferMethod === 'direct_transfer') {
         transferStatus = 'direct_transferred';
         paymentStatus = 'completed';
-      } else {
+        console.log('✅ [WEBHOOK] Direct transfer completed');
+      } else if (transferResult.transferMethod === 'arc59_inbox') {
         transferStatus = 'in_inbox';
         paymentStatus = 'paid';
+        console.log('📬 [WEBHOOK] Tokens sent to ARC-0059 inbox - user must claim');
+      } else {
+        // Fallback for unknown transfer methods
+        transferStatus = 'in_inbox';
+        paymentStatus = 'paid';
+        console.log('⚠️ [WEBHOOK] Unknown transfer method, defaulting to inbox');
       }
 
       // Update database with successful transfer
