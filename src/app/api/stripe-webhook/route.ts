@@ -109,7 +109,9 @@ async function handlePaymentIntentSucceeded(pi: Stripe.PaymentIntent) {
     // Check if this payment was already processed by checkout.session.completed
     const idempotencyCheck = await paymentDB.checkPaymentIdempotency(payment_reference);
     if (idempotencyCheck.found) {
-      console.log('⚠️ [WEBHOOK] Payment already processed, skipping payment_intent.succeeded');
+      console.log('⚠️ [WEBHOOK] Payment already processed by checkout.session.completed, skipping payment_intent.succeeded');
+      console.log('   Current status:', idempotencyCheck.current_status);
+      console.log('   Payment ID:', idempotencyCheck.payment_id);
       return;
     }
 
@@ -161,10 +163,12 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
   });
   
   try {
-    // Check idempotency
+    // Check idempotency - check for ANY existing payment, not just completed ones
     const idempotencyCheck = await paymentDB.checkPaymentIdempotency(data.paymentReference);
-    if (idempotencyCheck.found && idempotencyCheck.current_status === 'completed') {
-      console.log('⚠️ [WEBHOOK] Payment already processed:', data.paymentReference);
+    if (idempotencyCheck.found) {
+      console.log('⚠️ [WEBHOOK] Payment already processed, skipping:', data.paymentReference);
+      console.log('   Current status:', idempotencyCheck.current_status);
+      console.log('   Payment ID:', idempotencyCheck.payment_id);
       return;
     }
 
