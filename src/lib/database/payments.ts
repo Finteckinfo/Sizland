@@ -4,14 +4,20 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Database configuration with SSL fallback
+// Database configuration with enhanced resilience
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DB_SSL === 'disable' ? false : { rejectUnauthorized: false },
-  // Add connection timeout and retry options
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
-  max: 20,
+  // Enhanced connection management
+  connectionTimeoutMillis: 30000, // Increased from 10s to 30s
+  idleTimeoutMillis: 60000, // Increased from 30s to 60s
+  max: 10, // Reduced from 20 to prevent overload
+  min: 2, // Keep minimum connections alive
+  // Retry configuration
+  retryDelay: 1000, // 1 second delay between retries
+  maxRetries: 3, // Maximum retry attempts
+  // Connection health checks
+  healthCheck: true,
   // Add fallback for non-SSL connections
   ...(process.env.DB_SSL === 'disable' && {
     ssl: false
@@ -21,13 +27,32 @@ const dbConfig = {
 // Create connection pool
 const pool = new Pool(dbConfig);
 
-// Test connection on startup
+// Enhanced connection pool event handling
 pool.on('connect', (client) => {
-  console.log('✅ Database client connected');
+  console.log('✅ [DB] Database client connected');
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Database pool error:', err);
+  console.error('❌ [DB] Database pool error:', err);
+});
+
+pool.on('acquire', (client) => {
+  console.log('🔗 [DB] Client acquired from pool');
+});
+
+pool.on('release', (client) => {
+  console.log('🔓 [DB] Client released back to pool');
+});
+
+// Handle connection timeouts
+pool.on('connect', (client) => {
+  client.on('error', (err) => {
+    console.error('❌ [DB] Individual client error:', err);
+  });
+  
+  client.on('end', () => {
+    console.log('🔚 [DB] Client connection ended');
+  });
 });
 
 // Test connection function
@@ -581,6 +606,7 @@ export class PaymentDatabase {
   /**
    * Get pending payments for a specific wallet address
    * Updated to include ARC-0059 inbox statuses and direct transfers
+   * Enhanced with connection retry logic
    */
   async getPendingPaymentsByWallet(walletAddress: string): Promise<{
     id: string;
@@ -589,34 +615,90 @@ export class PaymentDatabase {
     tokenTransferStatus: string;
     createdAt: string;
   }[]> {
-    try {
-      const query = `
-        SELECT 
-          id,
-          token_amount as "tokenAmount",
-          payment_status as "paymentStatus",
-          token_transfer_status as "tokenTransferStatus",
-          created_at as "createdAt"
-        FROM payment_transactions 
-        WHERE user_wallet_address = $1 
-        AND payment_status IN ('paid', 'processing', 'monitoring', 'completed')
-        AND token_transfer_status IN ('pending', 'failed', 'in_inbox', 'ready_to_claim', 'direct_transferred')
-        ORDER BY created_at DESC
-      `;
-      
-      const result = await this.pool.query(query, [walletAddress]);
-      
-      return result.rows.map(row => ({
-        id: row.id,
-        tokenAmount: row.tokenAmount,
-        paymentStatus: row.paymentStatus,
-        tokenTransferStatus: row.tokenTransferStatus,
-        createdAt: row.createdAt
-      }));
-    } catch (error) {
-      console.error('Error fetching pending payments by wallet:', error);
-      throw error;
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔍 [DB] Attempt ${attempt}/${maxRetries} to fetch pending payments for wallet: ${walletAddress}`);
+        
+        const query = `
+          SELECT 
+            id,
+            token_amount as "tokenAmount",
+            payment_status as "paymentStatus",
+            token_transfer_status as "tokenTransferStatus",
+            created_at as "createdAt"
+          FROM payment_transactions 
+          WHERE user_wallet_address = $1 
+          AND payment_status IN ('paid', 'processing', 'monitoring', 'completed')
+          AND token_transfer_status IN ('pending', 'failed', 'in_inbox', 'ready_to_claim', 'direct_transferred')
+          ORDER BY created_at DESC
+        `;
+        
+        const result = await this.pool.query(query, [walletAddress]);
+        
+        console.log(`✅ [DB] Successfully fetched ${result.rows.length} pending payments on attempt ${attempt}`);
+        
+        return result.rows.map(row => ({
+          id: row.id,
+          tokenAmount: row.tokenAmount,
+          paymentStatus: row.paymentStatus,
+          tokenTransferStatus: row.tokenTransferStatus,
+          createdAt: row.createdAt
+        }));
+        
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`❌ [DB] Attempt ${attempt}/${maxRetries} failed:`, {
+          error: error instanceof Error ? error.message : String(error),
+          code: (error as any)?.code,
+          errno: (error as any)?.errno,
+          attempt,
+          maxRetries
+        });
+
+        // If this is a connection error and we have retries left, wait and retry
+        if (attempt < maxRetries && this.isConnectionError(error)) {
+          const delay = attempt * 1000; // Exponential backoff: 1s, 2s, 3s
+          console.log(`⏳ [DB] Waiting ${delay}ms before retry...`);
+          await this.sleep(delay);
+          continue;
+        }
+        
+        // If we're out of retries or it's not a connection error, break
+        break;
+      }
     }
+
+    // If we get here, all retries failed
+    console.error(`💥 [DB] All ${maxRetries} attempts failed for wallet: ${walletAddress}`);
+    throw lastError || new Error('Database connection failed after all retry attempts');
+  }
+
+  /**
+   * Check if an error is a connection-related error that should trigger a retry
+   */
+  private isConnectionError(error: any): boolean {
+    const connectionErrorCodes = [
+      'ECONNRESET',
+      'ECONNREFUSED', 
+      'ENOTFOUND',
+      'ETIMEDOUT',
+      'EHOSTUNREACH',
+      'ENETUNREACH'
+    ];
+    
+    return connectionErrorCodes.includes(error?.code) || 
+           error?.code === 'ECONNRESET' ||
+           error?.errno === -104;
+  }
+
+  /**
+   * Utility function to sleep for a given number of milliseconds
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
