@@ -152,6 +152,13 @@ interface PaymentProcessingData {
 
 async function processSuccessfulPayment(data: PaymentProcessingData) {
   console.log('🚀 [WEBHOOK] Processing successful payment:', data.paymentReference);
+  console.log('   📊 Payment Details:', {
+    tokenAmount: data.tokenAmount,
+    pricePerToken: data.pricePerToken,
+    userWallet: data.userWalletAddress,
+    amount: data.amount,
+    currency: data.currency
+  });
   
   try {
     // Check idempotency
@@ -162,6 +169,7 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
     }
 
     // Create payment transaction record
+    console.log('📝 [WEBHOOK] Creating payment transaction record...');
     const paymentTransaction = await paymentDB.createPaymentTransaction({
       payment_reference: data.paymentReference,
       stripe_payment_intent_id: data.paymentIntentId,
@@ -177,23 +185,31 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       payment_status: 'pending',
       token_transfer_status: 'pending',
     });
+    console.log('✅ [WEBHOOK] Payment transaction created with ID:', paymentTransaction.id);
 
     // Check token inventory and reserve tokens
+    console.log('🔍 [WEBHOOK] Checking token inventory...');
     const inventoryCheck = await paymentDB.checkTokenInventory(data.tokenAmount, data.network);
     if (!inventoryCheck.available) {
       console.error('❌ [WEBHOOK] Insufficient token inventory for payment:', data.paymentReference);
       await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', 'Insufficient token inventory');
       return;
     }
+    console.log('✅ [WEBHOOK] Token inventory available:', inventoryCheck);
 
     // Reserve tokens for this transaction
+    console.log('🔒 [WEBHOOK] Reserving tokens...');
     await paymentDB.reserveTokens(data.tokenAmount, paymentTransaction.id);
+    console.log('✅ [WEBHOOK] Tokens reserved successfully');
 
     // Transfer SIZ tokens using existing service
     console.log('🚀 [WEBHOOK] Starting token transfer for payment:', data.paymentReference);
-    console.log('   Receiver:', data.userWalletAddress);
-    console.log('   Amount:', data.tokenAmount);
-    console.log('   Payment ID:', paymentTransaction.id);
+    console.log('   📍 Transfer Details:', {
+      receiver: data.userWalletAddress,
+      amount: data.tokenAmount,
+      paymentId: paymentTransaction.id,
+      assetId: process.env.SIZ_TOKEN_ASSET_ID
+    });
     
     const transferResult = await sizTokenTransferService.transferSizTokensHybrid({
       receiverAddress: data.userWalletAddress,
@@ -207,45 +223,40 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       transferMethod: transferResult.transferMethod,
       requiresUserAction: transferResult.requiresUserAction,
       actionRequired: transferResult.actionRequired,
-      error: transferResult.error
+      error: transferResult.error,
+      fullResult: JSON.stringify(transferResult, null, 2)
     });
 
     if (transferResult.success && transferResult.txId) {
-      // Determine transfer status based on method and result
+      // Determine transfer status based on method
       let transferStatus: string;
       let paymentStatus: string;
       
-      console.log('🔍 [WEBHOOK] Transfer result details:', {
-        success: transferResult.success,
-        txId: transferResult.txId,
-        transferMethod: transferResult.transferMethod,
-        requiresUserAction: transferResult.requiresUserAction,
-        actionRequired: transferResult.actionRequired
-      });
+      console.log('🔍 [WEBHOOK] Processing successful transfer result...');
+      console.log('   Transfer Method:', transferResult.transferMethod);
+      console.log('   Transaction ID:', transferResult.txId);
       
       if (transferResult.transferMethod === 'direct_transfer') {
         transferStatus = 'direct_transferred';
         paymentStatus = 'completed';
         console.log('✅ [WEBHOOK] Direct transfer completed');
-      } else if (transferResult.transferMethod === 'arc59_inbox') {
-        transferStatus = 'in_inbox';
-        paymentStatus = 'paid';
-        console.log('📬 [WEBHOOK] Tokens sent to ARC-0059 inbox - user must claim');
       } else {
-        // Fallback for unknown transfer methods
         transferStatus = 'in_inbox';
         paymentStatus = 'paid';
-        console.log('⚠️ [WEBHOOK] Unknown transfer method, defaulting to inbox');
+        console.log('📬 [WEBHOOK] Tokens sent to inbox (ARC-0059)');
       }
 
       // Update database with successful transfer
+      console.log('💾 [WEBHOOK] Updating database with transfer status:', transferStatus);
       await paymentDB.updateTokenTransferStatus(paymentTransaction.id, transferStatus, transferResult.txId);
       await paymentDB.updatePaymentStatus(paymentTransaction.id, paymentStatus, 'Payment processed successfully');
 
       // Update user wallet balance
+      console.log('💰 [WEBHOOK] Updating user wallet balance...');
       await paymentDB.updateUserWalletBalance(data.userWalletAddress, data.tokenAmount, 'credit');
 
       // Record token transfer
+      console.log('📋 [WEBHOOK] Recording token transfer...');
       await paymentDB.recordTokenTransfer({
         payment_transaction_id: paymentTransaction.id,
         from_address: process.env.CENTRAL_WALLET_ADDRESS!,
@@ -257,13 +268,15 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       });
 
       console.log('✅ [WEBHOOK] Payment processing completed successfully:', data.paymentReference);
+      console.log('   Final Status:', { paymentStatus, transferStatus, txId: transferResult.txId });
     } else {
       // Handle transfer failure
       console.error('❌ [WEBHOOK] Token transfer failed:', {
         paymentReference: data.paymentReference,
         error: transferResult.error,
         success: transferResult.success,
-        txId: transferResult.txId
+        txId: transferResult.txId,
+        fullResult: JSON.stringify(transferResult, null, 2)
       });
       
       await paymentDB.updateTokenTransferStatus(
@@ -275,11 +288,17 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       await paymentDB.updatePaymentStatus(paymentTransaction.id, 'failed', `Token transfer failed: ${transferResult.error}`);
       
       // Release reserved tokens
+      console.log('🔓 [WEBHOOK] Releasing reserved tokens due to transfer failure...');
       await paymentDB.releaseReservedTokens(paymentTransaction.id);
     }
 
   } catch (error) {
     console.error('❌ [WEBHOOK] Error processing payment:', error);
+    console.error('   Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      paymentReference: data.paymentReference
+    });
     throw error;
   }
 }
