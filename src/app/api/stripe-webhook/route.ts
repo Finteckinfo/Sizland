@@ -77,7 +77,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       network: network || 'algorand',
       amount: session.amount_total ? session.amount_total / 100 : 0,
       currency: session.currency || 'usd',
-      customerEmail: session.customer_details?.email,
+      customerEmail: session.customer_details?.email || undefined,
     });
 
     console.log('✅ [WEBHOOK] Checkout session processed successfully:', session.id);
@@ -125,7 +125,7 @@ async function handlePaymentIntentSucceeded(pi: Stripe.PaymentIntent) {
       network: network || 'algorand',
       amount: pi.amount / 100,
       currency: pi.currency,
-      customerEmail: pi.receipt_email,
+      customerEmail: pi.receipt_email || undefined,
     });
 
     console.log('✅ [WEBHOOK] Payment intent processed successfully:', pi.id);
