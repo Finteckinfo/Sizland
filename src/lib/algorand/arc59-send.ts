@@ -44,7 +44,10 @@ export async function sendSizViaArc59(params: Arc59SendParams): Promise<Arc59Sen
       };
     }
 
-    console.log(`🚀 Starting ARC-0059 transfer for ${amount} SIZ tokens to ${receiver}`);
+    // NOTE: The 'amount' parameter is expected to be in base units (not token units)
+    // For SIZ tokens with 2 decimal places: 1 token = 100 base units
+    // This function is called from transferSizTokensHybrid which converts token units to base units
+    console.log(`🚀 Starting ARC-0059 transfer for ${amount} base units (${Number(amount) / 100} SIZ tokens) to ${receiver}`);
     console.log(`   Asset ID: ${assetId}`);
     console.log(`   Sender: ${sender}`);
     console.log(`   Receiver Address Length: ${receiver.length} (should be 58)`);
