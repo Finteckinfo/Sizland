@@ -10,6 +10,8 @@ import algosdk from 'algosdk';
 import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { claimSizFromInboxWithWallet } from '@/lib/algorand/arc59-send';
+import { Confetti } from './Confetti';
+import { ClaimSuccessMessage } from './ClaimSuccessMessage';
 
 interface Asset {
   assetId: number;
@@ -48,6 +50,9 @@ export const WalletBalance: React.FC = () => {
   const [claimLoading, setClaimLoading] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [claimedAmount, setClaimedAmount] = useState<string>('');
+  const [claimedTxId, setClaimedTxId] = useState<string>('');
 
   // Get URL parameters for success state
   const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
@@ -90,6 +95,20 @@ export const WalletBalance: React.FC = () => {
   // Set mounted to true after component mounts on client
   useEffect(() => {
     setMounted(true);
+    
+    // Check environment variables on mount
+    console.log('🔍 [ENV] Checking environment variables on component mount...');
+    console.log('   ARC59_APP_ID:', process.env.ARC59_APP_ID || 'NOT SET ❌');
+    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
+    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
+    console.log('   STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET ✅' : 'NOT SET ❌');
+    console.log('   DATABASE_URL:', process.env.DATABASE_URL ? 'SET ✅' : 'NOT SET ❌');
+    
+    if (!process.env.ARC59_APP_ID) {
+      console.error('❌ [ENV] Critical environment variable missing: ARC59_APP_ID');
+      console.error('   This will prevent the claim functionality from working.');
+      console.error('   Please add ARC59_APP_ID=643020148 to your .env.local file for testnet.');
+    }
   }, []);
 
   // Fetch pending payments for the connected wallet
@@ -107,93 +126,227 @@ export const WalletBalance: React.FC = () => {
     }
   };
 
-  // Handle claim functionality
-  const handleClaim = async () => {
-    if (!activeAccount?.address || pendingPayments.length === 0) return;
-
-    setClaimLoading(true);
-    setClaimError(null);
-    setClaimSuccess(null);
-
-    try {
-      // Check if there are any payments that can be claimed
-      const claimablePayments = pendingPayments.filter(payment => payment.canClaim);
-      
-      if (claimablePayments.length === 0) {
-        setClaimError('No tokens are ready to claim yet. Please wait for the transaction to be confirmed.');
-        return;
-      }
-
-      // For now, show a helpful message since wallet signing is not yet implemented
-      setClaimSuccess('🎉 Claim functionality is coming soon! Your tokens are being processed automatically. Check back in a few minutes to see them in your wallet.');
-      
-      // TODO: Implement proper wallet signing when the wallet integration is complete
-      // The current implementation would require proper wallet signing support
-      
-      // Refresh pending payments to show updated status
-      await fetchPendingPayments();
-      
-    } catch (error) {
-      console.error('Error claiming tokens:', error);
-      setClaimError(error instanceof Error ? error.message : 'Unknown error occurred');
-    } finally {
-      setClaimLoading(false);
-    }
+  // Handle confetti completion
+  const handleConfettiComplete = () => {
+    console.log('🎊 [CONFETTI] Confetti animation completed, handling cleanup...');
+    setShowConfetti(false);
+    console.log('   Confetti state set to false');
+    
+    // Keep success message visible for a bit longer
+    console.log('   Scheduling success message cleanup in 2 seconds...');
+    setTimeout(() => {
+      console.log('🧹 [CONFETTI] Cleaning up success message state...');
+      setClaimSuccess(null);
+      setClaimedAmount('');
+      setClaimedTxId('');
+      console.log('   Success state cleared');
+    }, 2000);
   };
 
-  // Handle claim from ARC-0059 inbox for successful payments
-  const handleClaimFromInbox = async () => {
-    if (!activeAccount?.address || !mostRecentPayment) {
-      setClaimError('Wallet not connected or no recent payment found');
+  // Handle claim functionality
+  const handleClaim = async () => {
+    console.log('🚀 [CLAIM] Starting claim process...');
+    console.log('   Active account:', activeAccount?.address);
+    console.log('   Pending payments count:', pendingPayments.length);
+    
+    // Validate required environment variables
+    console.log('🔍 [CLAIM] Checking required environment variables...');
+    console.log('   ARC59_APP_ID:', process.env.ARC59_APP_ID || 'NOT SET ❌');
+    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
+    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
+    
+    if (!process.env.ARC59_APP_ID) {
+      const errorMsg = 'ARC59_APP_ID environment variable is not set. Please add it to your .env.local file.';
+      console.error('❌ [CLAIM] Environment variable missing:', errorMsg);
+      setClaimError(errorMsg);
+      return;
+    }
+    
+    if (!process.env.SIZ_TOKEN_ASSET_ID) {
+      const errorMsg = 'SIZ_TOKEN_ASSET_ID environment variable is not set. Please add it to your .env.local file.';
+      console.error('❌ [CLAIM] Environment variable missing:', errorMsg);
+      setClaimError(errorMsg);
+      return;
+    }
+    
+    console.log('✅ [CLAIM] All required environment variables are set');
+    
+    if (!activeAccount?.address || pendingPayments.length === 0) {
+      console.log('❌ [CLAIM] Missing active account or no pending payments');
       return;
     }
 
     setClaimLoading(true);
     setClaimError(null);
     setClaimSuccess(null);
+    
+    console.log('✅ [CLAIM] State reset, starting claim process...');
 
     try {
-      console.log('🎯 Starting ARC-0059 inbox claim for user:', activeAccount.address);
+      // Check if there are any payments that can be claimed
+      const claimablePayments = pendingPayments.filter(payment => payment.canClaim);
+      console.log('🔍 [CLAIM] Filtering claimable payments...');
+      console.log('   Total pending payments:', pendingPayments.length);
+      console.log('   Claimable payments:', claimablePayments.length);
+      console.log('   Claimable payment details:', claimablePayments.map(p => ({
+        id: p.id,
+        tokenAmount: p.tokenAmount,
+        paymentStatus: p.paymentStatus,
+        tokenTransferStatus: p.tokenTransferStatus,
+        canClaim: p.canClaim
+      })));
       
-      // 1. Check if wallet supports transaction signing
-      // According to the documentation, useWallet provides transactionSigner
-      if (!transactionSigner) {
-        setClaimError('No wallet signer available. Please reconnect your wallet.');
-        setClaimLoading(false);
+      if (claimablePayments.length === 0) {
+        console.log('❌ [CLAIM] No claimable payments found');
+        setClaimError('No tokens are ready to claim yet. Please wait for the transaction to be confirmed.');
         return;
       }
+      
+      console.log('✅ [CLAIM] Found claimable payments, proceeding with claim...');
 
-      // 2. Initialize AlgorandClient with algodClient and signer from use-wallet
-      // Following the AlgoKit Utils pattern from the documentation
+      console.log('🎯 [CLAIM] Starting claim process for user:', activeAccount.address);
+      console.log('   Claimable payments:', claimablePayments.length);
+      
+      // Check if wallet supports transaction signing
+      console.log('🔐 [CLAIM] Checking wallet transaction signer...');
+      console.log('   Transaction signer available:', !!transactionSigner);
+      console.log('   Transaction signer type:', typeof transactionSigner);
+      
+      if (!transactionSigner) {
+        console.log('❌ [CLAIM] No transaction signer available');
+        setClaimError('No wallet signer available. Please reconnect your wallet.');
+        return;
+      }
+      
+             console.log('✅ [CLAIM] Transaction signer available, proceeding...');
+       
+       // Check wallet ALGO balance before proceeding
+       console.log('💰 [CLAIM] Checking wallet ALGO balance...');
+       try {
+         // Use algodClient directly to check balance
+         const accountInfo = await algodClient.accountInformation(activeAccount.address).do();
+         const algoBalance = Number(accountInfo.amount) / 1_000_000; // Convert from microALGO
+         console.log('   Current ALGO balance:', algoBalance);
+         
+         if (algoBalance < 0.1) {
+           const errorMsg = `Insufficient ALGO balance: ${algoBalance} ALGO. You need at least 0.1 ALGO for transaction fees and minimum balance.`;
+           console.error('❌ [CLAIM] Insufficient ALGO balance:', errorMsg);
+           setClaimError(errorMsg);
+           return;
+         }
+         
+         console.log('✅ [CLAIM] Sufficient ALGO balance for transaction');
+       } catch (balanceError) {
+         console.error('❌ [CLAIM] Error checking balance:', balanceError);
+         setClaimError('Unable to verify wallet balance. Please try again.');
+         return;
+       }
+
+      // Initialize AlgorandClient with algodClient and signer from use-wallet
+      console.log('🔧 [CLAIM] Initializing Algorand client...');
+      console.log('   Algod client available:', !!algodClient);
+      console.log('   Selected network:', selectedNetwork);
+      
       const algorand = algokit.AlgorandClient
         .fromClients({ algod: algodClient })
         .setSigner(activeAccount.address, transactionSigner);
+      
+      console.log('✅ [CLAIM] Algorand client initialized with signer');
 
-      // 3. Call the claim function with SIZ asset ID
+             // Get the SIZ asset ID for the selected network
+       const sizAssetId = getSizAssetId(selectedNetwork);
+       console.log(`🔍 [CLAIM] Using SIZ asset ID: ${sizAssetId} for ${selectedNetwork}`);
+       console.log('   Asset ID type:', typeof sizAssetId);
+       console.log('   Asset ID as BigInt:', BigInt(sizAssetId));
+       
+       // Validate network configuration
+       console.log('🌐 [CLAIM] Network validation:');
+       console.log('   Selected network:', selectedNetwork);
+       console.log('   Expected ARC59_APP_ID for mainnet:', '2449590623');
+       console.log('   Expected SIZ_TOKEN_ASSET_ID for mainnet:', '3186560531');
+       console.log('   Current ARC59_APP_ID:', process.env.ARC59_APP_ID);
+       console.log('   Current SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID);
+       
+       if (selectedNetwork === 'mainnet') {
+         if (process.env.ARC59_APP_ID !== '2449590623') {
+           console.error('❌ [CLAIM] Network mismatch: Mainnet selected but testnet ARC59_APP_ID configured');
+           setClaimError('Network configuration mismatch. Please check your environment variables.');
+           return;
+         }
+       }
+
+      // Call the claim function with SIZ asset ID
+      console.log('🎯 [CLAIM] Calling claimSizFromInboxWithWallet...');
+      console.log('   Receiver address:', activeAccount.address);
+      console.log('   Asset ID:', sizAssetId);
+      console.log('   Wallet signer type:', typeof transactionSigner);
+      
       const result = await claimSizFromInboxWithWallet({
         algorand,
         receiver: activeAccount.address,
-        assetId: BigInt(3186560531), // SIZ asset ID for mainnet (use 739030083 for testnet)
+        assetId: BigInt(sizAssetId),
         walletSigner: transactionSigner,
       });
+      
+      console.log('📡 [CLAIM] Claim function result received:');
+      console.log('   Success:', result.success);
+      console.log('   Transaction ID:', result.txId);
+      console.log('   Error:', result.error);
+      console.log('   Full result object:', result);
 
       if (result.success) {
+        console.log('🎉 [CLAIM] SUCCESS! Processing successful claim...');
+        
+        // Calculate total claimed amount
+        const totalClaimed = claimablePayments.reduce((sum, p) => sum + p.tokenAmount, 0);
+        const formattedAmount = formatSizTokenAmount(totalClaimed);
+        console.log('   Total claimed amount (raw):', totalClaimed);
+        console.log('   Formatted amount:', formattedAmount);
+        
+        // Set success state with details
+        setClaimedAmount(formattedAmount);
+        setClaimedTxId(result.txId || '');
         setClaimSuccess('🎉 Claim successful! Your SIZ tokens are now in your wallet.');
+        
+        // Trigger confetti animation
+        console.log('🎊 [CLAIM] Triggering confetti animation...');
+        setShowConfetti(true);
+        
+        console.log('✅ [CLAIM] Claim successful! Transaction ID:', result.txId);
+        console.log('   Success message set');
+        console.log('   Confetti triggered');
+        
         // Wait for confirmation and refresh balances
+        console.log('⏳ [CLAIM] Scheduling balance refresh in 2 seconds...');
         setTimeout(() => {
+          console.log('🔄 [CLAIM] Refreshing account info and pending payments...');
           fetchAccountInfo();
           fetchPendingPayments();
         }, 2000);
       } else {
+        console.log('❌ [CLAIM] FAILED! Processing claim failure...');
+        console.log('   Error message:', result.error);
+        console.log('   Setting error state...');
+        
         setClaimError(result.error || 'Unknown error during claim.');
+        console.error('❌ [CLAIM] Claim failed:', result.error);
       }
+      
     } catch (error) {
-      console.error('Error claiming from inbox:', error);
-      setClaimError(error instanceof Error ? error.message : 'Unknown error occurred during claim');
+      console.log('💥 [CLAIM] EXCEPTION occurred during claim process!');
+      console.error('   Error type:', typeof error);
+      console.error('   Error message:', error instanceof Error ? error.message : error);
+      console.error('   Full error object:', error);
+      
+      setClaimError(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
+      console.log('🏁 [CLAIM] Claim process completed, resetting loading state...');
       setClaimLoading(false);
+      console.log('   Loading state reset to false');
     }
   };
+
+
 
   // Fetch account information using AlgoKit
   const fetchAccountInfo = async () => {
@@ -397,7 +550,7 @@ export const WalletBalance: React.FC = () => {
               className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
             >
               <DownloadIcon className="h-4 w-4" />
-                             {claimLoading ? 'Claiming...' : `Claim ${formatSizTokenAmount(pendingPayments.filter(p => p.canClaim).reduce((sum, p) => sum + p.tokenAmount, 0))} SIZ`}
+              {claimLoading ? 'Claiming...' : 'Claim'}
             </Button>
           )}
 
@@ -493,8 +646,16 @@ export const WalletBalance: React.FC = () => {
         </div>
       )}
 
-      {/* Claim Status Messages */}
-      {claimSuccess && (
+      {/* Enhanced Claim Success Message */}
+      {claimSuccess && claimedAmount && (
+        <ClaimSuccessMessage 
+          tokenAmount={claimedAmount}
+          transactionId={claimedTxId}
+        />
+      )}
+
+      {/* Simple Success Message Fallback */}
+      {claimSuccess && !claimedAmount && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
           <Typography variant="paragraph" className="text-green-700 dark:text-green-300">
             {claimSuccess}
@@ -667,8 +828,14 @@ export const WalletBalance: React.FC = () => {
               </Typography>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}; 
+                 </div>
+       )}
+
+       {/* Confetti Animation */}
+       <Confetti 
+         isActive={showConfetti} 
+         onComplete={handleConfettiComplete}
+       />
+     </div>
+   );
+ }; 

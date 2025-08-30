@@ -431,7 +431,7 @@ export async function claimSizFromInbox(params: {
 
 /**
  * Claim SIZ tokens from ARC-0059 inbox using connected wallet
- * This follows the ARC-0059 reference implementation pattern
+ * This follows the official ARC-0059 reference implementation pattern
  */
 export async function claimSizFromInboxWithWallet(params: {
   algorand: algokit.AlgorandClient;
@@ -451,15 +451,7 @@ export async function claimSizFromInboxWithWallet(params: {
       throw new Error('ARC59_APP_ID not found in environment variables');
     }
 
-    // Register the wallet signer with AlgoKit client BEFORE creating the typed client
-    // This is the same pattern used in the working sendSizViaArc59 function
-    algorand.account.setSignerFromAccount({ 
-      addr: receiver as unknown as algosdk.Address, 
-      signer: walletSigner 
-    });
-    console.log(`   🔑 Registered wallet signer for address: ${receiver}`);
-
-    // Get ARC-0059 typed client
+    // Create ARC-0059 client
     const appClient = new Arc59Client({
       algorand,
       appId: BigInt(arc59AppId),
@@ -468,7 +460,7 @@ export async function claimSizFromInboxWithWallet(params: {
 
     console.log('   🔧 Building claim transaction...');
 
-    // Check if receiver needs to opt-in first
+    // Check if the claimer has opted in to the asset
     let claimerOptedIn = false;
     try {
       const accountInfo = await algorand.account.getInformation(receiver);
@@ -476,40 +468,79 @@ export async function claimSizFromInboxWithWallet(params: {
       claimerOptedIn = hasAsset || false;
       console.log(`   ✅ Claimer opt-in status: ${claimerOptedIn ? 'Already opted in' : 'Not opted in'}`);
     } catch (e) {
-      console.log('   🔐 Claimer needs to opt-in to SIZ asset');
+      console.log(`   🔐 Claimer needs to opt-in to SIZ asset (Asset ID: ${assetId})`);
     }
 
-    // Create the transaction composer
-    const claimComposer = appClient.newGroup();
+    // Get inbox address
+    const inbox = (
+      await appClient.send.arc59GetInbox({
+        args: { receiver }
+      })
+    ).return!;
 
-    // If not opted-in, add an opt-in transaction
+    console.log(`   📦 Inbox address: ${inbox}`);
+
+    // Create the transaction composer
+    const composer = appClient.newGroup();
+    let totalTxns = 3; // Base transactions for claim
+
+    // If the inbox has extra ALGO, claim it first
+    try {
+      const inboxInfo = await algorand.account.getInformation(inbox);
+      // Access amount and minBalance from the account info using type assertion
+      const inboxBalance = BigInt((inboxInfo as any).amount || 0);
+      const inboxMinBalance = BigInt((inboxInfo as any).minBalance || 0);
+      
+      if (inboxBalance > inboxMinBalance) {
+        console.log(`   💰 Inbox has extra ALGO, adding claimAlgo transaction`);
+        console.log(`      Current balance: ${Number(inboxBalance) / 1e6} ALGO`);
+        console.log(`      Min balance: ${Number(inboxMinBalance) / 1e6} ALGO`);
+        totalTxns += 2;
+        composer.arc59ClaimAlgo({
+          args: {},
+          staticFee: algokit.microAlgos(0) // Use microAlgos instead of algos to avoid type issues
+        });
+      }
+    } catch (error) {
+      console.log(`   ⚠️ Could not check inbox ALGO balance: ${error}`);
+    }
+
+    // If the claimer hasn't already opted in, add opt-in transaction
     if (!claimerOptedIn) {
       console.log('   🔐 Adding asset opt-in transaction...');
       const optInTxn = await algorand.createTransaction.assetOptIn({
         sender: receiver,
         assetId,
       });
-      claimComposer.addTransaction(optInTxn);
+      composer.addTransaction(optInTxn);
       console.log('   ✅ Added opt-in transaction to group');
     }
 
-    // Add ARC-0059 claim transaction
+    // Add the main ARC-0059 claim transaction
     console.log('   🎯 Adding ARC-0059 claim transaction...');
-    claimComposer.arc59Claim({ 
+    composer.arc59Claim({
       args: { asa: assetId },
-      staticFee: algokit.microAlgos(3000) // Fixed fee for claim
+      staticFee: algokit.microAlgos(1000 * totalTxns)
     });
-    
-    // Execute the claim transaction group
+
+    // Execute the transaction group
     console.log('   ⚡ Executing claim transaction group...');
-    const claimResult = await claimComposer.send();
+    const result = await composer.send();
 
     console.log('   ✅ ARC-0059 claim transaction successful!');
-    return { success: true, txId: claimResult.txIds[0] };
+    console.log(`   Transaction IDs: ${result.txIds.join(', ')}`);
+    
+    return { 
+      success: true, 
+      txId: result.txIds[0] 
+    };
 
   } catch (error) {
     console.error('   ❌ Claim failed:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown claim error' };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown claim error' 
+    };
   }
 }
 
