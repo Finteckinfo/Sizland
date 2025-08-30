@@ -207,7 +207,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     await processSuccessfulPayment({
       sessionId: session.id,
       paymentIntentId: session.payment_intent,
-      tokenAmount: parseInt(token_amount),
+      tokenAmount: parseInt(token_amount) * 100, // Convert from decimal (2.00) to smallest unit (200)
       pricePerToken: parseFloat(price_per_token),
       paymentReference: payment_reference,
       userWalletAddress: user_wallet_address,
@@ -259,7 +259,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
     await processSuccessfulPayment({
       sessionId: null,
       paymentIntentId: paymentIntent.id,
-      tokenAmount: parseInt(token_amount),
+      tokenAmount: parseInt(token_amount) * 100, // Convert from decimal (2.00) to smallest unit (200)
       pricePerToken: parseFloat(price_per_token),
       paymentReference: payment_reference,
       userWalletAddress: user_wallet_address,
@@ -486,40 +486,63 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
         
         console.log('✅ [PAYMENT] transferSizTokensHybrid call completed successfully');
         
-        const transferTime = Date.now() - transferStartTime;
-        console.log('📊 [PAYMENT] Transfer result received:', {
-          success: transferResult.success,
-          txId: transferResult.txId,
-          error: transferResult.error,
-          requiresOptIn: transferResult.requiresOptIn,
-          transferTime: `${transferTime}ms`,
-          totalProcessingTime: `${Date.now() - startTime}ms`
-        });
+                 const transferTime = Date.now() - transferStartTime;
+         console.log('📊 [PAYMENT] Transfer result received:', {
+           success: transferResult.success,
+           txId: transferResult.txId,
+           error: transferResult.error,
+           requiresOptIn: transferResult.requiresOptIn,
+           transferMethod: transferResult.transferMethod, // Add this to see what method was used
+           transferTime: `${transferTime}ms`,
+           totalProcessingTime: `${Date.now() - startTime}ms`
+         });
 
         if (transferResult.success && transferResult.txId) {
           // 6. Update database with successful transfer
           console.log('✅ [PAYMENT] Step 6: Token transfer successful! Updating database...');
           
-          // Determine the correct status based on transfer method
-          let transferStatus: string;
-          let paymentStatus: string;
-          let statusMessage: string;
-          
-          if (transferResult.requiresOptIn === false) {
-            // Direct transfer to opted-in wallet
-            transferStatus = 'direct_transferred';
-            paymentStatus = 'completed';
-            statusMessage = 'Tokens directly transferred to wallet - no claiming required';
-            
-            console.log('🎯 [PAYMENT] Direct transfer completed - user wallet was already opted in');
-          } else {
-            // ARC-0059 inbox transfer
-            transferStatus = 'in_inbox';
-            paymentStatus = 'paid';
-            statusMessage = 'Tokens sent to inbox via ARC-0059 - user must claim manually';
-            
-            console.log('📬 [PAYMENT] ARC-0059 inbox transfer completed - user must claim from inbox');
-          }
+                     // Determine the correct status based on transfer method
+           let transferStatus: string;
+           let paymentStatus: string;
+           let statusMessage: string;
+           
+           // Debug logging to see what we're working with
+           console.log('🔍 [PAYMENT] Status determination debug:', {
+             transferMethod: transferResult.transferMethod,
+             requiresOptIn: transferResult.requiresOptIn,
+             hasTransferMethod: !!transferResult.transferMethod,
+             transferMethodType: typeof transferResult.transferMethod
+           });
+           
+           if (transferResult.transferMethod === 'direct_transfer') {
+             // Direct transfer to opted-in wallet
+             transferStatus = 'direct_transferred';
+             paymentStatus = 'completed';
+             statusMessage = 'Tokens directly transferred to wallet - no claiming required';
+             
+             console.log('🎯 [PAYMENT] Direct transfer completed - user wallet was already opted in');
+           } else if (transferResult.transferMethod === 'arc59_inbox') {
+             // ARC-0059 inbox transfer
+             transferStatus = 'in_inbox';
+             paymentStatus = 'paid';
+             statusMessage = 'Tokens sent to inbox via ARC-0059 - user must claim manually';
+             
+             console.log('📬 [PAYMENT] ARC-0059 inbox transfer completed - user must claim from inbox');
+           } else {
+             // Fallback logic for backward compatibility
+             console.log('⚠️ [PAYMENT] Using fallback logic - transferMethod not set');
+             if (transferResult.requiresOptIn === false) {
+               transferStatus = 'direct_transferred';
+               paymentStatus = 'completed';
+               statusMessage = 'Tokens directly transferred to wallet - no claiming required';
+               console.log('🎯 [PAYMENT] Direct transfer completed (fallback logic)');
+             } else {
+               transferStatus = 'in_inbox';
+               paymentStatus = 'paid';
+               statusMessage = 'Tokens sent to inbox via ARC-0059 - user must claim manually';
+               console.log('📬 [PAYMENT] ARC-0059 inbox transfer completed (fallback logic)');
+             }
+           }
           
           // Update database with better error handling
           try {

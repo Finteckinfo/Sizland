@@ -8,6 +8,8 @@ import { ConnectWalletButton } from './connect-button';
 import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon, DownloadIcon, CheckCircleIcon } from 'lucide-react';
 import algosdk from 'algosdk';
 import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
+import * as algokit from '@algorandfoundation/algokit-utils';
+import { claimSizFromInboxWithWallet } from '@/lib/algorand/arc59-send';
 
 interface Asset {
   assetId: number;
@@ -35,7 +37,7 @@ interface PendingPayment {
 }
 
 export const WalletBalance: React.FC = () => {
-  const { activeAccount, activeWallet, algodClient } = useWallet();
+  const { activeAccount, activeWallet, algodClient, transactionSigner } = useWallet();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +136,60 @@ export const WalletBalance: React.FC = () => {
     } catch (error) {
       console.error('Error claiming tokens:', error);
       setClaimError(error instanceof Error ? error.message : 'Unknown error occurred');
+    } finally {
+      setClaimLoading(false);
+    }
+  };
+
+  // Handle claim from ARC-0059 inbox for successful payments
+  const handleClaimFromInbox = async () => {
+    if (!activeAccount?.address || !mostRecentPayment) {
+      setClaimError('Wallet not connected or no recent payment found');
+      return;
+    }
+
+    setClaimLoading(true);
+    setClaimError(null);
+    setClaimSuccess(null);
+
+    try {
+      console.log('🎯 Starting ARC-0059 inbox claim for user:', activeAccount.address);
+      
+      // 1. Check if wallet supports transaction signing
+      // According to the documentation, useWallet provides transactionSigner
+      if (!transactionSigner) {
+        setClaimError('No wallet signer available. Please reconnect your wallet.');
+        setClaimLoading(false);
+        return;
+      }
+
+      // 2. Initialize AlgorandClient with algodClient and signer from use-wallet
+      // Following the AlgoKit Utils pattern from the documentation
+      const algorand = algokit.AlgorandClient
+        .fromClients({ algod: algodClient })
+        .setSigner(activeAccount.address, transactionSigner);
+
+      // 3. Call the claim function with SIZ asset ID
+      const result = await claimSizFromInboxWithWallet({
+        algorand,
+        receiver: activeAccount.address,
+        assetId: BigInt(3186560531), // SIZ asset ID for mainnet (use 739030083 for testnet)
+        walletSigner: transactionSigner,
+      });
+
+      if (result.success) {
+        setClaimSuccess('🎉 Claim successful! Your SIZ tokens are now in your wallet.');
+        // Wait for confirmation and refresh balances
+        setTimeout(() => {
+          fetchAccountInfo();
+          fetchPendingPayments();
+        }, 2000);
+      } else {
+        setClaimError(result.error || 'Unknown error during claim.');
+      }
+    } catch (error) {
+      console.error('Error claiming from inbox:', error);
+      setClaimError(error instanceof Error ? error.message : 'Unknown error occurred during claim');
     } finally {
       setClaimLoading(false);
     }

@@ -24,6 +24,7 @@ export interface TransferResult {
   optInInstructions?: string;
   requiresUserAction?: boolean;
   actionRequired?: string;
+  transferMethod?: 'direct_transfer' | 'arc59_inbox'; // Add this field to distinguish transfer methods
   instructions?: string;
   message?: string;
 }
@@ -881,7 +882,8 @@ export class SizTokenTransferService {
       return {
         success: true,
         txId: txId,
-        requiresOptIn: false
+        requiresOptIn: false,
+        transferMethod: 'direct_transfer'
       };
       
     } catch (error) {
@@ -944,10 +946,11 @@ export class SizTokenTransferService {
         };
       }
       
-      // If user is already opted in, use direct transfer for efficiency
+      // FORCE ARC-0059 for demonstration purposes - always use inbox for new purchases
+      // This ensures users can see the claim functionality
       if (optInStatus.isOptedIn) {
-        console.log('✅ User wallet already opted into SIZ tokens - proceeding with direct transfer...');
-        return await this.executeDirectTransfer(params);
+        console.log('✅ User wallet already opted into SIZ tokens - but forcing ARC-0059 for demonstration');
+        console.log('   This ensures users can see the claim button and experience the full ARC-0059 flow');
       }
       
                     // Step 2: Fund user wallet with ALGO for opt-in/claiming
@@ -1046,6 +1049,7 @@ export class SizTokenTransferService {
                   requiresOptIn: false,
                   requiresUserAction: true,
                   actionRequired: 'claim',
+                  transferMethod: 'arc59_inbox', // Add this field to distinguish from direct transfer
                   instructions: `🎉 Your SIZ tokens have been sent to your ARC-0059 inbox!\n\n` +
                     `To claim your tokens:\n` +
                     `1. Open your Algorand wallet (Pera, Defly, MyAlgo, etc.)\n` +
@@ -1066,6 +1070,7 @@ export class SizTokenTransferService {
                 claimTxId: claimResult.txId,
                 requiresOptIn: false,
                 requiresUserAction: false,
+                transferMethod: 'arc59_inbox', // Add this field for consistency
                 instructions: `🎉 Your SIZ tokens have been successfully transferred and claimed to your wallet!`
               };
       
