@@ -106,31 +106,28 @@ async function handlePaymentIntentSucceeded(pi: Stripe.PaymentIntent) {
       return;
     }
 
+    // CRITICAL FIX: For Stripe Checkout, payment_intent.succeeded is redundant
+    // Checkout.session.completed already handles everything we need
+    console.log('⚠️ [WEBHOOK] Payment intent succeeded detected for Checkout session');
+    console.log('   Payment reference:', payment_reference);
+    console.log('   Skipping payment_intent.succeeded - checkout.session.completed handles this');
+    
     // Check if this payment was already processed by checkout.session.completed
     const idempotencyCheck = await paymentDB.checkPaymentIdempotency(payment_reference);
     if (idempotencyCheck.found) {
-      console.log('⚠️ [WEBHOOK] Payment already processed by checkout.session.completed, skipping payment_intent.succeeded');
+      console.log('✅ [WEBHOOK] Payment already processed by checkout.session.completed, confirmed skipping');
       console.log('   Current status:', idempotencyCheck.current_status);
       console.log('   Payment ID:', idempotencyCheck.payment_id);
       return;
     }
 
-    // Process the successful payment using existing logic
-    await processSuccessfulPayment({
-      sessionId: null,
-      paymentIntentId: pi.id,
-      tokenAmount: parseInt(token_amount),
-      pricePerToken: parseFloat(price_per_token),
-      paymentReference: payment_reference,
-      userWalletAddress: user_wallet_address || '',
-      productType: product_type || 'siz_token',
-      network: network || 'algorand',
-      amount: pi.amount / 100,
-      currency: pi.currency,
-      customerEmail: pi.receipt_email || undefined,
-    });
+    // If somehow we get here (shouldn't happen with Checkout), log and skip
+    console.log('⚠️ [WEBHOOK] Unexpected: Payment intent succeeded but no checkout session found');
+    console.log('   This should not happen with Stripe Checkout - skipping for safety');
+    return;
 
-    console.log('✅ [WEBHOOK] Payment intent processed successfully:', pi.id);
+    // REMOVED: The actual payment processing logic since Checkout handles it
+    // This prevents duplicate payment records
   } catch (error) {
     console.error('❌ [WEBHOOK] Error handling payment intent success:', error);
     throw error;
