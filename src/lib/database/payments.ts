@@ -228,14 +228,15 @@ export class PaymentDatabase {
     try {
       const query = `
         INSERT INTO webhook_events (
-          stripe_event_id, event_type
-        ) VALUES ($1, $2)
+          stripe_event_id, event_type, processed
+        ) VALUES ($1, $2, $3)
         RETURNING *
       `;
       
       const result = await this.pool.query(query, [
         stripeEventId, 
-        eventType
+        eventType,
+        eventType === 'processed' ? true : false
       ]);
       return result.rows[0];
     } catch (error) {
@@ -508,6 +509,28 @@ export class PaymentDatabase {
       };
     } catch (error) {
       console.error('Error getting webhook event statistics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get webhook event by Stripe event ID for idempotency
+   */
+  async getWebhookEventByStripeId(stripeEventId: string): Promise<WebhookEvent | null> {
+    try {
+      const query = `
+        SELECT 
+          id, stripe_event_id, event_type, processed, created_at
+        FROM webhook_events 
+        WHERE stripe_event_id = $1
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [stripeEventId]);
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('Error getting webhook event by Stripe ID:', error);
       throw error;
     }
   }
