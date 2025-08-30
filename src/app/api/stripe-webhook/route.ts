@@ -259,6 +259,13 @@ async function processSuccessfulPayment(data: PaymentProcessingData) {
       console.log('✅ [WEBHOOK] Payment processing completed successfully:', data.paymentReference);
     } else {
       // Handle transfer failure
+      console.error('❌ [WEBHOOK] Token transfer failed:', {
+        paymentReference: data.paymentReference,
+        error: transferResult.error,
+        success: transferResult.success,
+        txId: transferResult.txId
+      });
+      
       await paymentDB.updateTokenTransferStatus(
         paymentTransaction.id,
         'failed',
