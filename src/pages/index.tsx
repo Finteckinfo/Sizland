@@ -10,19 +10,19 @@ import Roadmap from "@/components/roadmap";
 const HomePage: NextPage = () => {
   return (
     <>
-      <PageLayout title="Homepage" description="Welcome to Sizland">
+      <PageLayout title="Homepage" description="Welcome to Sizland" requireAuth={false}>
         <section id="hero">
           <Hero /> {/* Use the Hero component */}
         </section>
       </PageLayout>
       <Features />
-      <PageLayout title="#about" description="About sizland">
+      <PageLayout title="#about" description="About sizland" requireAuth={false}>
         <section id="about">
           <About />
         </section>
       </PageLayout>
       <InfoHub />
-      <PageLayout title="#roadmap" description="roadmap to sizland">
+      <PageLayout title="#roadmap" description="roadmap to sizland" requireAuth={false}>
         <section id="roadmap">
           <Roadmap />
         </section>

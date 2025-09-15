@@ -15,7 +15,7 @@ const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
   const { theme } = useTheme();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/signup', '/sso-callback', '/404', '/terms', '/privacy'];
+  const publicRoutes = ['/', '/login', '/signup', '/sso-callback', '/404', '/terms', '/privacy'];
   const isPublicRoute = publicRoutes.includes(router.pathname);
 
   useEffect(() => {
