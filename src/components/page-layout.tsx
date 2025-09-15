@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { HeadComponent } from "./head-component";
+import AuthWrapper from "./auth-wrapper";
 import React from "react";
 
 interface LayoutProps {
@@ -14,6 +15,7 @@ interface PageLayoutProps extends LayoutProps {
   children: ReactNode;
   title?: string;
   description?: string;
+  requireAuth?: boolean;
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -25,8 +27,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   align = "center",
   gap = 8,
   background, // Destructure background from props
+  requireAuth = true, // Default to requiring authentication
 }) => {
-  return (
+  const content = (
     <>
       <HeadComponent title={title} description={description} />
       <MainContainer
@@ -40,6 +43,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       </MainContainer>
     </>
   );
+
+  // Wrap with AuthWrapper if authentication is required
+  if (requireAuth) {
+    return <AuthWrapper>{content}</AuthWrapper>;
+  }
+
+  return content;
 };
 
 const MainContainer: React.FC<LayoutProps & { children: React.ReactNode; background?: string }> = ({

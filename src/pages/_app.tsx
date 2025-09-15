@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { Providers } from '@/providers/index'
 import { SessionProvider } from "next-auth/react";
+import { ClerkProvider, ClerkLoaded } from "@clerk/nextjs";
 
 import { config } from "../wagmi";
 
@@ -37,24 +38,50 @@ export const monsterrat = Montserrat({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <WagmiProvider config={config}>
-      <SessionProvider session={pageProps.session}>
-        <QueryClientProvider client={client}>
-          <Providers>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </ThemeProvider>
-            </Providers>
-        </QueryClientProvider>
-      </SessionProvider>
-    </WagmiProvider>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      appearance={{
+        baseTheme: undefined,
+        variables: {
+          colorPrimary: "#6366f1", // indigo-500
+          colorBackground: "#ffffff",
+          colorInputBackground: "#ffffff",
+          colorInputText: "#000000",
+        },
+        elements: {
+          formButtonPrimary: "bg-indigo-600 hover:bg-indigo-700 text-white",
+          card: "bg-white dark:bg-gray-800 shadow-lg",
+          headerTitle: "text-gray-900 dark:text-white",
+          headerSubtitle: "text-gray-600 dark:text-gray-400",
+          socialButtonsBlockButton: "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600",
+          socialButtonsBlockButtonText: "text-gray-700 dark:text-gray-300",
+          formFieldInput: "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white",
+          formFieldLabel: "text-gray-700 dark:text-gray-300",
+          identityPreviewText: "text-gray-600 dark:text-gray-400",
+          formResendCodeLink: "text-indigo-600 dark:text-indigo-400",
+          footerActionLink: "text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300",
+        },
+      }}
+    >
+      <WagmiProvider config={config}>
+        <SessionProvider session={pageProps.session}>
+          <QueryClientProvider client={client}>
+            <Providers>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </ThemeProvider>
+              </Providers>
+          </QueryClientProvider>
+        </SessionProvider>
+      </WagmiProvider>
+    </ClerkProvider>
   );
 }
 

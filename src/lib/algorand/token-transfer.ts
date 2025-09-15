@@ -917,6 +917,7 @@ export class SizTokenTransferService {
       console.log(`   Asset ID: ${this.assetId}`);
       console.log(`   Payment ID: ${params.paymentId}`);
       console.log(`   Wallet Address Length: ${params.receiverAddress.length} (should be 58)`);
+      console.log(`   💡 SIZ tokens have 2 decimal places: 1 token = 100 base units`);
       
       // Initialize AlgoKit client using recommended mainnet factory
       const algorand = algokit.AlgorandClient.mainNet();
@@ -986,12 +987,17 @@ export class SizTokenTransferService {
               console.log(`   Address Length: ${params.receiverAddress.length} (should be 58)`);
               console.log(`   Is Correct Length: ${params.receiverAddress.length === 58}`);
               
+              // CRITICAL FIX: SIZ tokens have 2 decimal places, so multiply by 100
+              // If user buys 2 tokens, we need to send 200 base units
+              const baseUnitAmount = params.amount * 100;
+              console.log(`   🔢 Converting token amount: ${params.amount} SIZ → ${baseUnitAmount} base units`);
+              
               const arc59Result = await sendSizViaArc59({
                 algorand: algorand as any, // Type assertion for compatibility
                 sender: centralAccount.addr.toString(),
                 receiver: params.receiverAddress,
                 assetId: BigInt(this.assetId),
-                amount: BigInt(params.amount),
+                amount: BigInt(baseUnitAmount),
               });
 
               if (!arc59Result.success) {

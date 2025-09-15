@@ -9,6 +9,7 @@ import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
 import { loadWallet } from "@/lib/algorand/walletGenerator";
 import PillNav from "../ui/PillNav";
+import { UserButton, SignInButton, useAuth } from "@clerk/nextjs";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -82,6 +83,7 @@ const productLinks: DropdownLinks[] = [
 export const Navbar: React.FC = () => {
   const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -174,7 +176,30 @@ export const Navbar: React.FC = () => {
         {/* Right Section - Actions */}
         <div className="flex-shrink-0 flex items-center gap-3">
           <ThemeToggler />
-          <ConnectWalletButton />
+          {isLoaded && (
+            <>
+              {isSignedIn ? (
+                <>
+                  <ConnectWalletButton />
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8",
+                        userButtonPopoverCard: "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                        userButtonPopoverActionButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
+                      }
+                    }}
+                  />
+                </>
+              ) : (
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -197,8 +222,32 @@ export const Navbar: React.FC = () => {
           </button>
         </Link>
 
-        {/* Mobile Menu */}
-        <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
+        {/* Mobile Actions */}
+        <div className="flex items-center gap-2">
+          <ThemeToggler />
+          {isLoaded && (
+            <>
+              {isSignedIn ? (
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                      userButtonPopoverCard: "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                      userButtonPopoverActionButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
+                    }
+                  }}
+                />
+              ) : (
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              )}
+            </>
+          )}
+          <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
+        </div>
       </div>
     </div>
   );
