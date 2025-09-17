@@ -7,12 +7,14 @@ import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
+import { useAuth } from '@clerk/nextjs'
  
 import { useRouter } from 'next/router'
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
   const router = useRouter()
+  const { userId } = useAuth()
 
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
@@ -21,6 +23,58 @@ export const ConnectWalletButton = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const postWalletToExternalDB = async (walletAddress: string) => {
+    console.log('🔍 [Wallet] Starting postWalletToExternalDB with:', {
+      walletAddress,
+      userId: userId ? `${userId.substring(0, 8)}...` : 'undefined'
+    })
+
+    if (!userId) {
+      console.log('⚠️ [Wallet] No userId available, skipping external DB post')
+      return
+    }
+
+    try {
+      const requestBody = {
+        userId,
+        walletAddress
+      }
+      
+      console.log('🔍 [Wallet] Making API call to /api/user/wallet with body:', {
+        userId: `${userId.substring(0, 8)}...`,
+        walletAddress
+      })
+
+      const response = await fetch('/api/user/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      })
+
+      console.log('🔍 [Wallet] API response status:', response.status)
+      console.log('🔍 [Wallet] API response headers:', Object.fromEntries(response.headers.entries()))
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.log('❌ [Wallet] API error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('✅ [Wallet] API success response:', data)
+      console.log('✅ [Wallet] Wallet address posted to external database successfully')
+    } catch (error) {
+      console.error('❌ [Wallet] Error posting wallet to external database:', {
+        message: error.message,
+        stack: error.stack,
+        userId: userId ? `${userId.substring(0, 8)}...` : 'undefined',
+        walletAddress
+      })
+    }
+  }
 
   const handleGenerateWallet = async () => {
     setIsGenerating(true)
@@ -43,6 +97,14 @@ export const ConnectWalletButton = () => {
           console.log('🔍 Debug - Found custom wallet, attempting to connect...')
           await customWallet.connect()
           console.log('🔍 Debug - Custom wallet connected successfully!')
+          
+          // Post wallet address to external database after successful connection
+          if (wallet.address) {
+            console.log('🔍 [Wallet] Generated wallet connected, posting address to external DB:', wallet.address)
+            await postWalletToExternalDB(wallet.address)
+          } else {
+            console.log('⚠️ [Wallet] Generated wallet connected but no address available')
+          }
         } else {
           console.error('🔍 Debug - Custom wallet not found in wallets list')
         }
@@ -75,6 +137,14 @@ export const ConnectWalletButton = () => {
     try {
       await wallet.connect()
       setIsOpen(false)
+      
+      // Post wallet address to external database after successful connection
+      if (activeAccount?.address) {
+        console.log('🔍 [Wallet] Wallet connected, posting address to external DB:', activeAccount.address)
+        await postWalletToExternalDB(activeAccount.address)
+      } else {
+        console.log('⚠️ [Wallet] Wallet connected but no active account address available')
+      }
     } catch (err: any) {
       console.error('Wallet connect error:', err)
 
