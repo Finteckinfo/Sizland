@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/router';
 import { useEffect, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -10,24 +10,24 @@ interface AuthWrapperProps {
 }
 
 const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, user } = useUser();
   const router = useRouter();
   const { theme } = useTheme();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/signup', '/sso-callback', '/404', '/terms', '/privacy'];
+  const publicRoutes = ['/', '/login', '/signup', '/sso-callback', '/404', '/terms', '/privacy', '/blog', '/whitepaper'];
   const isPublicRoute = publicRoutes.includes(router.pathname);
 
   useEffect(() => {
-    if (isLoaded && !isSignedIn && !isPublicRoute) {
-      // Silent redirect to signup if not authenticated
+    // Only redirect if we're loaded, not authenticated, and not on a public route
+    if (isLoaded && !user && !isPublicRoute) {
       router.replace('/signup');
     }
-  }, [isLoaded, isSignedIn, isPublicRoute, router]);
+  }, [isLoaded, user, isPublicRoute, router]);
 
   // Show loading spinner while checking authentication
   if (!isLoaded) {
-    return (
+    return fallback || (
       <div className="min-h-screen flex items-center justify-center">
         <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-8 border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex flex-col items-center space-y-4">
@@ -42,7 +42,7 @@ const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
   }
 
   // If not authenticated and not on a public route, render nothing while redirecting
-  if (isLoaded && !isSignedIn && !isPublicRoute) {
+  if (isLoaded && !user && !isPublicRoute) {
     return null;
   }
 

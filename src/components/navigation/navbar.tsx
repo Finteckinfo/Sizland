@@ -9,7 +9,8 @@ import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
 import { loadWallet } from "@/lib/algorand/walletGenerator";
 import PillNav from "../ui/PillNav";
-import { UserButton, SignInButton, useAuth } from "@clerk/nextjs";
+import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
+import { userButtonAppearance } from '@/lib/clerk-appearance';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -83,7 +84,7 @@ const productLinks: DropdownLinks[] = [
 export const Navbar: React.FC = () => {
   const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { isSignedIn, isLoaded } = useAuth();
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     setMounted(true);
@@ -178,17 +179,11 @@ export const Navbar: React.FC = () => {
           <ThemeToggler />
           {isLoaded && (
             <>
-              {isSignedIn ? (
+              {user ? (
                 <>
                   <ConnectWalletButton />
                   <UserButton 
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8",
-                        userButtonPopoverCard: "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-                        userButtonPopoverActionButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
-                      }
-                    }}
+                    appearance={userButtonAppearance}
                   />
                 </>
               ) : (
@@ -227,7 +222,7 @@ export const Navbar: React.FC = () => {
           <ThemeToggler />
           {isLoaded && (
             <>
-              {isSignedIn ? (
+              {user ? (
                 <UserButton 
                   appearance={{
                     elements: {

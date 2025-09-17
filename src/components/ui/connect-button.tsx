@@ -7,14 +7,14 @@ import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
-import { useAuth } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
  
 import { useRouter } from 'next/router'
 
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
   const router = useRouter()
-  const { userId } = useAuth()
+  const { user } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
@@ -27,22 +27,22 @@ export const ConnectWalletButton = () => {
   const postWalletToExternalDB = async (walletAddress: string) => {
     console.log('🔍 [Wallet] Starting postWalletToExternalDB with:', {
       walletAddress,
-      userId: userId ? `${userId.substring(0, 8)}...` : 'undefined'
+      userId: user?.id ? `${user.id.substring(0, 8)}...` : 'undefined'
     })
 
-    if (!userId) {
-      console.log('⚠️ [Wallet] No userId available, skipping external DB post')
+    if (!user?.id) {
+      console.log('⚠️ [Wallet] No user available, skipping external DB post')
       return
     }
 
     try {
       const requestBody = {
-        userId,
+        userId: user.id,
         walletAddress
       }
       
       console.log('🔍 [Wallet] Making API call to /api/user/wallet with body:', {
-        userId: `${userId.substring(0, 8)}...`,
+        userId: `${user.id.substring(0, 8)}...`,
         walletAddress
       })
 
@@ -70,7 +70,7 @@ export const ConnectWalletButton = () => {
       console.error('❌ [Wallet] Error posting wallet to external database:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        userId: userId ? `${userId.substring(0, 8)}...` : 'undefined',
+        userId: user?.id ? `${user.id.substring(0, 8)}...` : 'undefined',
         walletAddress
       })
     }
