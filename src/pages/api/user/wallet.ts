@@ -59,14 +59,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json(data)
   } catch (error) {
     console.error('❌ [API] Error posting wallet to external database:', {
-      message: error.message,
-      stack: error.stack,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
       userId: userId ? `${userId.substring(0, 8)}...` : 'undefined',
       walletAddress
     })
     return res.status(500).json({ 
       error: 'Failed to post wallet address',
-      details: error.message 
+      details: error instanceof Error ? error.message : String(error)
     })
   }
 }

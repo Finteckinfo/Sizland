@@ -68,8 +68,8 @@ export const ConnectWalletButton = () => {
       console.log('✅ [Wallet] Wallet address posted to external database successfully')
     } catch (error) {
       console.error('❌ [Wallet] Error posting wallet to external database:', {
-        message: error.message,
-        stack: error.stack,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         userId: userId ? `${userId.substring(0, 8)}...` : 'undefined',
         walletAddress
       })
