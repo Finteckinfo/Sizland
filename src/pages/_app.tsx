@@ -41,6 +41,12 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
       appearance={clerkAppearance}
+      signInUrl="/login"
+      signUpUrl="/signup"
+      afterSignInUrl="/"
+      afterSignUpUrl="/"
+      domain="https://sizerp-2-0.vercel.app"
+      isSatellite={false}
     >
       <WagmiProvider config={config}>
         <QueryClientProvider client={client}>
