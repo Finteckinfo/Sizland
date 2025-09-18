@@ -3,16 +3,12 @@ import Stripe from 'stripe';
 import { paymentDB } from '@/lib/database/payments';
 import { sizTokenTransferService } from '@/lib/algorand/token-transfer';
 import algosdk from 'algosdk';
+import { stripe } from '@/lib/stripe/server';
 
 // Force Node.js runtime (stripe-node uses Node crypto). Do NOT use edge.
 export const runtime = 'nodejs';
 // Ensure no caching and no static optimization
 export const dynamic = 'force-dynamic';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // Pin to your chosen API version (update if needed)
-  apiVersion: '2025-07-30.basil',
-});
 
 // Idempotency guard using existing payment database
 async function alreadyProcessed(eventId: string): Promise<boolean> {

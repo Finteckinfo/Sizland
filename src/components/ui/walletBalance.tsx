@@ -1,17 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { useWallet } from '@txnlab/use-wallet-react';
+import { useWallet, WalletId } from '@txnlab/use-wallet-react';
 import { Typography } from './typography';
 import { Button } from './button';
 import { ConnectWalletButton } from './connect-button';
-import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon, DownloadIcon, CheckCircleIcon } from 'lucide-react';
+import { WalletIcon, CoinsIcon, AlertCircleIcon, ChevronDownIcon, DownloadIcon, CheckCircleIcon, PlusIcon } from 'lucide-react';
 import algosdk from 'algosdk';
 import { SIZ_ASSET_IDS, ALGORAND_NETWORKS, type Network } from '@/lib/config';
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { claimSizFromInboxWithWallet } from '@/lib/algorand/arc59-send';
 import { Confetti } from './Confetti';
 import { ClaimSuccessMessage } from './ClaimSuccessMessage';
+import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator';
+import { useRouter } from 'next/router';
+import { useUser } from '@clerk/nextjs';
 
 interface Asset {
   assetId: number;
@@ -39,7 +42,9 @@ interface PendingPayment {
 }
 
 export const WalletBalance: React.FC = () => {
-  const { activeAccount, activeWallet, algodClient, transactionSigner } = useWallet();
+  const { activeAccount, activeWallet, algodClient, transactionSigner, wallets } = useWallet();
+  const router = useRouter();
+  const { user } = useUser();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +58,11 @@ export const WalletBalance: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [claimedAmount, setClaimedAmount] = useState<string>('');
   const [claimedTxId, setClaimedTxId] = useState<string>('');
+  
+  // Create wallet states
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
 
   // Get URL parameters for success state
   const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
@@ -490,6 +500,86 @@ export const WalletBalance: React.FC = () => {
     return (amount / 100).toFixed(2);
   };
 
+  // Post wallet to external database
+  const postWalletToExternalDB = async (walletAddress: string) => {
+    try {
+      const response = await fetch('/api/user/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress,
+          userId: user?.id,
+          userEmail: user?.emailAddresses?.[0]?.emailAddress,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to post wallet to external DB:', response.statusText);
+      } else {
+        console.log('✅ [Wallet] Successfully posted wallet address to external DB');
+      }
+    } catch (error) {
+      console.error('Error posting wallet to external DB:', error);
+    }
+  };
+
+  // Handle create wallet functionality
+  const handleCreateWallet = async () => {
+    setIsGenerating(true);
+    setCreateError(null);
+    setCreateSuccess(null);
+
+    try {
+      console.log('🚀 [Create Wallet] Starting wallet generation...');
+      
+      // Generate wallet
+      const wallet = generateAlgorandWallet();
+      console.log('✅ [Create Wallet] Wallet generated successfully:', wallet.address);
+      
+      // Store wallet locally
+      storeWallet(wallet);
+      console.log('✅ [Create Wallet] Wallet stored locally');
+
+      // Try to auto-connect the custom provider
+      try {
+        const customWallet = wallets.find(w => w.id === WalletId.CUSTOM);
+        if (customWallet) {
+          await customWallet.connect();
+          console.log('✅ [Create Wallet] Auto-connected to custom wallet');
+          
+          // Post wallet address to external database after successful connection
+          if (wallet.address) {
+            console.log('🔍 [Create Wallet] Generated wallet connected, posting address to external DB:', wallet.address);
+            await postWalletToExternalDB(wallet.address);
+          }
+        } else {
+          console.error('🔍 [Create Wallet] Custom wallet not found in wallets list');
+        }
+      } catch (connectError) {
+        console.error('🔍 [Create Wallet] Failed to auto-connect wallet:', connectError);
+        // Don't throw error here as wallet was still generated successfully
+      }
+
+      // Notify that a wallet has been generated
+      window.dispatchEvent(new CustomEvent('walletGenerated'));
+      
+      setCreateSuccess('Wallet created successfully!');
+      
+      // Redirect to the new wallet page
+      setTimeout(() => {
+        router.push('/new-wallet');
+      }, 1500);
+      
+    } catch (err) {
+      console.error('Wallet generation failed:', err);
+      setCreateError('Failed to generate wallet. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // Get only the most recent payment for cleaner UI
   const mostRecentPayment = pendingPayments.length > 0 ? pendingPayments[0] : null;
   
@@ -525,7 +615,41 @@ export const WalletBalance: React.FC = () => {
           <Typography variant="paragraph" className="text-gray-500 mb-4">
             Connect your wallet to view your balance
           </Typography>
-          <ConnectWalletButton />
+          <div className="flex flex-col items-center space-y-4">
+            <ConnectWalletButton />
+            
+            {/* Create Wallet Button */}
+            <div className="flex flex-col items-center">
+              <Typography variant="small" className="text-gray-400 mb-3">
+                Don't have a wallet?
+              </Typography>
+              <Button
+                onClick={handleCreateWallet}
+                disabled={isGenerating}
+                className="flex items-center gap-2 px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200"
+              >
+                <PlusIcon className="h-5 w-5" />
+                {isGenerating ? 'Creating...' : 'Create Wallet'}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Create wallet success/error messages */}
+          {createSuccess && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+              <Typography variant="paragraph" className="text-green-700 dark:text-green-300">
+                {createSuccess}
+              </Typography>
+            </div>
+          )}
+          
+          {createError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+              <Typography variant="paragraph" className="text-red-700 dark:text-red-300">
+                {createError}
+              </Typography>
+            </div>
+          )}
         </div>
       </div>
     );

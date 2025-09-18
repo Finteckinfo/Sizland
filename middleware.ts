@@ -19,6 +19,8 @@ export default authMiddleware({
   protectedRoutes: [
     "/wallet",
     "/new-wallet",
+    "/lobby",
+    "/dex",
     "/api/user/wallet"
   ],
   // Redirect to signup instead of signin for better UX

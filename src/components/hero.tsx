@@ -4,9 +4,25 @@ import React from "react";
 import { Button1 } from "@/components/ui/button1";
 import ModalVideo from "@/components/modalVideo";
 import SplitText from "./ui/splittext";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/router";
 import Magnet from "./ui/magnet";
 
 const Hero = () => {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+
+  const handleGetStartedClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isLoaded && user) {
+      // User is authenticated, redirect to lobby
+      router.push('/lobby');
+    } else {
+      // User is not authenticated, redirect to signup
+      router.push('/signup');
+    }
+  };
+
   return (
     <section id="hero" className="relative py-12 sm:py-16 lg:pt-5 xl:pb-0 transition-colors duration-300">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -49,11 +65,12 @@ const Hero = () => {
               <div className="mt-6 sm:mt-8">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Magnet padding={50} disabled={false} magnetStrength={50}>
-                    <a href="/signup">
-                      <Button1 className="px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 w-full sm:w-auto">
-                        Get Started
-                      </Button1>
-                    </a>
+                    <Button1 
+                      onClick={handleGetStartedClick}
+                      className="px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 w-full sm:w-auto cursor-pointer"
+                    >
+                      {isLoaded && user ? 'Go to Dashboard' : 'Get Started'}
+                    </Button1>
                   </Magnet>
                   
                   <Magnet padding={50} disabled={false} magnetStrength={50}>
