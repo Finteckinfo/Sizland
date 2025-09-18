@@ -44,7 +44,7 @@ const dappTiles = [
     href: "#",
     isExternal: false,
     isClickable: false,
-    variant: "gray" as const
+    variant: "default" as const
   }
 ];
 
