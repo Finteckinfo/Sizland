@@ -45,8 +45,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       signUpUrl="/signup"
       afterSignInUrl="/"
       afterSignUpUrl="/"
-      domain="https://sizerp-2-0.vercel.app"
+      domain="https://siz.land"
       isSatellite={false}
+      allowedRedirectOrigins={["https://siz.land", "https://sizerp-2-0.vercel.app"]}
     >
       <WagmiProvider config={config}>
         <QueryClientProvider client={client}>
