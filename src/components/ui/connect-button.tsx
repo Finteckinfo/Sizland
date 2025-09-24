@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { Toast } from './Toast'
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
 import { useUser } from '@clerk/nextjs'
+import { Copy, LogOut, ChevronDown } from 'lucide-react'
  
 import { useRouter } from 'next/router'
 
@@ -17,12 +18,15 @@ export const ConnectWalletButton = () => {
   const { user } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
+  const [isWalletDropdownOpen, setIsWalletDropdownOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const walletDropdownRef = useRef<HTMLDivElement>(null)
 
   const postWalletToExternalDB = async (walletAddress: string) => {
     console.log('🔍 [Wallet] Starting postWalletToExternalDB with:', {
@@ -167,6 +171,24 @@ export const ConnectWalletButton = () => {
     if (activeWallet) {
       await activeWallet.disconnect()
     }
+    setIsWalletDropdownOpen(false)
+  }
+
+  const handleCopyAddress = async () => {
+    if (activeAccount?.address) {
+      try {
+        await navigator.clipboard.writeText(activeAccount.address)
+        setCopied(true)
+        setToastMsg('Address copied to clipboard!')
+        setTimeout(() => setCopied(false), 2000)
+        setTimeout(() => setToastMsg(''), 3000)
+        setIsWalletDropdownOpen(false)
+      } catch (err) {
+        console.error('Failed to copy address:', err)
+        setToastMsg('Failed to copy address')
+        setTimeout(() => setToastMsg(''), 3000)
+      }
+    }
   }
 
   const shortenAddress = (address: string) =>
@@ -176,6 +198,9 @@ export const ConnectWalletButton = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
+      }
+      if (walletDropdownRef.current && !walletDropdownRef.current.contains(event.target as Node)) {
+        setIsWalletDropdownOpen(false)
       }
     }
 
@@ -353,45 +378,132 @@ export const ConnectWalletButton = () => {
             )}
           </>
         ) : (
-          <div className="wallet-button-group" style={{ display: 'flex', gap: '8px' }}>
+          <div className="wallet-dropdown-container" ref={walletDropdownRef} style={{ position: 'relative' }}>
             <Button
               variant="outline"
-              onClick={() =>
-                alert(`Connected to ${activeWallet?.metadata?.name || activeWallet?.id}`)
-              }
-            >
-              <div
-                style={{
-                  background: 'black',
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  marginRight: 8,
-                }}
-              >
-                <Image alt="Algorand icon" src="/algorand-logo.svg" width={12} height={12} />
-              </div>
-              {activeWallet?.metadata?.name || 'Algorand'}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleDisconnect}
+              onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
                 background: 'linear-gradient(135deg, #1d1d1d, #444)',
                 color: 'white',
                 borderRadius: 12,
                 fontWeight: 400,
+                border: '1px solid #374151',
+                minWidth: '200px',
+                justifyContent: 'space-between'
               }}
             >
-              {shortenAddress(activeAccount.address)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    background: 'black',
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Image alt="Algorand icon" src="/algorand-logo.svg" width={12} height={12} />
+                </div>
+                <span>{shortenAddress(activeAccount.address)}</span>
+              </div>
+              <ChevronDown 
+                size={16} 
+                style={{ 
+                  transform: isWalletDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s ease'
+                }} 
+              />
             </Button>
+
+            {isWalletDropdownOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  zIndex: 1000,
+                  marginTop: '0.5rem',
+                  background: 'white',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '0.5rem',
+                  minWidth: '200px',
+                  padding: '0.5rem',
+                  border: '1px solid #e5e7eb'
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <button
+                    onClick={handleCopyAddress}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'transparent',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <Copy size={16} />
+                    <span>{copied ? 'Copied!' : 'Copy Address'}</span>
+                  </button>
+                  
+                  <button
+                    onClick={handleDisconnect}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'transparent',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#dc2626'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fef2f2';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <LogOut size={16} />
+                    <span>Disconnect</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {toastMsg && <Toast message={toastMsg} />}
+      {toastMsg && (
+        <Toast 
+          message={toastMsg} 
+          type={toastMsg.includes('copied') ? 'success' : toastMsg.includes('Failed') ? 'error' : 'info'} 
+        />
+      )}
       
       {/* Create Wallet Modal */}
       {showCreate && (
