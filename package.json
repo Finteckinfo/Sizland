@@ -94,6 +94,7 @@
     "viem": "^2.21.0",
     "wagmi": "2.13.5"
   },
+  "overrides": {},
   "devDependencies": {
     "@types/node": "^20.14.8",
     "@types/react": "^18.3.5",
