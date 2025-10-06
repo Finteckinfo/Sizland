@@ -36,9 +36,28 @@ const DexPage = () => {
           </div>
         </div>
 
+        {/* AppKit Connect Button */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="flex justify-end">
+            <appkit-button />
+          </div>
+        </div>
+
         {/* Trading Interface */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
+            {/* AppKit Swap Widget */}
+            <div className="w-full">
+              <div className="bg-black/10 dark:bg-white/5 border border-white/20 rounded-xl p-4">
+                <appkit-swap-widget 
+                  data-chain="mainnet"
+                  data-from-token="ETH"
+                  data-to-token="USDC"
+                  data-slippage="0.5"
+                />
+              </div>
+            </div>
+
             {/* Chart - Full width on all screen sizes */}
             <div className="w-full">
               <CandleStickChart />

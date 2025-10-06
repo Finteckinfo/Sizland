@@ -15,12 +15,28 @@ const NewWalletPage = () => {
   const [wallet, setWallet] = useState<GeneratedWallet | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [showSensitive, setShowSensitive] = useState(false);
+  const [validationOpen, setValidationOpen] = useState(false);
+  const [wordInputs, setWordInputs] = useState<string[]>(['', '', '']);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
     const storedWallet = loadWallet();
     if (storedWallet) {
       setWallet(storedWallet);
+      try {
+        const firstKey = `wallet-first-shown-${storedWallet.address}`;
+        const alreadyShown = typeof window !== 'undefined' ? localStorage.getItem(firstKey) : 'true';
+        if (!alreadyShown) {
+          setShowSensitive(true);
+          localStorage.setItem(firstKey, 'true');
+        } else {
+          setShowSensitive(false);
+        }
+      } catch (_) {
+        setShowSensitive(false);
+      }
     } else {
       // Redirect to home if no wallet is found
       router.push('/');
@@ -85,6 +101,26 @@ Generated on: ${new Date().toLocaleString()}
       }
     } catch (error) {
       console.error('Manual connection failed:', error);
+    }
+  };
+
+  const handleValidateReveal = () => {
+    if (!wallet) return;
+    const target = wallet.mnemonic
+      .split(' ')
+      .map(w => w.trim().toLowerCase())
+      .filter(Boolean);
+    const entered = wordInputs
+      .map(w => w.trim().toLowerCase())
+      .filter(Boolean);
+    const uniqueEntered = Array.from(new Set(entered));
+    const matches = uniqueEntered.filter(w => target.includes(w)).length;
+    if (matches >= 3) {
+      setShowSensitive(true);
+      setValidationError(null);
+      setValidationOpen(false);
+    } else {
+      setValidationError('Please enter at least 3 correct words from your recovery phrase.');
     }
   };
 
@@ -180,6 +216,45 @@ Generated on: ${new Date().toLocaleString()}
 
         {/* Wallet Credentials */}
         <div className="space-y-6">
+          {/* Validation Modal (simple inline) */}
+          {validationOpen && (
+            <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
+              <div className="space-y-3">
+                <Typography variant="h4" className="text-blue-800 dark:text-blue-200">
+                  Verify Ownership
+                </Typography>
+                <Typography variant="paragraph" className="text-blue-700 dark:text-blue-300">
+                  Enter any 3 words from your 25-word recovery phrase to reveal credentials.
+                </Typography>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {wordInputs.map((w, idx) => (
+                    <input
+                      key={idx}
+                      value={w}
+                      onChange={(e) => {
+                        const next = [...wordInputs];
+                        next[idx] = e.target.value;
+                        setWordInputs(next);
+                      }}
+                      placeholder={`Word ${idx + 1}`}
+                      className="px-3 py-2 rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    />
+                  ))}
+                </div>
+                {validationError && (
+                  <div className="text-red-600 dark:text-red-400 text-sm">{validationError}</div>
+                )}
+                <div className="flex gap-3">
+                  <Button onClick={handleValidateReveal} className="flex items-center gap-2">
+                    Reveal
+                  </Button>
+                  <Button variant="outline" onClick={() => setValidationOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Address */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -237,10 +312,20 @@ Generated on: ${new Date().toLocaleString()}
                 )}
               </Button>
             </div>
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
-              <Typography variant="paragraph" className="font-mono text-xs break-all text-red-800 dark:text-red-200">
+            <div className={`p-4 rounded-lg border ${showSensitive ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' : 'bg-red-50/50 dark:bg-red-900/10 border-red-200/60 dark:border-red-800/40'}`}>
+              <Typography
+                variant="paragraph"
+                className={`font-mono text-xs break-all ${showSensitive ? 'text-red-800 dark:text-red-200' : 'blur-sm select-none text-red-800/70 dark:text-red-200/70'}`}
+              >
                 {wallet.privateKey}
               </Typography>
+              {!showSensitive && (
+                <div className="mt-3 flex gap-3">
+                  <Button size="sm" onClick={() => setValidationOpen(true)}>
+                    Reveal
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -269,10 +354,20 @@ Generated on: ${new Date().toLocaleString()}
                 )}
               </Button>
             </div>
-            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-              <Typography variant="paragraph" className="font-mono text-sm break-words text-orange-800 dark:text-orange-200 leading-relaxed">
+            <div className={`p-4 rounded-lg border ${showSensitive ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700' : 'bg-orange-50/50 dark:bg-orange-900/10 border-orange-200/60 dark:border-orange-800/40'}`}>
+              <Typography
+                variant="paragraph"
+                className={`font-mono text-sm break-words leading-relaxed ${showSensitive ? 'text-orange-800 dark:text-orange-200' : 'blur-sm select-none text-orange-800/70 dark:text-orange-200/70'}`}
+              >
                 {wallet.mnemonic}
               </Typography>
+              {!showSensitive && (
+                <div className="mt-3 flex gap-3">
+                  <Button size="sm" onClick={() => setValidationOpen(true)}>
+                    Reveal
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
