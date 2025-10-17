@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
 // Call the API route instead of importing server actions directly to avoid bundling server-only deps in the browser
-import { calculateTokenPrice, validateTokenAmount, formatCurrency } from '@/lib/stripe/config';
+import { calculateTokenPrice, validateTokenAmount, formatCurrency, convertUSDToCurrency, getCurrencySymbol, PAYSTACK_PRODUCT_CONFIG } from '@/lib/paystack/config';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -17,6 +17,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
   const { activeAccount } = useWallet();
   const [tokenAmount, setTokenAmount] = useState<number>(100);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
@@ -26,13 +27,19 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
     subtotal: number;
     processingFee: number;
     total: number;
+    totalInSelectedCurrency: number;
   } | null>(null);
 
-  // Calculate pricing when token amount changes
+  // Calculate pricing when token amount or currency changes
   useEffect(() => {
     try {
       const calculatedPricing = calculateTokenPrice(tokenAmount);
-      setPricing(calculatedPricing);
+      const totalInSelectedCurrency = convertUSDToCurrency(calculatedPricing.total, selectedCurrency);
+      
+      setPricing({
+        ...calculatedPricing,
+        totalInSelectedCurrency,
+      });
       setError('');
     } catch (err) {
       if (err instanceof Error) {
@@ -40,7 +47,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
       }
       setPricing(null);
     }
-  }, [tokenAmount]);
+  }, [tokenAmount, selectedCurrency]);
 
   // Handle input change with validation
   const handleTokenAmountChange = (value: string) => {
@@ -54,8 +61,8 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
 
 
 
-  // Handle Stripe checkout
-  const handleStripeCheckout = async () => {
+  // Handle Paystack payment
+  const handlePaystackPayment = async () => {
     if (!activeAccount?.address) {
       setError('Please connect your wallet first');
       return;
@@ -80,7 +87,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
     setSuccess('');
 
     try {
-      const res = await fetch('/api/stripe/create-checkout-session', {
+      const res = await fetch('/api/paystack/create-transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,30 +96,18 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
           userWalletAddress: activeAccount.address,
           successUrl: `${window.location.origin}/wallet?success=true&tokens=${tokenAmount}`,
           cancelUrl: `${window.location.origin}/wallet?canceled=true`,
+          currency: selectedCurrency,
         }),
       });
       const result = await res.json();
 
-      if (result.success && result.sessionId) {
-        setSuccess('Redirecting to secure checkout...');
+      if (result.success && result.authorizationUrl) {
+        setSuccess('Redirecting to secure payment...');
         
-        // Redirect to Stripe Checkout
-        const stripe = await import('@stripe/stripe-js');
-        const stripeInstance = await stripe.loadStripe(
-          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-        );
-        
-        if (stripeInstance) {
-          const { error: stripeError } = await stripeInstance.redirectToCheckout({
-            sessionId: result.sessionId,
-          });
-          
-          if (stripeError) {
-            setError(`Checkout error: ${stripeError.message}`);
-          }
-        }
+        // Redirect to Paystack payment page
+        window.location.href = result.authorizationUrl;
       } else {
-        setError(result.error || 'Failed to create checkout session');
+        setError(result.error || 'Failed to create payment transaction');
       }
     } catch (err) {
       console.error('Checkout error:', err);
@@ -131,7 +126,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">Buy SIZ Tokens</h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Secure payment powered by Stripe
+          Secure payment powered by Paystack
         </p>
       </div>
 
@@ -170,6 +165,28 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Currency Selection */}
+      <div>
+        <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Payment Currency
+        </label>
+        <select
+          id="currency"
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        >
+          {PAYSTACK_PRODUCT_CONFIG.SUPPORTED_CURRENCIES.map((currency) => (
+            <option key={currency} value={currency}>
+              {currency} - {getCurrencySymbol(currency)}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Select your preferred payment currency
+        </p>
       </div>
 
       {/* Email Input */}
@@ -217,10 +234,13 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
             
             <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
               <div className="flex justify-between font-semibold">
-                <span className="text-gray-900 dark:text-gray-100">Total</span>
+                <span className="text-gray-900 dark:text-gray-100">Total ({selectedCurrency})</span>
                 <span className="text-green-600 dark:text-green-400">
-                  {formatCurrency(pricing.total)}
+                  {getCurrencySymbol(selectedCurrency)}{pricing.totalInSelectedCurrency.toLocaleString()}
                 </span>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1">
+                ≈ {formatCurrency(pricing.total)} USD
               </div>
             </div>
           </div>
@@ -245,7 +265,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
       {/* Purchase Button */}
       <div className="space-y-3">
         <Button
-          onClick={handleStripeCheckout}
+          onClick={handlePaystackPayment}
           disabled={isLoading || !activeAccount?.address || !userEmail.trim() || !pricing}
           className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
@@ -272,7 +292,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
       {/* Security Features */}
       <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
         <Shield className="h-4 w-4" />
-        <span>Secure payment powered by Stripe</span>
+        <span>Secure payment powered by Paystack</span>
       </div>
     </div>
   );
