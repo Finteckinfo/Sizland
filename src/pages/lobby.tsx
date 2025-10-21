@@ -14,7 +14,7 @@ const dappTiles = [
     title: "ERP",
     description: "At the heart of Sizland lies the ERP solution created for today's decentralized world",
     icon: "Workflow",
-    href: "https://sizerp-2-0.vercel.app",
+    href: "https://erp.siz.land",
     isExternal: true,
     isClickable: true,
     variant: "blue" as const
