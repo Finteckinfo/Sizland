@@ -91,7 +91,7 @@ But that's not all, our platform also provides access to various investment oppo
             let href = "#";
             let isExternal = false;
             if (isERP) {
-              href = "https://sizerp-2-0.vercel.app";
+              href = "https://erp.siz.land";
               isExternal = true;
             } else if (isFundManager) {
               href = "https://sandbox.sizland.tech/";
