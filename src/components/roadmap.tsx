@@ -25,29 +25,29 @@ const SizLogoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const roadmap = [
   {
-    title: 'Phase 1: Laying the Groundwork',
-    date: 'Months 1–6',
+    title: 'Phase 1: Foundation & Core Infrastructure',
+    date: 'Q1-Q2 2024',
     description:
-      'We\'re setting up smart contracts, building the ERP system, and getting everything secure. This includes testing our tools, setting up legal frameworks, and building our early community.',
-    badge: 'Live',
+      'Building the foundational infrastructure with Algorand smart contracts, ARC-0059 integration, and core ERP system. Establishing security protocols, legal frameworks, and initial community development. Launch of unified wallet system and basic trading functionality.',
+    badge: 'Completed',
   },
   {
-    title: 'Phase 2: Growing the Platform ',
-    date: 'Months 7–18',
+    title: 'Phase 2: Platform Expansion & DeFi Integration',
+    date: 'Q3-Q4 2024',
     description:
-      'We take things to the next level. We\'ll integrate AI features, integrate DeFi tools, and make the platform mobile-friendly. Private and public token sales will also help fund the next stage and grow our community.',
+      'Expanding platform capabilities with advanced DeFi tools, AI-powered features, and mobile optimization. Integration of multi-chain support (Sui, Base, BNB Smart Chain). Private token sales and community growth initiatives. Enhanced trading features and liquidity pools.',
   },
   {
-    title: 'Phase 3: Going Live',
-    date: 'Months 19–36',
+    title: 'Phase 3: Ecosystem Launch & Advanced Features',
+    date: 'Q1-Q2 2025',
     description:
-      'Everything comes together. We launch the token, offer more tools like savings and investment features, and start using NFTs and DAOs to give the community more say.',
+      'Full ecosystem launch with public token distribution, advanced investment tools, and comprehensive business management suite. Introduction of NFT marketplace, DAO governance, and cross-chain interoperability. Launch of educational platform and community-driven features.',
   },
   {
-    title: 'Phase 4: Long-Term Growth',
-    date: '36+ Months',
+    title: 'Phase 4: Global Expansion & Decentralization',
+    date: 'Q3 2025+',
     description:
-      'After launch, we focus on building with the community. Sizland becomes fully decentralized, and users help shape the future. More products, more countries, and more freedom for users.',
+      'Global expansion with multi-language support, regional partnerships, and advanced financial products. Full decentralization with community governance, advanced AI integration, and expansion into emerging markets. Development of enterprise solutions and institutional partnerships.',
   },
 ];
 

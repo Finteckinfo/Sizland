@@ -6,6 +6,7 @@ import Features from "@/components/features";
 import About from "@/components/about";
 import InfoHub from "@/components/infoHub";
 import Roadmap from "@/components/roadmap";
+import Tokenomics from "@/components/tokenomics";
 
 const HomePage: NextPage = () => {
   return (
@@ -15,6 +16,7 @@ const HomePage: NextPage = () => {
           <Hero /> {/* Use the Hero component */}
         </section>
       </PageLayout>
+      <Tokenomics />
       <Features />
       <PageLayout title="#about" description="About sizland" requireAuth={false}>
         <section id="about">
