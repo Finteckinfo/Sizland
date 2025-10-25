@@ -5,17 +5,17 @@ import React, { useState } from 'react';
 // Token allocation data based on SIZ Token Deployment Report
 const tokenAllocationData = [
   { name: 'Community', value: 34.3, amount: '34.3M', color: '#10B981' },
-  { name: 'Contwhizz', value: 30, amount: '30M', color: '#059669' },
+  { name: 'Management', value: 30, amount: '30M', color: '#059669' },
   { name: 'Sizland Company Reserve', value: 14, amount: '14M', color: '#047857' },
-  { name: 'Management', value: 14.7, amount: '14.7M', color: '#065F46' },
+  { name: 'Team', value: 14.7, amount: '14.7M', color: '#065F46' },
   { name: 'Founders (Seed Round)', value: 7, amount: '7M', color: '#064E3B' },
 ];
 
 const barChartData = [
   { name: 'Community', amount: 34300000, percentage: 34.3 },
-  { name: 'Contwhizz', amount: 30000000, percentage: 30 },
+  { name: 'Management', amount: 30000000, percentage: 30 },
   { name: 'Company Reserve', amount: 14000000, percentage: 14 },
-  { name: 'Management', amount: 14700000, percentage: 14.7 },
+  { name: 'Team', amount: 14700000, percentage: 14.7 },
   { name: 'Founders', amount: 7000000, percentage: 7 },
 ];
 
