@@ -81,25 +81,25 @@ const BlogPage: NextPage = () => {
         </div>
 
         {/* Twitter Feed Section */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50">
-            <div className="mb-8 text-center">
-              <Typography variant="h2" className="text-xl sm:text-2xl font-bold text-white mb-3">
+        <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-gray-700/50">
+            <div className="mb-6 sm:mb-8 text-center px-2 sm:px-0">
+              <Typography variant="h2" className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">
                 Live Updates from Sizland
               </Typography>
-              <Typography variant="paragraph" className="text-sm sm:text-base text-gray-400 max-w-3xl mx-auto">
+              <Typography variant="paragraph" className="text-xs sm:text-sm lg:text-base text-gray-400 max-w-xs sm:max-w-2xl lg:max-w-3xl mx-auto px-2 sm:px-0">
                 Follow our journey as we build the boring rails remote teams need. 
                 We ship in public, daily updates on our progress.
               </Typography>
             </div>
             
             {/* Featured Tweets */}
-            <div className="flex flex-col items-center space-y-6 mb-8">
-              <div className="w-full max-w-4xl">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="flex flex-col items-center space-y-4 sm:space-y-6 mb-8">
+              <div className="w-full max-w-sm sm:max-w-md lg:max-w-4xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* First Tweet */}
                   <div className="flex justify-center">
-                    <div className="w-full max-w-md">
+                    <div className="w-full max-w-sm sm:max-w-md">
                       <TweetEmbed 
                         tweetId="1958067960506900738"
                         username="sizlandofficial"
@@ -110,7 +110,7 @@ const BlogPage: NextPage = () => {
                   
                   {/* Second Tweet */}
                   <div className="flex justify-center">
-                    <div className="w-full max-w-md">
+                    <div className="w-full max-w-sm sm:max-w-md">
                       <TweetEmbed 
                         tweetId="1980965670717190421"
                         username="sizlandofficial"
@@ -125,7 +125,7 @@ const BlogPage: NextPage = () => {
 
             {/* Timeline */}
             <div className="flex justify-center mb-8">
-              <div className="w-full max-w-4xl">
+              <div className="w-full max-w-sm sm:max-w-md lg:max-w-4xl">
                 <TwitterEmbed 
                   username="sizlandofficial"
                   showTimeline={true}
