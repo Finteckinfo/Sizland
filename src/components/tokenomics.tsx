@@ -203,10 +203,10 @@ const Tokenomics = () => {
           </div>
 
           {/* Token Selection */}
-          <div className="flex justify-center gap-2 mb-12">
+          <div className="flex justify-center gap-2 mb-8 sm:mb-12 px-4">
             <button
               onClick={() => setActiveToken('SIZ')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-sm sm:text-base ${
                 activeToken === 'SIZ'
                   ? 'bg-green-500/80 backdrop-blur-sm text-white shadow-lg'
                   : 'bg-gray-700/50 backdrop-blur-sm text-gray-300 hover:bg-gray-600/70'
