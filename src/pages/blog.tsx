@@ -82,46 +82,56 @@ const BlogPage: NextPage = () => {
 
         {/* Twitter Feed Section */}
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-            <div className="mb-6 text-center">
-              <Typography variant="h2" className="text-2xl font-bold text-white mb-2">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50">
+            <div className="mb-8 text-center">
+              <Typography variant="h2" className="text-xl sm:text-2xl font-bold text-white mb-3">
                 Live Updates from Sizland
               </Typography>
-              <Typography variant="paragraph" className="text-gray-400">
+              <Typography variant="paragraph" className="text-sm sm:text-base text-gray-400 max-w-3xl mx-auto">
                 Follow our journey as we build the boring rails remote teams need. 
                 We ship in public, daily updates on our progress.
               </Typography>
             </div>
             
             {/* Featured Tweets */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* First Tweet */}
-              <div>
-                <TweetEmbed 
-                  tweetId="1958067960506900738"
-                  username="sizlandofficial"
-                  title="Building Remote Rails"
-                />
-              </div>
-              
-              {/* Second Tweet */}
-              <div>
-                <TweetEmbed 
-                  tweetId="1980965670717190421"
-                  username="sizlandofficial"
-                  title="Latest Update"
-                />
+            <div className="flex flex-col items-center space-y-6 mb-8">
+              <div className="w-full max-w-4xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* First Tweet */}
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-md">
+                      <TweetEmbed 
+                        tweetId="1958067960506900738"
+                        username="sizlandofficial"
+                        title="Building Remote Rails"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Second Tweet */}
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-md">
+                      <TweetEmbed 
+                        tweetId="1980965670717190421"
+                        username="sizlandofficial"
+                        title="Latest Update"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
 
             {/* Timeline */}
-            <div className="mb-8">
-              <TwitterEmbed 
-                username="sizlandofficial"
-                showTimeline={true}
-                maxTweets={5}
-              />
+            <div className="flex justify-center mb-8">
+              <div className="w-full max-w-4xl">
+                <TwitterEmbed 
+                  username="sizlandofficial"
+                  showTimeline={true}
+                  maxTweets={5}
+                />
+              </div>
             </div>
           </div>
         </div>
