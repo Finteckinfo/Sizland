@@ -4,6 +4,7 @@ import { OrderCard } from '@/components/ui/orderCard';
 import { TradeCard } from '@/components/ui/tradeCard';
 import { CandleStickChart } from '@/components/ui/candleStickChart';
 import { WalletBalance } from '@/components/ui/walletBalance';
+import Tokenomics from '@/components/tokenomics';
 
 import { PageLayout } from '@/components/page-layout';
 import { useWallet } from '@txnlab/use-wallet-react';
@@ -76,6 +77,11 @@ const WalletPage = () => {
           <div className="w-full lg:w-1/4">
             <OrderCard type="sell" data={dummyOrders} />
           </div>
+        </div>
+        
+        {/* Tokenomics Section */}
+        <div className="w-full">
+          <Tokenomics />
         </div>
         
         {/* Chart - Full width on all screen sizes */}

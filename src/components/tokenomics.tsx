@@ -21,9 +21,9 @@ const barChartData = [
 
 // SVG Pie Chart Component
 const PieChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: any) => {
-  const radius = 80;
-  const centerX = 120;
-  const centerY = 120;
+  const radius = 60; // Reduced for mobile
+  const centerX = 100; // Adjusted for mobile
+  const centerY = 100; // Adjusted for mobile
   let cumulativePercentage = 0;
 
   const createArcPath = (startAngle: number, endAngle: number) => {
@@ -42,7 +42,7 @@ const PieChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: an
   };
 
   return (
-    <svg width="240" height="240" className="mx-auto">
+    <svg width="200" height="200" className="mx-auto max-w-full h-auto" viewBox="0 0 200 200">
       {data.map((item: any, index: number) => {
         const startAngle = cumulativePercentage * 3.6;
         const endAngle = (cumulativePercentage + item.value) * 3.6;
@@ -79,13 +79,13 @@ const PieChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: an
 // Bar Chart Component
 const BarChartSVG = ({ data, hoveredSegment, setHoveredSegment }: any) => {
   const maxValue = Math.max(...data.map((item: any) => item.amount));
-  const barWidth = 40;
-  const chartHeight = 200;
-  const chartWidth = 400;
-  const padding = 20;
+  const barWidth = 30; // Reduced for mobile
+  const chartHeight = 180; // Reduced for mobile
+  const chartWidth = 350; // Reduced for mobile
+  const padding = 15; // Reduced for mobile
 
   return (
-    <svg width={chartWidth} height={chartHeight + 20} className="mx-auto">
+    <svg width={chartWidth} height={chartHeight + 20} className="mx-auto max-w-full h-auto" viewBox={`0 0 ${chartWidth} ${chartHeight + 20}`}>
       {/* Grid lines */}
       {[0, 25, 50, 75, 100].map((percentage) => (
         <g key={percentage}>
@@ -112,7 +112,7 @@ const BarChartSVG = ({ data, hoveredSegment, setHoveredSegment }: any) => {
       {/* Bars */}
       {data.map((item: any, index: number) => {
         const barHeight = (item.percentage / 100) * chartHeight;
-        const x = padding + index * (barWidth + 20);
+        const x = padding + index * (barWidth + 15); // Reduced spacing for mobile
         const y = chartHeight - barHeight;
         
         return (
@@ -176,27 +176,29 @@ const Tokenomics = () => {
       <section className="py-20 bg-transparent">
         <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <div className="text-center mb-12 sm:mb-16 px-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             Tokenomics
           </h2>
-          <p className="text-xl text-gray-300 mb-8">
+          <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
             Manage SIZ token allocations and distribution
           </p>
           
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 mb-8">
-            <button className="px-6 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-600/70 text-white rounded-lg transition-colors duration-200 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 px-4">
+            <button className="px-4 sm:px-6 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-600/70 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Refresh Data
+              <span className="hidden sm:inline">Refresh Data</span>
+              <span className="sm:hidden">Refresh</span>
             </button>
-            <button className="px-6 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-600/70 text-white rounded-lg transition-colors duration-200 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="px-4 sm:px-6 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-600/70 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Export Report
+              <span className="hidden sm:inline">Export Report</span>
+              <span className="sm:hidden">Export</span>
             </button>
           </div>
 
@@ -216,37 +218,37 @@ const Tokenomics = () => {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200">
-            <h3 className="text-gray-400 text-sm font-medium mb-2 text-center md:text-left">Total Supply</h3>
-            <p className="text-3xl font-bold text-white text-center md:text-left">100M</p>
-            <p className="text-gray-500 text-sm text-center md:text-left">SIZ tokens</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-16 px-4">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200 text-center">
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Total Supply</h3>
+            <p className="text-2xl sm:text-3xl font-bold text-white">100M</p>
+            <p className="text-gray-500 text-sm">SIZ tokens</p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200">
-            <h3 className="text-gray-400 text-sm font-medium mb-2 text-center md:text-left">Allocated</h3>
-            <p className="text-3xl font-bold text-white text-center md:text-left">0M</p>
-            <p className="text-gray-500 text-sm text-center md:text-left">0% of total</p>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200 text-center">
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Allocated</h3>
+            <p className="text-2xl sm:text-3xl font-bold text-white">0M</p>
+            <p className="text-gray-500 text-sm">0% of total</p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200">
-            <h3 className="text-gray-400 text-sm font-medium mb-2 text-center md:text-left">Remaining</h3>
-            <p className="text-3xl font-bold text-blue-400 text-center md:text-left">100M</p>
-            <p className="text-gray-500 text-sm text-center md:text-left">Available for allocation</p>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200 text-center">
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Remaining</h3>
+            <p className="text-2xl sm:text-3xl font-bold text-blue-400">100M</p>
+            <p className="text-gray-500 text-sm">Available for allocation</p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200">
-            <h3 className="text-gray-400 text-sm font-medium mb-2 text-center md:text-left">Categories</h3>
-            <p className="text-3xl font-bold text-white text-center md:text-left">5</p>
-            <p className="text-gray-500 text-sm text-center md:text-left">Allocation categories</p>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-gray-600/70 transition-colors duration-200 text-center">
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Categories</h3>
+            <p className="text-2xl sm:text-3xl font-bold text-white">5</p>
+            <p className="text-gray-500 text-sm">Allocation categories</p>
           </div>
         </div>
 
         {/* Charts Section */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4">
           {/* Pie Chart */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
-            <h3 className="text-xl font-bold text-white mb-2 text-center md:text-left">Allocation Distribution</h3>
-            <p className="text-gray-400 text-sm mb-6 text-center md:text-left">Percentage breakdown by category</p>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">Allocation Distribution</h3>
+            <p className="text-gray-400 text-sm mb-4 sm:mb-6 text-center">Percentage breakdown by category</p>
             
-            <div className="h-80 flex items-center justify-center">
+            <div className="h-64 sm:h-80 flex items-center justify-center">
               <PieChartSVG 
                 data={tokenAllocationData}
                 hoveredSegment={hoveredSegment}
@@ -256,11 +258,11 @@ const Tokenomics = () => {
             </div>
 
             {/* Legend */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 sm:mt-6">
               {tokenAllocationData.map((item, index) => (
                 <div
                   key={index}
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 justify-center md:justify-start ${
+                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 justify-center ${
                     hoveredSegment === item.name ? 'bg-gray-700/50 backdrop-blur-sm' : ''
                   }`}
                 >
@@ -275,11 +277,11 @@ const Tokenomics = () => {
           </div>
 
           {/* Bar Chart */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
-            <h3 className="text-xl font-bold text-white mb-2 text-center md:text-left">Allocation Amounts</h3>
-            <p className="text-gray-400 text-sm mb-6 text-center md:text-left">Token amounts by category</p>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">Allocation Amounts</h3>
+            <p className="text-gray-400 text-sm mb-4 sm:mb-6 text-center">Token amounts by category</p>
             
-            <div className="h-80 flex items-center justify-center">
+            <div className="h-64 sm:h-80 flex items-center justify-center overflow-x-auto">
               <BarChartSVG 
                 data={barChartData}
                 hoveredSegment={hoveredSegment}
@@ -288,11 +290,11 @@ const Tokenomics = () => {
             </div>
 
             {/* Legend */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 sm:mt-6">
               {barChartData.map((item, index) => (
                 <div
                   key={index}
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 cursor-pointer ${
+                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 cursor-pointer justify-center ${
                     hoveredSegment === item.name ? 'bg-gray-700/50 backdrop-blur-sm' : ''
                   }`}
                   onMouseEnter={() => setHoveredSegment(item.name)}
@@ -310,10 +312,10 @@ const Tokenomics = () => {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-16 text-center">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700/50 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-white mb-4">SIZ Token Utility</h3>
-            <div className="grid md:grid-cols-3 gap-6 text-center md:text-left">
+        <div className="mt-12 sm:mt-16 text-center px-4">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-gray-700/50 max-w-4xl mx-auto">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">SIZ Token Utility</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="space-y-2">
                 <h4 className="text-green-400 font-semibold">ERP Operations</h4>
                 <p className="text-gray-300 text-sm">
