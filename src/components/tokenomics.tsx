@@ -206,13 +206,43 @@ const Tokenomics = () => {
           <div className="flex justify-center gap-2 mb-8 sm:mb-12 px-4">
             <button
               onClick={() => setActiveToken('SIZ')}
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-sm sm:text-base ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
                 activeToken === 'SIZ'
                   ? 'bg-green-500/80 backdrop-blur-sm text-white shadow-lg'
                   : 'bg-gray-700/50 backdrop-blur-sm text-gray-300 hover:bg-gray-600/70'
               }`}
             >
-              SIZ (Stablecoin)
+              {/* Sizland Logo */}
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              >
+                <path 
+                  d="M12 2L2 7L12 12L22 7L12 2Z" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+                <path 
+                  d="M2 17L12 22L22 17" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+                <path 
+                  d="M2 12L12 17L22 12" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+              SIZ
             </button>
           </div>
         </div>
