@@ -193,16 +193,18 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
       {/* Tweet Embed */}
       {!isLoading && (
         <div className="space-y-4">
-          <div className="flex justify-center">
-            <blockquote 
-              className="twitter-tweet" 
-              data-media-max-width="560"
-              data-theme="dark"
-              data-chrome="noheader nofooter noborders"
-              data-dnt="true"
-            >
-              <a href={`https://twitter.com/${username}/status/${tweetId}`} title={`Tweet by @${username}`}></a>
-            </blockquote>
+          <div className="flex justify-center w-full">
+            <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
+              <blockquote 
+                className="twitter-tweet w-full" 
+                data-media-max-width="560"
+                data-theme="dark"
+                data-chrome="noheader nofooter noborders"
+                data-dnt="true"
+              >
+                <a href={`https://twitter.com/${username}/status/${tweetId}`} title={`Tweet by @${username}`}></a>
+              </blockquote>
+            </div>
           </div>
           
           {/* Fallback Link */}

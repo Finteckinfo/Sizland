@@ -196,16 +196,18 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({
             <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
             Featured Tweet
           </h4>
-          <div className="flex justify-center">
-            <blockquote 
-              className="twitter-tweet" 
-              data-media-max-width="560"
-              data-theme="dark"
-              data-chrome="noheader nofooter noborders"
-              data-dnt="true"
-            >
-              <a href={`https://twitter.com/${username}/status/${tweetId}`} title={`Tweet by @${username}`}></a>
-            </blockquote>
+          <div className="flex justify-center w-full">
+            <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
+              <blockquote 
+                className="twitter-tweet w-full" 
+                data-media-max-width="560"
+                data-theme="dark"
+                data-chrome="noheader nofooter noborders"
+                data-dnt="true"
+              >
+                <a href={`https://twitter.com/${username}/status/${tweetId}`} title={`Tweet by @${username}`}></a>
+              </blockquote>
+            </div>
           </div>
           
           {/* Fallback Link */}
@@ -237,19 +239,21 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({
             <Repeat2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
             Recent Tweets
           </h4>
-          <div className="flex justify-center">
-            <a
-              className="twitter-timeline"
-              data-theme="dark"
-              data-chrome="noheader nofooter noborders"
-              data-tweet-limit={maxTweets}
-              data-width="100%"
-              data-height="600"
-              href={`https://twitter.com/${username}?ref_src=twsrc%5Etfw`}
-              title={`Timeline by @${username}`}
-            >
-              Tweets by {username}
-            </a>
+          <div className="flex justify-center w-full">
+            <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
+              <a
+                className="twitter-timeline w-full"
+                data-theme="dark"
+                data-chrome="noheader nofooter noborders"
+                data-tweet-limit={maxTweets}
+                data-width="100%"
+                data-height="600"
+                href={`https://twitter.com/${username}?ref_src=twsrc%5Etfw`}
+                title={`Timeline by @${username}`}
+              >
+                Tweets by {username}
+              </a>
+            </div>
           </div>
         </div>
       )}
