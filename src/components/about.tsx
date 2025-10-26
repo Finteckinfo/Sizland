@@ -50,6 +50,15 @@ const About = () => {
       <div className="container mx-auto px-4">
         {/* Header Section */}
         <div className="text-center mb-12">
+          {/* SIZLAND Logo Image */}
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/siz_land_cover-removebg-preview.png" 
+              alt="SIZLAND Logo" 
+              className="w-full max-w-[280px] sm:max-w-[350px] md:max-w-[450px] lg:max-w-[500px] h-auto object-contain"
+            />
+          </div>
+          
           <span className="block mb-4 text-lg font-semibold text-dark dark:text-white">
             SIZ
           </span>
