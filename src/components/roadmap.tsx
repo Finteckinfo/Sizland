@@ -25,29 +25,29 @@ const SizLogoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const roadmap = [
   {
-    title: 'Phase 1: Foundation & Core Infrastructure',
-    date: 'Q1-Q2 2024',
+    title: 'Phase 1: Laying the Groundwork (Current Phase: Live)',
+    date: 'Months 1–12',
     description:
-      'Building the foundational infrastructure with Algorand smart contracts, ARC-0059 integration, and core ERP system. Establishing security protocols, legal frameworks, and initial community development. Launch of unified wallet system and basic trading functionality.',
-    badge: 'Completed',
+      'Tunaweka msingi salama wa ERP inayotumia blockchain kwa timu za mbali. Maendeleo yalianza Februari mwaka huu yakijengwa juu ya dhana na prototypes za 2023. Achievements (Months 1–7): Web ERP ya msingi iko live; mfumo wa automated workflows kwa token-based tasks unaofyatua malipo na kuhifadhi uthibitisho wa milestones on-chain; malipo ya papo hapo yamejengwa na kufanya kazi; msingi wa multichain (Algorand, Sui, Base, BNB Chain) uko tayari; kujenga jamii na mfumo wa kisheria unaendelea. Next (Months 7–12): Kuunganisha zana za kwanza za DeFi ndani ya ERP—staking, swapping, na P2P fiat/crypto services kwa kuboresha hali ya kifedha ya wafanyakazi wa mbali.',
+    badge: 'Live',
   },
   {
-    title: 'Phase 2: Platform Expansion & DeFi Integration',
-    date: 'Q3-Q4 2024',
+    title: 'Phase 2: Growing the Platform',
+    date: 'Months 12–18',
     description:
-      'Expanding platform capabilities with advanced DeFi tools, AI-powered features, and mobile optimization. Integration of multi-chain support (Sui, Base, BNB Smart Chain). Private token sales and community growth initiatives. Enhanced trading features and liquidity pools.',
+      'Kuzingatia matumizi bora na upatikanaji: uzoefu wa mobile-first, ujumuishaji wa AI kuboresha workflows na kutoa insights za hatari na rasilimali, na kukamilisha suite ya DeFi (staking, swapping, P2P) pamoja na uzinduzi wa token (private/public) kwa kufadhili ukuaji na kupanua jamii.',
   },
   {
-    title: 'Phase 3: Ecosystem Launch & Advanced Features',
-    date: 'Q1-Q2 2025',
+    title: 'Phase 3: Going Live & Scaling',
+    date: 'Months 19–36',
     description:
-      'Full ecosystem launch with public token distribution, advanced investment tools, and comprehensive business management suite. Introduction of NFT marketplace, DAO governance, and cross-chain interoperability. Launch of educational platform and community-driven features.',
+      'Kuleta kila kitu pamoja na kuweka kiwango cha tasnia: uzinduzi wa mfumo wa on-chain credit score unaotokana na historia ya kazi iliyoidhinishwa ndani ya ERP; huduma za mikopo zilizogatuliwa kulingana na credit score hiyo; kupeleka bidhaa sokoni kwa uzani kamili na kuwafikia watumiaji duniani; kuongeza vipengele vya enterprise vya ERP (reporting ya juu, HR, analytics za kina).',
   },
   {
-    title: 'Phase 4: Global Expansion & Decentralization',
-    date: 'Q3 2025+',
+    title: 'Phase 4: Decentralization & Ecosystem Growth',
+    date: 'Months 37+',
     description:
-      'Global expansion with multi-language support, regional partnerships, and advanced financial products. Full decentralization with community governance, advanced AI integration, and expansion into emerging markets. Development of enterprise solutions and institutional partnerships.',
+      'Uendeshaji wa jamii kupitia decentralized governance ambako wamiliki wa token hupiga kura juu ya maamuzi makubwa; kuanzisha mfuko wa incubation kusaidia wabunifu wa tatu kujenga juu ya miundombinu ya Sizland; kuimarisha interoperability kwenye mitandao mingi na web3; R&D ya muda mrefu ikijumuisha ZK proofs kwa faragha na scalability.',
   },
 ];
 
