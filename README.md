@@ -1,6 +1,6 @@
 # **Next.js + Rainbowkit + SIWE + shadcn Template**
 
-Live Demo: [https://next-web3-template-umber.vercel.app/](https://next-web3-template-umber.vercel.app/)
+Live Demo: [https://siz.land]
 
 A **Next.js** Web3 project template, powered by **TypeScript**, **RainbowKit**, **Wagmi**, **Shadcn**, and **TailwindCSS**. This template is designed to streamline the creation of Web3 applications with **SIWE (Sign-In With Ethereum)** authentication, a theme toggler, and modern design patterns.
 
