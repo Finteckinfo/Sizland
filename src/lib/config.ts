@@ -1,6 +1,10 @@
+// Allow ENV override for SIZ token IDs (client-safe NEXT_PUBLIC_*)
+const envMainnetAssetId = Number(process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID || 0);
+const envTestnetAssetId = Number(process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID_TESTNET || 0);
+
 export const SIZ_ASSET_IDS = {
-  testnet: 739030083,
-  mainnet: 3186560531,
+  testnet: envTestnetAssetId > 0 ? envTestnetAssetId : 739030083,
+  mainnet: envMainnetAssetId > 0 ? envMainnetAssetId : 3186560531,
 } as const;
 
 export const ALGORAND_NETWORKS = {

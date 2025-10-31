@@ -7,6 +7,13 @@ const nextConfig = {
       'utf-8-validate': 'commonjs utf-8-validate',
       'bufferutil': 'commonjs bufferutil',
     });
+    // Stub RN-only/optional deps required by some web SDKs
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@react-native-async-storage/async-storage': false,
+      'pino-pretty': false,
+    };
     return config;
   },
   // CRITICAL FIX: Ensure webhook routes work properly

@@ -108,16 +108,14 @@ export const WalletBalance: React.FC = () => {
     
     // Check environment variables on mount
     console.log('🔍 [ENV] Checking environment variables on component mount...');
-    console.log('   ARC59_APP_ID:', process.env.ARC59_APP_ID || 'NOT SET ❌');
-    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
-    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
-    console.log('   STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET ✅' : 'NOT SET ❌');
-    console.log('   DATABASE_URL:', process.env.DATABASE_URL ? 'SET ✅' : 'NOT SET ❌');
-    
-    if (!process.env.ARC59_APP_ID) {
+    console.log('   ARC59_APP_ID:', process.env.NEXT_PUBLIC_ARC59_APP_ID || 'NOT SET ❌');
+    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
+    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.NEXT_PUBLIC_CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
+
+    if (!process.env.NEXT_PUBLIC_ARC59_APP_ID) {
       console.error('❌ [ENV] Critical environment variable missing: ARC59_APP_ID');
       console.error('   This will prevent the claim functionality from working.');
-      console.error('   Please add ARC59_APP_ID=643020148 to your .env.local file for testnet.');
+      console.error('   Please add NEXT_PUBLIC_ARC59_APP_ID=643020148 to your .env.local file for testnet.');
     }
   }, []);
 
@@ -161,19 +159,19 @@ export const WalletBalance: React.FC = () => {
     
     // Validate required environment variables
     console.log('🔍 [CLAIM] Checking required environment variables...');
-    console.log('   ARC59_APP_ID:', process.env.ARC59_APP_ID || 'NOT SET ❌');
-    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
-    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
+    console.log('   ARC59_APP_ID:', process.env.NEXT_PUBLIC_ARC59_APP_ID || 'NOT SET ❌');
+    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
+    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.NEXT_PUBLIC_CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
     
-    if (!process.env.ARC59_APP_ID) {
-      const errorMsg = 'ARC59_APP_ID environment variable is not set. Please add it to your .env.local file.';
+    if (!process.env.NEXT_PUBLIC_ARC59_APP_ID) {
+      const errorMsg = 'NEXT_PUBLIC_ARC59_APP_ID environment variable is not set. Please add it to your .env.local file.';
       console.error('❌ [CLAIM] Environment variable missing:', errorMsg);
       setClaimError(errorMsg);
       return;
     }
     
-    if (!process.env.SIZ_TOKEN_ASSET_ID) {
-      const errorMsg = 'SIZ_TOKEN_ASSET_ID environment variable is not set. Please add it to your .env.local file.';
+    if (!process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID) {
+      const errorMsg = 'NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID environment variable is not set. Please add it to your .env.local file.';
       console.error('❌ [CLAIM] Environment variable missing:', errorMsg);
       setClaimError(errorMsg);
       return;
@@ -274,11 +272,11 @@ export const WalletBalance: React.FC = () => {
        console.log('   Selected network:', selectedNetwork);
        console.log('   Expected ARC59_APP_ID for mainnet:', '2449590623');
        console.log('   Expected SIZ_TOKEN_ASSET_ID for mainnet:', '3186560531');
-       console.log('   Current ARC59_APP_ID:', process.env.ARC59_APP_ID);
-       console.log('   Current SIZ_TOKEN_ASSET_ID:', process.env.SIZ_TOKEN_ASSET_ID);
+      console.log('   Current ARC59_APP_ID:', process.env.NEXT_PUBLIC_ARC59_APP_ID);
+      console.log('   Current SIZ_TOKEN_ASSET_ID:', process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID);
        
        if (selectedNetwork === 'mainnet') {
-         if (process.env.ARC59_APP_ID !== '2449590623') {
+        if (process.env.NEXT_PUBLIC_ARC59_APP_ID !== '2449590623') {
            console.error('❌ [CLAIM] Network mismatch: Mainnet selected but testnet ARC59_APP_ID configured');
            setClaimError('Network configuration mismatch. Please check your environment variables.');
            return;

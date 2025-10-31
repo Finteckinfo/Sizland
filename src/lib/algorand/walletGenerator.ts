@@ -11,12 +11,8 @@ export function generateAlgorandWallet(): GeneratedWallet {
   try {
     const account = algosdk.generateAccount();
     
-    // Debug logging to check data types
-    console.log('🔍 Debug - account object:', account);
-    console.log('🔍 Debug - account.addr type:', typeof account.addr, 'value:', account.addr);
-    console.log('🔍 Debug - account.sk type:', typeof account.sk, 'value:', account.sk);
-    console.log('🔍 Debug - account.sk instanceof Uint8Array:', account.sk instanceof Uint8Array);
-    console.log('🔍 Debug - account.sk length:', account.sk.length);
+    // Minimal debug; avoid logging secrets
+    console.log('🔍 Debug - Algorand account generated');
     
     const privateKeyBase64 = Buffer.from(account.sk).toString('base64');
     
@@ -25,38 +21,35 @@ export function generateAlgorandWallet(): GeneratedWallet {
     try {
       // First attempt: direct conversion
       mnemonic = algosdk.secretKeyToMnemonic(account.sk);
-      console.log('🔍 Debug - mnemonic generation successful (direct)');
+      // success
     } catch (mnemonicError) {
-      console.error('🔍 Debug - direct mnemonic generation failed:', mnemonicError);
+      console.error('🔍 Debug - direct mnemonic generation failed');
       
       try {
         // Second attempt: ensure it's a proper Uint8Array
         const secretKeyBytes = new Uint8Array(account.sk);
         mnemonic = algosdk.secretKeyToMnemonic(secretKeyBytes);
-        console.log('🔍 Debug - mnemonic generation successful (Uint8Array)');
+        // success
       } catch (fallbackError) {
-        console.error('🔍 Debug - Uint8Array mnemonic generation failed:', fallbackError);
+          console.error('🔍 Debug - Uint8Array mnemonic generation failed');
         
         try {
           // Third attempt: try with Buffer
           const secretKeyBuffer = Buffer.from(account.sk);
           mnemonic = algosdk.secretKeyToMnemonic(new Uint8Array(secretKeyBuffer));
-          console.log('🔍 Debug - mnemonic generation successful (Buffer)');
+          // success
         } catch (bufferError) {
-          console.error('🔍 Debug - Buffer mnemonic generation failed:', bufferError);
+          console.error('🔍 Debug - Buffer mnemonic generation failed');
           
           // Final attempt: try with array conversion
           const secretKeyArray = Array.from(account.sk);
           mnemonic = algosdk.secretKeyToMnemonic(new Uint8Array(secretKeyArray));
-          console.log('🔍 Debug - mnemonic generation successful (Array conversion)');
+          // success
         }
       }
     }
     
-    // Debug logging for generated values
-    console.log('🔍 Debug - privateKeyBase64 type:', typeof privateKeyBase64, 'value:', privateKeyBase64);
-    console.log('🔍 Debug - mnemonic type:', typeof mnemonic, 'value:', mnemonic);
-    console.log('🔍 Debug - mnemonic length:', mnemonic ? mnemonic.split(' ').length : 'undefined');
+    // Do not log private key or mnemonic
 
     const result = { 
       address: account.addr.toString(), // Convert Address object to string
@@ -64,7 +57,7 @@ export function generateAlgorandWallet(): GeneratedWallet {
       mnemonic 
     };
     
-    console.log('🔍 Debug - final result:', result);
+    console.log('🔍 Debug - wallet generated with address:', result.address);
     
     // Validate the result
     if (!result.address || !result.privateKey || !result.mnemonic) {
@@ -73,7 +66,7 @@ export function generateAlgorandWallet(): GeneratedWallet {
     
     return result;
   } catch (error) {
-    console.error('🔍 Debug - Wallet generation error:', error);
+    console.error('🔍 Debug - Wallet generation error');
     throw error;
   }
 }
@@ -83,10 +76,7 @@ export function recoverAlgorandWallet(mnemonic: string): GeneratedWallet {
   try {
     const account = algosdk.mnemonicToSecretKey(mnemonic);
     
-    // Debug logging
-    console.log('🔍 Debug - recovered account object:', account);
-    console.log('🔍 Debug - recovered account.addr type:', typeof account.addr, 'value:', account.addr);
-    console.log('🔍 Debug - recovered account.sk type:', typeof account.sk, 'value:', account.sk);
+    // Avoid logging secret material
     
     const privateKeyBase64 = Buffer.from(account.sk).toString('base64');
     const result = { 
@@ -95,21 +85,21 @@ export function recoverAlgorandWallet(mnemonic: string): GeneratedWallet {
       mnemonic 
     };
     
-    console.log('🔍 Debug - recovered result:', result);
+    console.log('🔍 Debug - wallet recovered with address:', result.address);
     return result;
   } catch (error) {
-    console.error('🔍 Debug - Wallet recovery error:', error);
+    console.error('🔍 Debug - Wallet recovery error');
     throw error;
   }
 }
 
 // Store wallet in localStorage
 export function storeWallet(wallet: GeneratedWallet): void {
-  console.log('🔍 Debug - storing wallet:', wallet);
+  console.log('🔍 Debug - storing wallet for address:', wallet.address);
   
   // Validate wallet before storing
   if (!wallet.address || !wallet.privateKey || !wallet.mnemonic) {
-    console.error('🔍 Debug - Invalid wallet data for storage:', wallet);
+    console.error('🔍 Debug - Invalid wallet data for storage');
     throw new Error('Invalid wallet data for storage');
   }
   
@@ -123,11 +113,11 @@ export function loadWallet(): GeneratedWallet | null {
   
   try {
     const parsed = JSON.parse(data);
-    console.log('🔍 Debug - loaded wallet:', parsed);
+    console.log('🔍 Debug - loaded wallet for address:', parsed?.address);
     
     // Validate loaded wallet
     if (!parsed.address || !parsed.privateKey || !parsed.mnemonic) {
-      console.error('🔍 Debug - Invalid wallet data loaded:', parsed);
+      console.error('🔍 Debug - Invalid wallet data loaded');
       return null;
     }
     
