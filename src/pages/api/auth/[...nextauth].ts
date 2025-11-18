@@ -1,0 +1,164 @@
+import NextAuth, { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    // Web2 Authentication: Traditional Email/Password
+    CredentialsProvider({
+      id: 'credentials',
+      name: 'Email & Password',
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data) {
+            return {
+              id: data.id,
+              email: data.email,
+              name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              authType: 'web2'
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error('Authorization error:', error);
+          return null;
+        }
+      }
+    }),
+    
+    // Web3 Authentication: MetaMask/SIWE
+    CredentialsProvider({
+      id: 'siwe',
+      name: 'MetaMask',
+      credentials: {
+        message: { label: "Message", type: "text" },
+        signature: { label: "Signature", type: "text" },
+        nonceKey: { label: "Nonce Key", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.message || !credentials?.signature || !credentials?.nonceKey) {
+          throw new Error('Missing SIWE credentials');
+        }
+
+        try {
+          // Verify the signature with our SIWE endpoint
+          const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/siwe/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: credentials.message,
+              signature: credentials.signature,
+              nonceKey: credentials.nonceKey
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.success && data.user) {
+            return {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.name,
+              walletAddress: data.user.walletAddress,
+              authType: 'web3'
+            };
+          }
+
+          throw new Error(data.error || 'SIWE verification failed');
+        } catch (error) {
+          console.error('SIWE authorization error:', error);
+          throw error;
+        }
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' 
+        ? '__Secure-next-auth.session-token' 
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        // Critical for SSO: Set domain to .siz.land in production to share cookies across subdomains
+        domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
+        secure: process.env.NODE_ENV === 'production'
+      }
+    },
+    callbackUrl: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.callback-url'
+        : 'next-auth.callback-url',
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
+        secure: process.env.NODE_ENV === 'production'
+      }
+    },
+    csrfToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Host-next-auth.csrf-token'
+        : 'next-auth.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  },
+  pages: {
+    signIn: '/login',
+    signOut: '/logout',
+    error: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.email = (token.email as string) || '';
+        session.user.name = (token.name as string) || '';
+      }
+      return session;
+    }
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+};
+
+export default NextAuth(authOptions);

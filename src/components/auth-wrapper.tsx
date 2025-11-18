@@ -1,4 +1,4 @@
-import { useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -10,23 +10,23 @@ interface AuthWrapperProps {
 }
 
 const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
-  const { isLoaded, user } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { theme } = useTheme();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/signup', '/sso-callback', '/404', '/terms', '/privacy', '/blog', '/whitepaper'];
+  const publicRoutes = ['/', '/login', '/signup', '/wallet-auth', '/auth-choice', '/sso-callback', '/404', '/terms', '/privacy', '/blog', '/whitepaper'];
   const isPublicRoute = publicRoutes.includes(router.pathname);
 
   useEffect(() => {
     // Only redirect if we're loaded, not authenticated, and not on a public route
-    if (isLoaded && !user && !isPublicRoute) {
-      router.replace('/signup');
+    if (status === 'unauthenticated' && !isPublicRoute) {
+      router.replace('/wallet-auth');
     }
-  }, [isLoaded, user, isPublicRoute, router]);
+  }, [status, isPublicRoute, router]);
 
   // Show loading spinner while checking authentication
-  if (!isLoaded) {
+  if (status === 'loading') {
     return fallback || (
       <div className="min-h-screen flex items-center justify-center">
         <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-8 border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -42,7 +42,7 @@ const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
   }
 
   // If not authenticated and not on a public route, render nothing while redirecting
-  if (isLoaded && !user && !isPublicRoute) {
+  if (status === 'unauthenticated' && !isPublicRoute) {
     return null;
   }
 

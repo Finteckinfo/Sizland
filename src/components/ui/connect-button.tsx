@@ -7,7 +7,7 @@ import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
-import { useUser } from '@clerk/nextjs'
+import { useSession } from 'next-auth/react'
 import { Copy, LogOut, ChevronDown } from 'lucide-react'
  
 import { useRouter } from 'next/router'
@@ -15,7 +15,7 @@ import { useRouter } from 'next/router'
 export const ConnectWalletButton = () => {
   const { wallets, activeAccount, activeWallet, isReady } = useWallet()
   const router = useRouter()
-  const { user } = useUser()
+  const { data: session } = useSession()
 
   const [isOpen, setIsOpen] = useState(false)
   const [isWalletDropdownOpen, setIsWalletDropdownOpen] = useState(false)
@@ -31,22 +31,22 @@ export const ConnectWalletButton = () => {
   const postWalletToExternalDB = async (walletAddress: string) => {
     console.log('🔍 [Wallet] Starting postWalletToExternalDB with:', {
       walletAddress,
-      userId: user?.id ? `${user.id.substring(0, 8)}...` : 'undefined'
+      userId: session?.user?.id ? `${session.user.id.substring(0, 8)}...` : 'undefined'
     })
 
-    if (!user?.id) {
+    if (!session?.user?.id) {
       console.log('⚠️ [Wallet] No user available, skipping external DB post')
       return
     }
 
     try {
       const requestBody = {
-        userId: user.id,
+        userId: session.user.id,
         walletAddress
       }
       
       console.log('🔍 [Wallet] Making API call to /api/user/wallet with body:', {
-        userId: `${user.id.substring(0, 8)}...`,
+        userId: `${session.user.id.substring(0, 8)}...`,
         walletAddress
       })
 
@@ -74,7 +74,7 @@ export const ConnectWalletButton = () => {
       console.error('❌ [Wallet] Error posting wallet to external database:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        userId: user?.id ? `${user.id.substring(0, 8)}...` : 'undefined',
+        userId: session?.user?.id ? `${session.user.id.substring(0, 8)}...` : 'undefined',
         walletAddress
       })
     }

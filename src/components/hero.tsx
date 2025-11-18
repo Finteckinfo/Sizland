@@ -4,22 +4,23 @@ import React from "react";
 import { Button1 } from "@/components/ui/button1";
 import ModalVideo from "@/components/modalVideo";
 import SplitText from "./ui/splittext";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Magnet from "./ui/magnet";
 
 const Hero = () => {
-  const { user, isLoaded } = useUser();
+  const { data: session, status } = useSession();
+  const isLoaded = status !== "loading";
   const router = useRouter();
 
   const handleGetStartedClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isLoaded && user) {
+    if (isLoaded && session?.user) {
       // User is authenticated, redirect to lobby
       router.push('/lobby');
     } else {
-      // User is not authenticated, redirect to signup
-      router.push('/signup');
+      // User is not authenticated, redirect to auth choice page
+      router.push('/auth-choice');
     }
   };
 
@@ -69,7 +70,7 @@ const Hero = () => {
                       onClick={handleGetStartedClick}
                       className="px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 w-full sm:w-auto cursor-pointer"
                     >
-                      {isLoaded && user ? 'Go to Dashboard' : 'Get Started'}
+                      {isLoaded && session?.user ? 'Go to Dashboard' : 'Get Started'}
                     </Button1>
                   </Magnet>
                   
