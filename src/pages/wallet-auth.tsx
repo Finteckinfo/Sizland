@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useWallet, WalletId } from '@txnlab/use-wallet-react'
 import { MetaMaskSignIn } from '@/components/auth/metamask-signin'
 import { useRouter } from 'next/router'
+import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import { generateAlgorandWallet, storeWallet, clearWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator'
 import { Copy, CheckCircle, Download, Trash2, Shield } from 'lucide-react'
@@ -24,7 +25,7 @@ export default function WalletAuth() {
   const [copied, setCopied] = useState<string | null>(null)
 
   const handleSuccess = () => {
-    router.push('/')
+    router.push('/lobby')
   }
 
   const handleCopy = async (text: string, type: string) => {
@@ -121,38 +122,34 @@ Generated on: ${new Date().toLocaleString()}
         console.error('Failed to auto-connect wallet:', connectError)
       }
       
-      // Post wallet address to external database
+      // Create NextAuth session using the wallet provider
       try {
-        const response = await fetch('/api/user/wallet', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            walletAddress: wallet.address,
-          }),
+        const result = await signIn('wallet', {
+          redirect: false,
+          walletAddress: wallet.address,
         })
 
-        if (response.ok) {
-          console.log('✅ [Create Wallet] Successfully posted wallet address to external DB')
+        if (result?.ok) {
+          console.log('✅ [Create Wallet] NextAuth session created')
+          
+          // Notify that a wallet has been generated
+          window.dispatchEvent(new CustomEvent('walletGenerated'))
+          console.log('✅ [Create Wallet] Dispatched walletGenerated event')
+          
+          setSuccess('Wallet created successfully! Redirecting to your Sizland dashboard...')
+          
+          // NextAuth redirect callback will handle sending to /lobby
+          setTimeout(() => {
+            router.push('/lobby')
+          }, 1500)
         } else {
-          console.error('Failed to post wallet to external DB:', response.statusText)
+          console.error('Failed to create NextAuth session:', result?.error)
+          setError('Failed to create session. Please try again.')
         }
-      } catch (dbError) {
-        console.error('Error posting wallet to external DB:', dbError)
-        // Don't throw error here as wallet was still generated successfully
+      } catch (authError) {
+        console.error('Error creating NextAuth session:', authError)
+        setError('Failed to authenticate. Please try again.')
       }
-      
-      // Notify that a wallet has been generated
-      window.dispatchEvent(new CustomEvent('walletGenerated'))
-      console.log('✅ [Create Wallet] Dispatched walletGenerated event')
-      
-      setSuccess('Wallet created successfully! Redirecting...')
-      
-      // Redirect to the new wallet page (like the old logic)
-      setTimeout(() => {
-        router.push('/new-wallet')
-      }, 1500)
       
     } catch (err) {
       console.error('Wallet generation failed:', err)
@@ -168,7 +165,35 @@ Generated on: ${new Date().toLocaleString()}
 
     try {
       await wallet.connect()
-      router.push('/')
+      
+      // Get the connected wallet address
+      const accounts = wallet.accounts
+      if (!accounts || accounts.length === 0) {
+        setError('No accounts found in wallet')
+        return
+      }
+      
+      const walletAddress = accounts[0].address
+      console.log('✅ [Algorand Wallet] Connected:', walletAddress)
+      
+      // Create NextAuth session using the wallet provider
+      try {
+        const result = await signIn('wallet', {
+          redirect: false,
+          walletAddress: walletAddress,
+        })
+
+        if (result?.ok) {
+          console.log('✅ [Algorand Wallet] NextAuth session created')
+          router.push('/lobby')
+        } else {
+          console.error('Failed to create NextAuth session:', result?.error)
+          setError('Failed to create session. Please try again.')
+        }
+      } catch (authError) {
+        console.error('Error creating NextAuth session:', authError)
+        setError('Failed to authenticate. Please try again.')
+      }
     } catch (err: any) {
       console.error('Wallet connect error:', err)
       const canceled = err?.data?.type === 'CONNECT_MODAL_CLOSED' || 

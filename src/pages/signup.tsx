@@ -80,7 +80,7 @@ const SignUpPage = () => {
         router.push('/login?registered=true');
       } else if (result?.ok) {
         // Both registration and login succeeded
-        router.push('/');
+        router.push('/lobby');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');

@@ -30,7 +30,7 @@ const LoginPage = () => {
       if (result?.error) {
         setError('Invalid email or password');
       } else if (result?.ok) {
-        router.push('/');
+        router.push('/lobby');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');

@@ -90,7 +90,7 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push('/');
+          router.push('/lobby');
         }
       }
 

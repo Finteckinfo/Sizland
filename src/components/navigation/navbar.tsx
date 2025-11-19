@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
 import { loadWallet } from "@/lib/algorand/walletGenerator";
+import { useRouter } from "next/router";
 import PillNav from "../ui/PillNav";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { User, LogOut } from "lucide-react";
@@ -91,6 +92,7 @@ const productLinks: DropdownLinks[] = [
 ];
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { data: session, status } = useSession();
@@ -221,7 +223,7 @@ export const Navbar: React.FC = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => signIn()}>
+                <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
                   Sign In
                 </Button>
               )}

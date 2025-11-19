@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import jwt from 'jsonwebtoken';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -42,6 +43,52 @@ export const authOptions: NextAuthOptions = {
           return null;
         } catch (error) {
           console.error('Authorization error:', error);
+          return null;
+        }
+      }
+    }),
+    
+    // Web3 Authentication: Wallet Address (Algorand, etc.)
+    CredentialsProvider({
+      id: 'wallet',
+      name: 'Web3 Wallet',
+      credentials: {
+        walletAddress: { label: "Wallet Address", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.walletAddress) {
+          return null;
+        }
+
+        try {
+          // Call backend wallet-login endpoint
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/wallet-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              walletAddress: credentials.walletAddress,
+              chainId: 'algorand',
+              domain: process.env.NEXTAUTH_URL
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data) {
+            return {
+              id: data.id,
+              email: data.email,
+              name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              walletAddress: data.walletAddress,
+              authType: 'web3'
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error('Wallet authorization error:', error);
           return null;
         }
       }
@@ -140,19 +187,47 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // After successful sign in, always redirect to /lobby
+      // This matches the original Clerk behavior from the backup
+      if (url.startsWith('/') && !url.startsWith('//')) {
+        return `${baseUrl}/lobby`;
+      }
+      if (url.startsWith(baseUrl)) {
+        return `${baseUrl}/lobby`;
+      }
+      // For external URLs, return to lobby for safety
+      return `${baseUrl}/lobby`;
+    },
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
+        token.id = (user as any).id;
+        token.email = (user as any).email;
+        token.name = (user as any).name;
+
+        const secret = process.env.NEXTAUTH_SECRET;
+        if (secret) {
+          const payload = {
+            id: token.id,
+            email: token.email,
+            name: token.name,
+          };
+          token.accessToken = jwt.sign(payload, secret, {
+            expiresIn: '30d',
+          });
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
+        session.user.id = (token.id as string) || '';
         session.user.email = (token.email as string) || '';
         session.user.name = (token.name as string) || '';
+
+        if (token.accessToken) {
+          (session as any).accessToken = token.accessToken as string;
+        }
       }
       return session;
     }
