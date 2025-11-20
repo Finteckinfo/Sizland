@@ -14,7 +14,7 @@ import { Confetti } from './Confetti';
 import { ClaimSuccessMessage } from './ClaimSuccessMessage';
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator';
 import { useRouter } from 'next/router';
-import { useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 
 interface Asset {
   assetId: number;
@@ -44,7 +44,7 @@ interface PendingPayment {
 export const WalletBalance: React.FC = () => {
   const { activeAccount, activeWallet, algodClient, transactionSigner, wallets } = useWallet();
   const router = useRouter();
-  const { user } = useUser();
+  const { data: session } = useSession();
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -508,8 +508,8 @@ export const WalletBalance: React.FC = () => {
         },
         body: JSON.stringify({
           walletAddress,
-          userId: user?.id,
-          userEmail: user?.emailAddresses?.[0]?.emailAddress,
+          userId: session?.user?.id || session?.user?.name,
+          userEmail: session?.user?.email,
         }),
       });
 
