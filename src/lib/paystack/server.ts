@@ -6,14 +6,7 @@ if (!process.env.PAYSTACK_SECRET_KEY) {
   console.warn('⚠️  PAYSTACK_SECRET_KEY is not set in environment variables');
   console.warn('📝 Please create a .env.local file with your Paystack configuration');
   console.warn('💡 See PAYSTACK_INTEGRATION.md for setup instructions');
-  
-  // For development, use a placeholder to prevent build errors
-  // In production, this should be properly configured
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('🔧 Using placeholder key for development build');
-  } else {
-    throw new Error('PAYSTACK_SECRET_KEY is required in production environment');
-  }
+  console.warn('🔧 Using placeholder key for build - Paystack features will not work until configured');
 }
 
 // Use placeholder for development if key is missing, otherwise use the actual key

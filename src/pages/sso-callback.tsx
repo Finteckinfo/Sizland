@@ -1,26 +1,26 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
 
 const SSOCallbackPage = () => {
-  const { isLoaded, user } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { theme } = useTheme();
 
   useEffect(() => {
-    if (isLoaded) {
-      if (user) {
-        // Redirect to home page after successful SSO
-        router.push('/');
-      } else {
-        // Redirect to sign-in if not signed in
-        router.push('/sign-in');
-      }
+    if (status === 'loading') return;
+    
+    if (session) {
+      // Redirect to lobby after successful SSO
+      router.push('/lobby');
+    } else {
+      // Redirect to login if not signed in
+      router.push('/login');
     }
-  }, [isLoaded, user, router]);
+  }, [status, session, router]);
 
   return (
     <PageLayout 
