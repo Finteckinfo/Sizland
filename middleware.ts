@@ -24,7 +24,9 @@ const publicApiRoutes = [
   '/api/auth/siwe/verify',
   '/api/auth/algorand/nonce',
   '/api/auth/algorand/verify',
-  '/api/auth/',
+  '/api/auth/signin',
+  '/api/auth/signout',
+  '/api/auth/providers',
 ]
 
 export function middleware(request: NextRequest) {
