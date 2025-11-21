@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged
+npx lint-staged
+
+# Check for sensitive files
+if git diff --cached --name-only | grep -E "^\.env$|^\.env\..*$" | grep -v "\.env\.example$"; then
+  echo "Error: Attempting to commit .env file!"
+  echo "Please remove .env from staging area"
+  exit 1
+fi
+
+# Check for hardcoded secrets
+if git diff --cached -U0 | grep -iE "(api[_-]?key|secret|password|token|private[_-]?key|mnemonic).*=.*['\"][^'\"]{8,}"; then
+  echo "Warning: Possible hardcoded secret detected!"
+  echo "Please review your changes before committing"
+  exit 1
+fi
