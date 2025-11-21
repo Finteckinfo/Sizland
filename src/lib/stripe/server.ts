@@ -20,6 +20,6 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder_for_development_build';
 
 export const stripe = new Stripe(stripeKey, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2025-08-27.basil',
   typescript: true,
 });

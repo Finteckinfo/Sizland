@@ -6,8 +6,7 @@ import { Montserrat } from "next/font/google";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { Providers } from '@/providers/index'
-import { ClerkProvider } from "@clerk/nextjs";
-import { clerkAppearance } from "@/lib/clerk-appearance";
+import { SessionProvider } from "next-auth/react";
 
 import { config } from "../wagmi";
 
@@ -38,17 +37,7 @@ export const monsterrat = Montserrat({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      appearance={clerkAppearance}
-      signInUrl="/login"
-      signUpUrl="/signup"
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
-      domain="https://siz.land"
-      isSatellite={false}
-      allowedRedirectOrigins={["https://siz.land", "https://sizerp-2-0.vercel.app","https://erp.siz.land"]}
-    >
+    <SessionProvider session={pageProps.session}>
       <WagmiProvider config={config}>
         <QueryClientProvider client={client}>
           <Providers>
@@ -65,7 +54,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </Providers>
         </QueryClientProvider>
       </WagmiProvider>
-    </ClerkProvider>
+    </SessionProvider>
   );
 }
 

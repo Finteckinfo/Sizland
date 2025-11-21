@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { PageLayout } from "@/components/page-layout";
 import PixelCard from "@/components/ui/pixelCard";
 import { useTheme } from "next-themes";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useWallet } from "@txnlab/use-wallet-react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
@@ -50,22 +51,25 @@ const dappTiles = [
 
 const LobbyPage = () => {
   const { theme } = useTheme();
-  const { isLoaded, user } = useUser();
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const { activeAccount, isReady } = useWallet();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (isLoaded && !user) {
-      // Redirect to signup if not authenticated
-      router.push('/signup');
-    }
-  }, [isLoaded, user, router]);
+  const isAuthed = !!session?.user || (!!activeAccount && isReady);
 
-  if (!mounted || !isLoaded) {
+  useEffect(() => {
+    if (mounted && !isAuthed && status !== "loading" && isReady) {
+      // Redirect to login if neither NextAuth session nor wallet is available
+      router.push("/login");
+    }
+  }, [mounted, isAuthed, status, isReady, router]);
+
+  if (!mounted || (!isAuthed && (status === "loading" || !isReady))) {
     return (
       <PageLayout title="Loading - Sizland" description="Loading your dashboard" requireAuth={true}>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -78,8 +82,8 @@ const LobbyPage = () => {
     );
   }
 
-  if (!user) {
-    return null; // Will redirect via useEffect
+  if (!isAuthed) {
+    return null; // Will redirect via useEffect when unauthenticated and no wallet connected
   }
 
   return (
@@ -90,7 +94,7 @@ const LobbyPage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 drop-shadow-lg">
-                Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0]}!
+                Welcome back, {(session?.user?.name || session?.user?.email?.split("@")[0] || activeAccount?.address?.slice(0, 8)) ?? "User"}!
               </h1>
               <p className="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto drop-shadow-md">
                 Access all Sizland dApps from your personalized dashboard. Manage your business, trade assets, and grow your portfolio - all in one place.

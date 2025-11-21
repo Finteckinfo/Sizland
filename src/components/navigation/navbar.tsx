@@ -8,9 +8,19 @@ import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
 import { ConnectWalletButton } from "../ui/connect-button";
 import { loadWallet } from "@/lib/algorand/walletGenerator";
+import { useRouter } from "next/router";
 import PillNav from "../ui/PillNav";
-import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
-import { userButtonAppearance } from '@/lib/clerk-appearance';
+import { useSession, signIn, signOut } from "next-auth/react";
+import { User, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -82,9 +92,11 @@ const productLinks: DropdownLinks[] = [
 ];
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { user, isLoaded } = useUser();
+  const { data: session, status } = useSession();
+  const isLoaded = status !== "loading";
 
   useEffect(() => {
     setMounted(true);
@@ -179,19 +191,41 @@ export const Navbar: React.FC = () => {
           <ThemeToggler />
           {isLoaded && (
             <>
-              {user ? (
+              {session?.user ? (
                 <>
                   <ConnectWalletButton />
-                  <UserButton 
-                    appearance={userButtonAppearance}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+                          <AvatarFallback>
+                            {session.user.name?.charAt(0).toUpperCase() || session.user.email?.charAt(0).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {session.user.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => signOut()}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
-                <SignInButton mode="modal">
-                  <Button variant="outline" size="sm">
-                    Sign In
-                  </Button>
-                </SignInButton>
+                <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
+                  Sign In
+                </Button>
               )}
             </>
           )}
@@ -222,22 +256,38 @@ export const Navbar: React.FC = () => {
           <ThemeToggler />
           {isLoaded && (
             <>
-              {user ? (
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8",
-                      userButtonPopoverCard: "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-                      userButtonPopoverActionButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
-                    }
-                  }}
-                />
+              {session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+                        <AvatarFallback>
+                          {session.user.name?.charAt(0).toUpperCase() || session.user.email?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {session.user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <SignInButton mode="modal">
-                  <Button variant="outline" size="sm">
-                    Sign In
-                  </Button>
-                </SignInButton>
+                <Button variant="outline" size="sm" onClick={() => signIn()}>
+                  Sign In
+                </Button>
               )}
             </>
           )}
