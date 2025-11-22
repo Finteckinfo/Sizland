@@ -1,189 +1,189 @@
-'use client';
+             
 
-import React from 'react';
+                          
 
-// SIZ Logo Icon Component
-const SizLogoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* SIZ Logo - Simplified geometric design */}
-    <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor" opacity="0.1"/>
-    <path 
-      d="M7 8h10M7 12h10M7 16h6" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <circle cx="18" cy="6" r="2" fill="currentColor"/>
-  </svg>
-);
+                          
+                                                                            
+       
+                          
+                        
+                
+                                      
+   
+                                                  
+                                                                                       
+          
+                                 
+                            
+                      
+                            
+                            
+      
+                                                      
+        
+  
 
-interface RoadmapItem {
-  title: string;
-  date: string;
-  description?: string;
-  badge?: string;
-  achievements?: {
-    title: string;
-    date: string;
-    items: string[];
-  };
-  nextSteps?: {
-    title: string;
-    date: string;
-    items: string[];
-  };
-  items?: string[];
-}
+                       
+                
+               
+                       
+                 
+                  
+                  
+                 
+                    
+    
+               
+                  
+                 
+                    
+    
+                   
+ 
 
-const roadmap: RoadmapItem[] = [
-  {
-    title: 'Phase 1: Laying the Groundwork (Current Phase: Live)',
-    date: 'Months 1-12',
-    description:
-      'We are setting up the secure, foundational technology for the Sizland platform, which is our blockchain-based ERP system. Development officially began in February of this year, building upon the initial ERP concepts and prototypes from 2023. This phase is about establishing the core value proposition for remote teams.',
-    badge: 'Live',
-    achievements: {
-      title: 'Phase 1 Achievements (What\'s DONE Now)',
-      date: 'Months 1-7',
-      items: [
-        'Core ERP Web Application is Live: We launched the central web platform, which is the main hub for teams to manage projects and workflows.',
-        'Automated Workflow System: The fundamental logic for streamlining work is complete, allowing teams to set up token-based tasks that automatically trigger payments and record milestone verification on the blockchain.',
-        'Instant, Automated Payments: The core automated payment system is built and functioning, cutting out manual payment headaches for remote teams.',
-        'Multichain Foundation: We\'ve established the initial smart contract infrastructure across four major blockchain networks: Algorand, Sui, Base, and BNB Chain. This ensures the platform is fast, scalable, and ready for a global user base.',
-        'Community Building: We are actively building our early community and establishing the legal framework to ensure secure and compliant operations.',
-      ],
-    },
-    nextSteps: {
-      title: 'Phase 1 Next Steps (Focusing on DeFi Integration)',
-      date: 'Months 7-12',
-      items: [
-        'Staking: Allowing users to earn passive income by holding our native tokens.',
-        'Swapping: Implementing an in-app tool for users to easily exchange one cryptocurrency for another.',
-        'P2P Services: Building a peer-to-peer module for users to directly exchange tokens for local currency without a central middleman.',
-      ],
-    },
-  },
-  {
-    title: 'Phase 2: Growing the Platform',
-    date: 'Months 12-18',
-    description:
-      'We will take things to the next level by focusing on usability, accessibility, and high-level financial tools. This is where we fully integrate advanced features to make the ERP more powerful and available everywhere.',
-    items: [
-      'Mobile-First Experience: Making the entire platform fully mobile-friendly to ensure remote workers can manage tasks, track progress, and access payments from anywhere.',
-      'AI Integration: Introducing Artificial Intelligence features to streamline workflows, enhance efficiency, and provide intelligent insights for better resource management and risk mitigation.',
-      'Full DeFi Suite & Token Launch: Completing the full suite of DeFi tools (including staking, swapping, and P2P services) and conducting private/public token sales to fund the next stage of growth and expand our community.',
-    ],
-  },
-  {
-    title: 'Phase 3: Going Live & Scaling',
-    date: 'Months 19-36',
-    description:
-      'Everything comes together. This phase is focused on establishing the platform as an industry standard for remote work and rolling out our unique on-chain financial services to the world.',
-    items: [
-      'Launch of On-Chain Credit Score System: Implementing the ultimate financial tool for remote workers: an immutable, transparent credit score generated by verified, on-chain work history within the ERP.',
-      'Decentralized Lending Services: Based on the on-chain credit score, we will launch lending services that can offer fair, decentralized loans to remote workers globally.',
-      'Full Production Deployment: Scaling the platform and launching it officially into the global market to reach a massive user base.',
-      'Global ERP Features: Adding complex, enterprise-level ERP modules (like advanced reporting, HR tools, and deep analytics) tailored for large, globally distributed teams.',
-    ],
-  },
-  {
-    title: 'Phase 4: Decentralization & Ecosystem Growth',
-    date: 'Months 37+',
-    description:
-      'This final phase is about handing over control to the community and driving sustained, decentralized growth for the entire ecosystem.',
-    items: [
-      'Decentralized Governance: Transitioning platform control to a community-run model, where token holders can vote on major decisions for the future of Sizland.',
-      'Ecosystem Incubation: Launching a dedicated fund and program to support third-party developers who want to build new applications and services on top of the Sizland infrastructure.',
-      'Interoperability Focus: Focusing on maximum integration across all multichain networks and Web3 ecosystems to ensure Sizland remains the most flexible and connected platform for remote work.',
-      'Long-Term R&D: Dedicated research and development into future technologies like ZK proofs for enhanced privacy and scalability.',
-    ],
-  },
-];
+                                
+   
+                                                                  
+                        
+                
+                                                                                                                                                                                                                                                                                                                                        
+                  
+                   
+                                                       
+                         
+              
+                                                                                                                                                    
+                                                                                                                                                                                                                                  
+                                                                                                                                                          
+                                                                                                                                                                                                                                                        
+                                                                                                                                                           
+        
+      
+                
+                                                                 
+                          
+              
+                                                                                       
+                                                                                                             
+                                                                                                                                             
+        
+      
+    
+   
+                                           
+                         
+                
+                                                                                                                                                                                                                                  
+            
+                                                                                                                                                                                
+                                                                                                                                                                                                       
+                                                                                                                                                                                                                                     
+      
+    
+   
+                                           
+                         
+                
+                                                                                                                                                                                                   
+            
+                                                                                                                                                                                                                 
+                                                                                                                                                                                 
+                                                                                                                                          
+                                                                                                                                                                                  
+      
+    
+   
+                                                          
+                       
+                
+                                                                                                                                              
+            
+                                                                                                                                                                      
+                                                                                                                                                                                             
+                                                                                                                                                                                                       
+                                                                                                                                        
+      
+    
+  
 
-const Roadmap = () => {
-  return (
-    <div className="flex flex-col items-center px-4 py-8">
-      <div className="max-w-4xl w-full mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
-          Sizland Product Roadmap
-        </h2>
-        <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed text-center mb-6">
-          Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
-        </p>
-      </div>
-      <ol className="relative border-s border-gray-200 dark:border-gray-700 max-w-4xl w-full">
-        {roadmap.map((item, index) => (
-          <li key={index} className="mb-12 ms-6">
-            <span className="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900">
-              <SizLogoIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
-            </span>
-            <h3 className="flex items-center mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-              {item.title}
-              {item.badge && (
-                <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300 ms-3">
-                  {item.badge}
-                </span>
-              )}
-            </h3>
-            <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-              {item.date}
-            </time>
-            {item.description && (
-              <p className="text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                {item.description}
-              </p>
-            )}
-            {item.achievements && (
-              <div className="mt-6 mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {item.achievements.title}
-                </h4>
-                <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-                  {item.achievements.date}
-                </time>
-                <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {item.achievements.items.map((achievement, idx) => (
-                    <li key={idx}>{achievement}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {item.nextSteps && (
-              <div className="mt-6 mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {item.nextSteps.title}
-                </h4>
-                <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-                  {item.nextSteps.date}
-                </time>
-                <p className="text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
-                  The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {item.nextSteps.items.map((step, idx) => (
-                    <li key={idx}>{step}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {item.items && (
-              <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
-                {item.items.map((listItem, idx) => (
-                  <li key={idx}>{listItem}</li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-};
+                       
+          
+                                                          
+                                              
+                                                                                          
+                                 
+             
+                                                                                                 
+                                                                                                                                                                                                                                                                                            
+            
+            
+                                                                                              
+                                       
+                                                 
+                                                                                                                                                                          
+                                                                                    
+                   
+                                                                                                       
+                          
+                              
+                                                                                                                                                             
+                              
+                       
+                
+                 
+                                                                                                             
+                         
+                   
+                                  
+                                                                                                         
+                                  
+                  
+              
+                                   
+                                         
+                                                                                         
+                                           
+                     
+                                                                                                                 
+                                          
+                       
+                                                                                                                                       
+                                                                      
+                                                    
+                     
+                     
+                    
+              
+                                
+                                         
+                                                                                         
+                                        
+                     
+                                                                                                                 
+                                       
+                       
+                                                                                                           
+                                                                                                                                                                       
+                    
+                                                                                                                                       
+                                                            
+                                             
+                     
+                     
+                    
+              
+                            
+                                                                                                                                          
+                                                    
+                                               
+                   
+                   
+              
+               
+           
+           
+          
+    
+  
 
-export default Roadmap;
+                       
