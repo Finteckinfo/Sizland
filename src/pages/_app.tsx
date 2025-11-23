@@ -35,6 +35,8 @@ export const monsterrat = Montserrat({
   weight: "500",
 });
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
