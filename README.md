@@ -12,7 +12,7 @@ Live: [https://siz.land](https://siz.land) | ERP: [https://app.sizland.com](http
 
 ---
 
-## 🌟 What is SIZLAND?
+## What is SIZLAND?
 
 SIZLAND is a **revolutionary blockchain-based project management ecosystem** that combines traditional ERP capabilities with Web3 technology. This landing page serves as the public gateway to the SIZLAND platform, showcasing our vision and onboarding users into the future of transparent, decentralized project management.
 
@@ -38,7 +38,7 @@ SIZLAND is a **revolutionary blockchain-based project management ecosystem** tha
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🎯 Purpose
+## Purpose
 
 This landing page is the **first touchpoint** for users discovering SIZLAND. It serves multiple critical functions:
 
@@ -49,9 +49,9 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - **Trust Builder**: Display tokenomics, roadmap, and ecosystem transparency
 - **Community Portal**: Connect with stakeholders, partners, and developers
 
-## ✨ Key Features
+## Key Features
 
-### 🌐 Modern Web3 Landing Experience
+### Modern Web3 Landing Experience
 
 **Hero Section**
 - Stunning animated background with GSAP/Framer Motion
@@ -71,7 +71,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - Network switching capabilities
 - Smart contract interaction examples
 
-### 💰 SIZ Token & Blockchain Integration
+### SIZ Token & Blockchain Integration
 
 **Token Distribution**
 - Fiat-to-crypto gateway (Stripe & Paystack integration)
@@ -87,7 +87,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - **Multi-chain**: Polygon, Arbitrum, Optimism ready
 - Direct transfer fallback mechanisms
 
-### 🎨 Design & User Experience
+### Design & User Experience
 
 **Responsive Design**
 - Mobile-first approach with TailwindCSS
@@ -103,7 +103,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - Image optimization with next/image
 - Code splitting and lazy loading
 
-### 📊 Content Sections
+### Content Sections
 
 **Information Pages**
 - Comprehensive whitepaper
@@ -119,7 +119,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - Video tutorials and demos
 - FAQ and documentation links
 
-### 🔐 Security & Authentication
+### Security & Authentication
 
 **NextAuth Integration**
 - Multiple authentication strategies
@@ -135,7 +135,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - Rate limiting
 - Input validation and sanitization
 
-### 📈 Analytics & Tracking
+### Analytics & Tracking
 
 - User behavior analytics
 - Conversion funnel tracking
@@ -184,7 +184,7 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - **Formatting**: Prettier
 - **Testing Scripts**: Custom TypeScript test runners
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -270,7 +270,7 @@ npm run dev
 
 ✅ **Landing page now running at:** `http://localhost:3000`
 
-## 🛠️ Development
+## Development
 
 ### Available Scripts
 
@@ -326,7 +326,7 @@ cd ~/SizLand/SIZERPBACKEND2-0
 npm run dev  # Runs on :4000
 ```
 
-### 📁 Project Structure
+### Project Structure
 
 ```
 web3-landing/
@@ -406,7 +406,7 @@ web3-landing/
 └── README.md                    # This file
 ```
 
-## 🔄 User Journey
+## User Journey
 
 ### From Discovery to Ecosystem Entry
 
@@ -463,7 +463,7 @@ Joins projects → Works on tasks → Receives blockchain payments
 - Transaction hash returned for verification
 - Confirmation email sent with wallet details
 
-### 🌉 Integration with ERP System
+### Integration with ERP System
 
 **Seamless Transition**
 
@@ -498,7 +498,7 @@ if (isSignedIn) {
 }
 ```
 
-### 🔗 Web3 Integration Example
+### Web3 Integration Example
 
 **Wallet Connection (Ethereum/Multi-chain)**
 
@@ -596,7 +596,7 @@ Access at `/admin` (requires admin authentication):
 - `GET /api/admin/users` - List all users
 - `POST /api/admin/distribute` - Manual token distribution
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Build
 
@@ -864,7 +864,7 @@ For technical support or questions:
 - Contact the development team
 - Review the documentation files in the repository
 
-## 🌐 SIZLAND Ecosystem
+## SIZLAND Ecosystem
 
 This landing page is **part of a complete blockchain-powered project management ecosystem**:
 
@@ -941,7 +941,7 @@ npm install
 npm run dev
 ```
 
-## 📚 Related Documentation
+## Related Documentation
 
 **In This Repository:**
 - `SECURITY_BREACH_RESPONSE.md` - Security incident handling
@@ -964,7 +964,7 @@ npm run dev
 - [`../COMPLETE_SIZLAND_SYSTEM_GUIDE.md`](../COMPLETE_SIZLAND_SYSTEM_GUIDE.md) - Complete ecosystem documentation
 - [`../README.md`](../README.md) - Master README for entire SIZLAND system
 
-## 🤝 Contributing
+## Contributing
 
 ### Development Workflow
 
