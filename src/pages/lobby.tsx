@@ -9,46 +9,6 @@ import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
-// Dapp tiles configuration
-const dappTiles = [
-  {
-    title: "ERP",
-    description: "At the heart of Sizland lies the ERP solution created for today's decentralized world",
-    icon: "Workflow",
-    href: "https://erp.siz.land",
-    isExternal: true,
-    isClickable: true,
-    variant: "blue" as const
-  },
-  {
-    title: "Unified Wallets",
-    description: "A streamlined, all-in-one wallet that lets users manage fiat and crypto assets side-by-side.",
-    icon: "Wallet",
-    href: "/wallet",
-    isExternal: false,
-    isClickable: true,
-    variant: "green" as const
-  },
-  {
-    title: "DEX",
-    description: "Fast, cost-effective, and flexible, the exchange supports decentralized and centralized trading with full wallet integration.",
-    icon: "Shuffle",
-    href: "/dex",
-    isExternal: false,
-    isClickable: true,
-    variant: "blue" as const
-  },
-  {
-    title: "Fund Manager",
-    description: "Manage your assets efficiently with our decentralized fund management system.",
-    icon: "PieChart",
-    href: "#",
-    isExternal: false,
-    isClickable: false,
-    variant: "default" as const
-  }
-];
-
 const LobbyPage = () => {
   const { theme } = useTheme();
   const router = useRouter();
@@ -61,6 +21,52 @@ const LobbyPage = () => {
   }, []);
 
   const isAuthed = !!session?.user || (!!activeAccount && isReady);
+
+  // Get access token from session (with type assertion as it's a custom property)
+  const accessToken = (session as any)?.accessToken;
+
+  // Dapp tiles configuration with dynamic URL for ERP
+  const dappTiles = [
+    {
+      title: "ERP",
+      description: "At the heart of Sizland lies the ERP solution created for today's decentralized world",
+      icon: "Workflow",
+      // Pass token if available for SSO
+      href: accessToken 
+        ? `https://sizerp20.netlify.app?token=${accessToken}` 
+        : "https://sizerp20.netlify.app",
+      isExternal: true,
+      isClickable: true,
+      variant: "blue" as const
+    },
+    {
+      title: "Unified Wallets",
+      description: "A streamlined, all-in-one wallet that lets users manage fiat and crypto assets side-by-side.",
+      icon: "Wallet",
+      href: "/wallet",
+      isExternal: false,
+      isClickable: true,
+      variant: "green" as const
+    },
+    {
+      title: "DEX",
+      description: "Fast, cost-effective, and flexible, the exchange supports decentralized and centralized trading with full wallet integration.",
+      icon: "Shuffle",
+      href: "/dex",
+      isExternal: false,
+      isClickable: true,
+      variant: "blue" as const
+    },
+    {
+      title: "Fund Manager",
+      description: "Manage your assets efficiently with our decentralized fund management system.",
+      icon: "PieChart",
+      href: "#",
+      isExternal: false,
+      isClickable: false,
+      variant: "default" as const
+    }
+  ];
 
   useEffect(() => {
     if (mounted && !isAuthed && status !== "loading" && isReady) {
