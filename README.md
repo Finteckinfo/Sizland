@@ -1,148 +1,62 @@
-# SIZLAND - Web3 Landing Platform
+# SIZ.land - Web3 Token Distribution Platform
 
-**The Gateway to Blockchain-Powered Project Management**
+Live Demo: [https://siz.land](https://siz.land)
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.1.6-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0.0-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
-[![Algorand](https://img.shields.io/badge/Algorand-Blockchain-00D1B2)](https://www.algorand.com/)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
+A comprehensive Next.js Web3 application for the SIZ token ecosystem, featuring Algorand blockchain integration, automated token distribution, wallet management, and payment processing via Stripe and Paystack. Built with TypeScript, Next.js, and modern Web3 technologies.
 
-Live: [https://siz.land](https://siz.land) | ERP: [https://app.sizland.com](https://app.sizland.com)
+## Overview
 
----
-
-## What is SIZLAND?
-
-SIZLAND is a **revolutionary blockchain-based project management ecosystem** that combines traditional ERP capabilities with Web3 technology. This landing page serves as the public gateway to the SIZLAND platform, showcasing our vision and onboarding users into the future of transparent, decentralized project management.
-
-### The Complete Ecosystem
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SIZLAND ECOSYSTEM                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  🌐 Landing Page (This Repo)                                │
-│  └─► Marketing, demos, wallet connection showcase           │
-│                                                              │
-│  💼 ERP Application (SIZERP2-0)                             │
-│  └─► Project management, task tracking, team collaboration  │
-│                                                              │
-│  ⚡ Backend API (SIZERPBACKEND2-0)                          │
-│  └─► Business logic, database, payment processing           │
-│                                                              │
-│  ⛓️  Algorand Blockchain                                     │
-│  └─► SIZ Token, secure payments, transparent transactions   │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Purpose
-
-This landing page is the **first touchpoint** for users discovering SIZLAND. It serves multiple critical functions:
-
-- **Marketing Hub**: Showcase the power of blockchain-integrated project management
-- **Education Center**: Explain how SIZLAND revolutionizes team collaboration
-- **Web3 Demo**: Demonstrate wallet connection and blockchain capabilities
-- **Onboarding Gateway**: Direct users to create accounts in the ERP system
-- **Trust Builder**: Display tokenomics, roadmap, and ecosystem transparency
-- **Community Portal**: Connect with stakeholders, partners, and developers
+SIZ.land serves as the primary frontend for the SIZ token ecosystem, providing users with seamless token purchasing, wallet creation, and blockchain interaction capabilities. The platform integrates with Algorand blockchain for secure token distribution using ARC-0059 atomic transfers, supports multiple wallet providers, and includes comprehensive admin tools for token inventory management.
 
 ## Key Features
 
-### Modern Web3 Landing Experience
+### Blockchain Integration
+- **Algorand Network**: Full integration with Algorand blockchain for SIZ token operations
+- **ARC-0059 Atomic Transfers**: Secure, automated token distribution using Algorand smart contracts
+- **Multi-Wallet Support**: Compatible with Pera Wallet, Defly, Lute Connect, and WalletConnect
+- **Direct Transfer Fallback**: Automatic fallback to direct transfers if atomic transfer fails
+- **Transaction Monitoring**: Real-time transaction status tracking and confirmations
+- **ASA (Algorand Standard Asset)**: Full support for SIZ token as an ASA
 
-**Hero Section**
-- Stunning animated background with GSAP/Framer Motion
-- Clear value proposition and call-to-action
-- Live wallet connection demonstration
-- Real-time blockchain data display
+### Token Purchase & Distribution
+- **Fiat Payment Processing**: Stripe and Paystack integration for token purchases
+- **Automated Wallet Generation**: Server-side wallet creation for new users
+- **Token Claiming System**: Secure token claiming with email verification
+- **Batch Distribution**: Efficient batch token transfers for multiple recipients
+- **Inventory Management**: Real-time tracking of available token supply
+- **Purchase History**: Complete transaction history for all users
 
-**Feature Showcase**
-- Interactive cards highlighting platform capabilities
-- Visual demonstrations of key workflows
-- Testimonials and success stories
-- Integration partner logos
+### Authentication & Security
+- **Multiple Auth Methods**: 
+  - Wallet-based authentication (SIWE - Sign-In With Ethereum)
+  - Email/password authentication
+  - NextAuth integration for SSO
+- **Secure Wallet Storage**: Encrypted wallet mnemonic storage
+- **Session Management**: Secure session handling with JWT tokens
+- **Admin Access Control**: Role-based access for administrative functions
+- **Database Security**: PostgreSQL with SSL support
 
-**Web3 Integration Demo**
-- Multi-chain wallet support (Ethereum, Polygon, Arbitrum)
-- Real-time balance and transaction display
-- Network switching capabilities
-- Smart contract interaction examples
+### User Experience
+- **Responsive Design**: Mobile-first design with TailwindCSS
+- **Dark/Light Theme**: Built-in theme toggle for user preference
+- **Wallet Dashboard**: Complete wallet management interface
+- **Transaction History**: Detailed transaction logs and status updates
+- **Real-time Notifications**: User feedback for all blockchain operations
+- **Progressive Web App**: PWA support with offline capabilities
 
-### SIZ Token & Blockchain Integration
+### Admin Features
+- **Token Inventory Dashboard**: Real-time token supply monitoring
+- **User Management**: Admin interface for user account management
+- **Transaction Monitoring**: Track all token distributions and purchases
+- **Database Tools**: SQL query interface for data management
+- **Analytics**: Purchase trends and user statistics
 
-**Token Distribution**
-- Fiat-to-crypto gateway (Stripe & Paystack integration)
-- Automated wallet generation for new users
-- Secure token claiming with email verification
-- ARC-0059 atomic transfers on Algorand
-- Real-time transaction monitoring
-- Complete purchase history tracking
-
-**Wallet Support**
-- **Algorand**: Pera Wallet, Defly, Lute Connect
-- **Ethereum**: MetaMask, WalletConnect, Coinbase Wallet, Rainbow
-- **Multi-chain**: Polygon, Arbitrum, Optimism ready
-- Direct transfer fallback mechanisms
-
-### Design & User Experience
-
-**Responsive Design**
-- Mobile-first approach with TailwindCSS
-- Tablet and desktop optimizations
-- Dark/Light theme toggle
-- Smooth animations and transitions
-- Progressive Web App (PWA) support
-
-**Performance Optimized**
-- Next.js 15 with App Router
-- Server-side rendering (SSR)
-- Static site generation (SSG) where applicable
-- Image optimization with next/image
-- Code splitting and lazy loading
-
-### Content Sections
-
-**Information Pages**
-- Comprehensive whitepaper
-- Product roadmap and milestones
-- Team introduction
-- Technology stack details
-- Partnership information
-- Blog and news updates
-
-**Onboarding Flow**
-- Clear CTAs to ERP signup
-- Guided wallet connection process
-- Video tutorials and demos
-- FAQ and documentation links
-
-### Security & Authentication
-
-**NextAuth Integration**
-- Multiple authentication strategies
-- Wallet-based auth (SIWE - Sign-In With Ethereum)
-- Email/password authentication
-- OAuth providers ready (Google, GitHub)
-- Secure session management with JWT
-
-**Data Protection**
-- Encrypted wallet storage
-- HTTPS enforcement
-- CORS configuration
-- Rate limiting
-- Input validation and sanitization
-
-### Analytics & Tracking
-
-- User behavior analytics
-- Conversion funnel tracking
-- Wallet connection metrics
-- Page performance monitoring
-- A/B testing capabilities
-- SEO optimization
+### Content Pages
+- **Landing Page**: Hero section with features, about, and roadmap
+- **Whitepaper**: Comprehensive SIZ ecosystem documentation
+- **Blog**: Content management system for updates and news
+- **DEX Information**: Decentralized exchange integration details
+- **Privacy & Terms**: Legal documentation
 
 ## Technology Stack
 
@@ -184,381 +98,260 @@ This landing page is the **first touchpoint** for users discovering SIZLAND. It 
 - **Formatting**: Prettier
 - **Testing Scripts**: Custom TypeScript test runners
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
+- Node.js 18+ (or Bun for faster performance)
+- PostgreSQL database
+- Stripe account (for payment processing)
+- Algorand wallet with funding account
+- SIZ token ASA deployed on Algorand
+- ARC-0059 router application deployed
 
-**Required:**
-- Node.js 18+ or Bun (recommended for faster builds)
-- npm or yarn package manager
-- Git for version control
+## Installation
 
-**For Full Functionality:**
-- PostgreSQL database (for token distribution tracking)
-- Stripe account (payment processing)
-- Paystack account (African payment methods)
-- WalletConnect Project ID (Web3 wallet connections)
-- Algorand wallet (Pera, Defly, or Lute)
-- SIZ token ASA on Algorand mainnet/testnet
-
-### Installation
-
-**1. Clone the Repository**
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Finteckinfo/next-web3-template-main.git
 cd next-web3-template-main
 ```
 
-**2. Install Dependencies**
+### 2. Install Dependencies
 
+Using Bun (recommended):
 ```bash
-# Using Bun (recommended - faster)
 bun install
-
-# Or using npm
-npm install
-
-# Or using yarn
-yarn install
 ```
 
-**3. Environment Setup**
+Or using npm:
+```bash
+npm install
+```
 
-Create a `.env.local` file in the root directory:
+### 3. Environment Configuration
+
+Copy the example environment file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-**Minimum Configuration (For Landing Page Only):**
+Configure the following required variables:
 
 ```env
-# Public Variables
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_ERP_URL=http://localhost:5173
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_wc_project_id
-
-# Clerk Authentication (Optional)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-
-# For Token Distribution Features (Optional)
+# Database Configuration
 DATABASE_URL=postgresql://user:password@host:port/database
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+DB_SSL=disable  # or "require" for production
 
-# Algorand Configuration (Optional)
-ALGORAND_NETWORK_URL=https://testnet-api.algonode.cloud
-SIZ_TOKEN_ASSET_ID=your_asset_id
-CENTRAL_WALLET_ADDRESS=your_wallet
-CENTRAL_WALLET_MNEMONIC=your 25 word mnemonic
+# Stripe Payment Configuration
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# Algorand Blockchain Configuration
+ALGORAND_NETWORK_URL=https://mainnet-api.algonode.cloud
+ALGORAND_NETWORK_TOKEN=  # Usually empty for public nodes
+ALGOD_URL=https://mainnet-api.algonode.cloud
+
+# SIZ Token Configuration
+SIZ_TOKEN_ASSET_ID=your_token_asset_id
+CENTRAL_WALLET_ADDRESS=your_central_wallet_address
+CENTRAL_WALLET_MNEMONIC=your 25 word mnemonic phrase
+
+# ARC-0059 Router Configuration
+ARC59_APP_ID=your_arc59_application_id
+UNFREEZE_ACCOUNT_ADDRESS=your_freeze_manager_address
+UNFREEZE_ACCOUNT_MNEMONIC=your freeze manager 25 word mnemonic
+
+# Testing (optional)
+TEST_RECEIVER_ADDRESS=test_wallet_address
+TEST_RECEIVER_MNEMONIC=test wallet 25 word mnemonic
 ```
 
-**4. Database Setup (If Using Token Distribution)**
+### 4. Database Setup
+
+Run the database initialization script:
 
 ```bash
 npm run setup:db
 ```
 
-**5. Start Development Server**
+This will create the necessary tables:
+- `purchases`: Token purchase records
+- `webhooks`: Webhook event logs
+- `users`: User accounts
+- `wallets`: Generated wallet information
+
+### 5. Start Development Server
 
 ```bash
 npm run dev
+# or
+bun run dev
 ```
 
-✅ **Landing page now running at:** `http://localhost:3000`
+The application will be available at `http://localhost:3000`.
 
 ## Development
 
 ### Available Scripts
 
 ```bash
-# Development Workflow
-npm run dev              # Start dev server (http://localhost:3000)
+# Development
+npm run dev              # Start development server
 npm run build            # Build for production
 npm run start            # Start production server
-npm run export           # Export static site
-
-# Code Quality
 npm run lint             # Run ESLint
-npm run format           # Format with Prettier
+npm run format           # Format code with Prettier
 npm run typecheck        # TypeScript type checking
 
-# Database Management (Token Distribution)
-npm run setup:db         # Initialize database
-npm run init:inventory   # Setup token inventory
-npm run check:db         # Test DB connection
+# Database Management
+npm run setup:db         # Initialize database tables
+npm run init:inventory   # Set up token inventory
+npm run fix:schema       # Fix database schema issues
+npm run check:db         # Check database connection
+npm run create:tables    # Create missing tables
 
 # Testing & Debugging
-npm run test:arc59       # Test Algorand integration
-npm run test:payment     # Test payment flow
-npm run test:webhook     # Test webhook processing
-```
-
-### Development Workflow
-
-**For Landing Page Development Only:**
-1. Start dev server: `npm run dev`
-2. Edit pages in `src/pages/` or `src/app/`
-3. Add components in `src/components/`
-4. Update styles in `src/styles/`
-5. Hot reload happens automatically
-
-**For Full Ecosystem Development:**
-
-**Terminal 1 - Landing Page:**
-```bash
-cd ~/SizLand/web3-landing
-npm run dev  # Runs on :3000
-```
-
-**Terminal 2 - ERP System:**
-```bash
-cd ~/SizLand/SIZERP2-0
-npm run dev  # Runs on :5173
-```
-
-**Terminal 3 - Backend API:**
-```bash
-cd ~/SizLand/SIZERPBACKEND2-0
-npm run dev  # Runs on :4000
+npm run test:arc59              # Test ARC-0059 integration
+npm run test:payment            # Test payment flow
+npm run test:wallet-claim       # Test wallet claiming
+npm run test:paystack           # Test Paystack integration
+npm run test:webhook-flow       # Test webhook processing
+npm run debug:production        # Debug production issues
+npm run debug:webhook           # Debug webhook integration
 ```
 
 ### Project Structure
 
 ```
-web3-landing/
+siz.land/
 ├── public/                      # Static assets
-│   ├── favicon.ico              # Site icon
-│   ├── images/                  # Image assets
-│   └── manifest.json            # PWA manifest
-│
+│   ├── favicon.ico
+│   └── images/
 ├── src/
-│   ├── app/                     # Next.js 15 App Router
-│   │   ├── layout.tsx           # Root layout
-│   │   ├── page.tsx             # Homepage
-│   │   └── globals.css          # Global styles
-│   │
-│   ├── pages/                   # Pages Router (Hybrid)
-│   │   ├── api/                 # API endpoints
-│   │   │   ├── auth/            # Authentication
-│   │   │   ├── webhooks/        # Payment webhooks
+│   ├── app/                     # Next.js App Router pages
+│   ├── assets/                  # Images and icons
+│   ├── components/              # React components
+│   │   ├── ui/                  # Shadcn UI components
+│   │   ├── navigation/          # Navigation components
+│   │   ├── hero.tsx             # Landing hero section
+│   │   ├── features.tsx         # Features section
+│   │   ├── roadmap.tsx          # Product roadmap
+│   │   └── ...
+│   ├── config/                  # Configuration files
+│   ├── context/                 # React context providers
+│   ├── lib/                     # Utility functions
+│   │   ├── algorand/            # Algorand integration
+│   │   ├── stripe/              # Stripe integration
+│   │   ├── db/                  # Database utilities
+│   │   └── utils.ts
+│   ├── pages/                   # Next.js Pages Router
+│   │   ├── api/                 # API routes
+│   │   │   ├── auth/            # Authentication endpoints
+│   │   │   ├── admin/           # Admin endpoints
+│   │   │   ├── user/            # User endpoints
 │   │   │   ├── generateWallet.ts
 │   │   │   └── wallet.ts
-│   │   ├── index.tsx            # Landing page (alternative)
-│   │   ├── whitepaper.tsx       # Whitepaper page
+│   │   ├── admin/               # Admin dashboard
+│   │   ├── index.tsx            # Homepage
+│   │   ├── wallet.tsx           # Wallet dashboard
+│   │   ├── wallet-auth.tsx      # Wallet authentication
+│   │   ├── new-wallet.tsx       # Wallet creation
+│   │   ├── login.tsx            # Login page
+│   │   ├── signup.tsx           # Registration page
 │   │   ├── dex.tsx              # DEX information
-│   │   ├── blog.tsx             # Blog listing
-│   │   └── wallet.tsx           # Wallet dashboard
-│   │
-│   ├── components/              # React components
-│   │   ├── ui/                  # Shadcn UI library
-│   │   ├── layout/              # Layout components
-│   │   │   ├── Header.tsx       # Navigation bar
-│   │   │   ├── Footer.tsx       # Site footer
-│   │   │   └── Sidebar.tsx      # Mobile menu
-│   │   ├── sections/            # Page sections
-│   │   │   ├── Hero.tsx         # Hero section
-│   │   │   ├── Features.tsx     # Features showcase
-│   │   │   ├── Roadmap.tsx      # Product roadmap
-│   │   │   ├── Tokenomics.tsx   # Token economics
-│   │   │   └── Team.tsx         # Team members
-│   │   └── web3/                # Web3 components
-│   │       ├── ConnectButton.tsx
-│   │       ├── WalletInfo.tsx
-│   │       └── NetworkSwitch.tsx
-│   │
-│   ├── lib/                     # Utilities & configs
-│   │   ├── algorand/            # Algorand SDK
-│   │   ├── stripe/              # Payment processing
-│   │   ├── db/                  # Database utils
-│   │   ├── wagmi.ts             # Wagmi config
-│   │   └── utils.ts             # Helper functions
-│   │
-│   ├── context/                 # React contexts
-│   │   ├── AuthContext.tsx      # Authentication state
-│   │   └── Web3Context.tsx      # Web3 providers
-│   │
-│   ├── types/                   # TypeScript definitions
-│   │   ├── index.ts             # Main types
-│   │   ├── api.ts               # API types
-│   │   └── web3.ts              # Web3 types
-│   │
-│   └── styles/                  # Stylesheets
-│       └── globals.css          # Global CSS
-│
+│   │   ├── blog.tsx             # Blog page
+│   │   ├── whitepaper.tsx       # Whitepaper
+│   │   └── ...
+│   ├── providers/               # Context providers
+│   ├── styles/                  # Global styles
+│   ├── types/                   # TypeScript types
+│   └── wagmi.ts                 # Wagmi configuration
 ├── scripts/                     # Utility scripts
-│   ├── setup-database.ts        # DB initialization
 │   ├── test-arc59-integration.ts
-│   └── test-payment-flow.ts
-│
-├── .env.example                 # Environment template
-├── .env.local                   # Local environment (gitignored)
-├── .gitignore                   # Git ignore rules
-├── components.json              # Shadcn config
-├── middleware.ts                # Route protection
-├── next.config.js               # Next.js config
-├── tailwind.config.ts           # Tailwind config
-├── tsconfig.json                # TypeScript config
-├── package.json                 # Dependencies
-└── README.md                    # This file
+│   ├── test-payment-flow.ts
+│   ├── setup-database.ts
+│   └── ...
+├── .env.example                 # Environment variables template
+├── .env.local                   # Local environment variables (gitignored)
+├── components.json              # Shadcn configuration
+├── middleware.ts                # Next.js middleware
+├── next.config.js               # Next.js configuration
+├── tailwind.config.ts           # Tailwind configuration
+├── tsconfig.json                # TypeScript configuration
+├── package.json                 # Dependencies and scripts
+└── README.md                    # Documentation
 ```
 
-## User Journey
+## Core Features Documentation
 
-### From Discovery to Ecosystem Entry
+### Token Purchase Flow
 
-**Step 1: Discovery** (Landing Page)
-```
-User finds SIZLAND → Explores features → Watches demos → Connects wallet
-```
+1. **User Initiates Purchase**
+   - User selects token amount on landing page
+   - Stripe checkout session created
+   - User redirected to Stripe payment page
 
-**Step 2: Education** (Landing Page)
-```
-Reads whitepaper → Reviews roadmap → Checks tokenomics → Views team
-```
+2. **Payment Processing**
+   - Stripe processes payment
+   - Webhook received at `/api/webhooks/stripe`
+   - Payment verified and recorded in database
 
-**Step 3: Decision** (Landing Page)
-```
-Clicks "Get Started" → Redirected to ERP signup
-```
+3. **Wallet Generation**
+   - Server generates new Algorand wallet
+   - Wallet address and encrypted mnemonic stored
+   - Wallet info sent to user via email
 
-**Step 4: Onboarding** (ERP System)
-```
-Creates account → Connects Algorand wallet → Completes profile
-```
+4. **Token Distribution**
+   - User claims wallet using email link
+   - ARC-0059 atomic transfer initiated
+   - Tokens transferred to user's wallet
+   - Transaction confirmed on blockchain
 
-**Step 5: Participation** (ERP System)
-```
-Joins projects → Works on tasks → Receives blockchain payments
-```
+### Wallet Authentication
 
-### Complete Token Purchase Flow
+Users can authenticate using two methods:
 
-**1. Token Purchase Initiation**
-- User clicks "Buy SIZ Tokens" on landing page
-- Selects token amount and payment method
-- Stripe/Paystack checkout session created
-- Redirected to secure payment page
-
-**2. Payment Processing**
-- Payment provider processes transaction
-- Webhook notification sent to `/api/webhooks/stripe`
-- Payment verified via signature validation
-- Transaction recorded in database
-
-**3. Wallet Generation**
-- Server automatically generates Algorand wallet
-- Mnemonic encrypted with AES-256-GCM
-- Wallet address and encrypted keys stored
-- Email sent with claim link
-
-**4. Token Distribution**
-- User clicks email claim link
-- Verifies identity via secure token
-- ARC-0059 atomic transfer initiated on Algorand
-- Tokens transferred to user's new wallet
-- Transaction hash returned for verification
-- Confirmation email sent with wallet details
-
-### Integration with ERP System
-
-**Seamless Transition**
-
-The landing page is designed to smoothly transition users to the ERP application:
-
-```javascript
-// CTA Button Component
-function GetStartedButton() {
-  const handleClick = () => {
-    // Track conversion
-    analytics.track('get_started_clicked');
-    
-    // Redirect to ERP signup
-    window.location.href = process.env.NEXT_PUBLIC_ERP_URL + '/register';
-  };
-  
-  return <Button onClick={handleClick}>Get Started</Button>;
-}
+**Wallet-Based Authentication**:
+```typescript
+// Connect wallet using any supported provider
+const { wallets, activeAccount } = useWallet();
+// Sign message to verify ownership
+const signature = await signMessage(message);
+// Authenticate with backend
 ```
 
-**Shared Authentication Context**
-
-Both landing page and ERP can share authentication via Clerk:
-
-```javascript
-// Wallet connection preserved across domains
-const { isSignedIn, user } = useUser();
-
-if (isSignedIn) {
-  // User authenticated, redirect to dashboard
-  router.push(ERP_URL + '/dashboard');
-}
+**Email/Password Authentication**:
+```typescript
+// Traditional authentication flow
+await signIn('credentials', { email, password });
 ```
 
-### Web3 Integration Example
+### ARC-0059 Integration
 
-**Wallet Connection (Ethereum/Multi-chain)**
+The platform uses ARC-0059 for secure atomic transfers:
 
 ```typescript
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { mainnet, polygon, arbitrum } from 'wagmi/chains';
-
-function WalletButton() {
-  const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
-
-  if (isConnected) {
-    return (
-      <div>
-        <p>Connected: {address}</p>
-        <button onClick={() => disconnect()}>Disconnect</button>
-      </div>
-    );
-  }
-
-  return connectors.map((connector) => (
-    <button key={connector.id} onClick={() => connect({ connector })}>
-      Connect {connector.name}
-    </button>
-  ));
-}
+// Atomic transfer with ARC-0059
+const txn = await makeAtomicTransferTxn({
+  from: centralWallet,
+  to: recipientAddress,
+  amount: tokenAmount,
+  assetId: SIZ_TOKEN_ASSET_ID,
+  appId: ARC59_APP_ID
+});
 ```
 
-**Token Distribution (Algorand)**
-
+Fallback to direct transfer if atomic transfer fails:
 ```typescript
-import algosdk from 'algosdk';
-
-// ARC-0059 atomic transfer
-async function distributeTokens(recipientAddress: string, amount: number) {
-  const algodClient = new algosdk.Algodv2(
-    process.env.ALGORAND_TOKEN,
-    process.env.ALGORAND_URL,
-    ''
-  );
-
-  // Create atomic transfer transaction group
-  const txn = await makeAtomicTransferTxn({
-    from: centralWallet,
-    to: recipientAddress,
-    amount: amount,
-    assetId: SIZ_TOKEN_ASSET_ID,
-    appId: ARC59_APP_ID,
-  });
-
-  // Sign and send
-  const signedTxn = await signTransaction(txn);
-  const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
-  
-  // Wait for confirmation
-  await waitForConfirmation(algodClient, txId, 4);
-  
-  return txId;
-}
+// Direct ASA transfer
+const txn = await makeAssetTransferTxn({
+  from: centralWallet,
+  to: recipientAddress,
+  amount: tokenAmount,
+  assetId: SIZ_TOKEN_ASSET_ID
+});
 ```
 
 ### Admin Dashboard
@@ -598,196 +391,64 @@ Access at `/admin` (requires admin authentication):
 
 ## Deployment
 
-### Production Build
+### Build for Production
 
 ```bash
-# Build optimized production bundle
 npm run build
-
-# Preview production build locally
-npm run start
-
-# Or export as static site
-npm run export
 ```
+
+### Environment Variables for Production
+
+Update the following for production deployment:
+
+- Change `ALGORAND_NETWORK_URL` to mainnet
+- Use production Stripe keys
+- Enable SSL for database (`DB_SSL=require`)
+- Set strong secrets for wallet encryption
+- Configure production domain in CORS settings
 
 ### Deployment Platforms
 
-**Option 1: Vercel (Recommended)**
+**Netlify** (Configured):
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-
-# Custom domain
-vercel --prod --domains=sizland.com
-```
-
-**Option 2: Netlify**
-```bash
-# Install Netlify CLI
-npm i -g netlify-cli
-
-# Deploy
+# Deploy using Netlify CLI
 netlify deploy --prod
 ```
 
-**Option 3: Docker**
-```dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-RUN npm ci --only=production
-EXPOSE 3000
-CMD ["npm", "start"]
+**Vercel**:
+```bash
+# Deploy using Vercel CLI
+vercel --prod
 ```
 
-### Environment Variables (Production)
-
-**Critical Updates:**
-```env
-# Application URLs
-NEXT_PUBLIC_APP_URL=https://sizland.com
-NEXT_PUBLIC_ERP_URL=https://app.sizland.com
-NEXT_PUBLIC_API_URL=https://api.sizland.com
-
-# Algorand Mainnet
-ALGORAND_NETWORK_URL=https://mainnet-api.algonode.cloud
-SIZ_TOKEN_ASSET_ID=<your_mainnet_asset_id>
-
-# Production Payment Keys
-STRIPE_SECRET_KEY=sk_live_xxx
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-
-# Security
-DB_SSL=require
-NEXTAUTH_SECRET=<generate_strong_secret>
-NEXTAUTH_URL=https://sizland.com
-```
-
-### Domain Configuration
-
-**Recommended DNS Setup:**
-```
-# Main landing page
-A     @           <vercel_ip_or_netlify_ip>
-CNAME www         cname.vercel-dns.com
-
-# ERP Application
-CNAME app         <erp-deployment>.vercel.app
-
-# Backend API
-CNAME api         <backend-deployment>.railway.app
+**Manual Deployment**:
+```bash
+npm run build
+npm start
 ```
 
 ### Webhook Configuration
 
-**Stripe Dashboard:**
-1. Go to Developers → Webhooks
-2. Add endpoint: `https://sizland.com/api/webhooks/stripe`
-3. Select events: `checkout.session.completed`, `payment_intent.succeeded`
-4. Copy signing secret to `STRIPE_WEBHOOK_SECRET`
+Configure webhooks in payment provider dashboards:
 
-**Paystack Dashboard:**
-1. Go to Settings → Webhooks
-2. Add URL: `https://sizland.com/api/webhooks/paystack`
-3. Enable: `charge.success`
+**Stripe**:
+- Endpoint: `https://yourdomain.com/api/webhooks/stripe`
+- Events: `checkout.session.completed`, `payment_intent.succeeded`
 
-### Post-Deployment Checklist
+**Paystack**:
+- Endpoint: `https://yourdomain.com/api/webhooks/paystack`
+- Events: `charge.success`
 
-- [ ] All environment variables set correctly
-- [ ] Webhook endpoints configured and tested
-- [ ] SSL certificates active (HTTPS)
-- [ ] Database connection working
-- [ ] Token distribution tested on mainnet
-- [ ] Analytics tracking configured
-- [ ] Error monitoring setup (Sentry)
-- [ ] Performance monitoring active
-- [ ] SEO meta tags verified
-- [ ] Social sharing cards tested
+## Security Considerations
 
-## 🔐 Security
-
-### Implemented Security Measures
-
-**Data Protection**
-- ✅ AES-256-GCM encryption for wallet mnemonics
-- ✅ PBKDF2 key derivation for encryption keys
-- ✅ All sensitive data in environment variables
-- ✅ HTTPS enforcement in production
-- ✅ Secure HTTP headers with middleware
-
-**API Security**
-- ✅ Webhook signature verification (Stripe/Paystack)
-- ✅ Rate limiting on all endpoints
-- ✅ CORS configuration for trusted domains
-- ✅ Input validation and sanitization
-- ✅ SQL injection prevention (parameterized queries)
-
-**Authentication & Authorization**
-- ✅ NextAuth for session management
-- ✅ JWT token-based authentication
-- ✅ Wallet signature verification (SIWE)
-- ✅ Role-based access control (RBAC)
-- ✅ Protected admin routes
-
-**Blockchain Security**
-- ✅ Transaction signing on server-side
-- ✅ Wallet mnemonic never exposed to client
-- ✅ ARC-0059 atomic transfers for safety
-- ✅ Transaction verification before confirmation
-
-### Security Best Practices
-
-**For Development:**
-```bash
-# Audit dependencies regularly
-npm audit
-
-# Fix vulnerabilities
-npm audit fix
-
-# Keep dependencies updated
-npm update
-
-# Use security linting
-npm run lint
-```
-
-**For Production:**
-- 🔒 Enable database SSL (`DB_SSL=require`)
-- 🔒 Use strong secrets (>32 characters, random)
-- 🔒 Rotate API keys and secrets regularly
-- 🔒 Enable 2FA for admin accounts
-- 🔒 Monitor security logs
-- 🔒 Implement CSRF protection
-- 🔒 Set up WAF (Web Application Firewall)
-- 🔒 Regular penetration testing
-
-### Security Incident Response
-
-**If Security Breach Detected:**
-1. **Immediate**: Disable affected services
-2. **Notify**: Alert users and stakeholders
-3. **Investigate**: Review logs and identify breach vector
-4. **Rotate**: Change all compromised credentials
-5. **Patch**: Fix vulnerability
-6. **Monitor**: Watch for further attempts
-7. **Document**: Create incident report
-
-**Refer to:** `SECURITY_BREACH_RESPONSE.md` for detailed procedures
+- All wallet mnemonics are encrypted before storage
+- Use environment variables for all sensitive data
+- Enable database SSL in production
+- Implement rate limiting on API endpoints
+- Validate all webhook signatures
+- Use HTTPS in production
+- Regular security audits recommended
+- Keep dependencies updated
 
 ## Testing
 
@@ -864,224 +525,13 @@ For technical support or questions:
 - Contact the development team
 - Review the documentation files in the repository
 
-## SIZLAND Ecosystem
-
-This landing page is **part of a complete blockchain-powered project management ecosystem**:
-
-### Component Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SIZLAND ECOSYSTEM                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  🌐 Landing Page (This Repository)                          │
-│  📦 Repository: web3-landing                                 │
-│  🎯 Purpose: Marketing, education, token distribution        │
-│  🔗 Tech: Next.js 15, React 19, TailwindCSS                  │
-│                                                              │
-│  ───────────────────────────────────────────────────────────│
-│                                                              │
-│  💼 ERP Application                                          │
-│  📦 Repository: SIZERP2-0                                    │
-│  🎯 Purpose: Project management, task tracking, payments     │
-│  🔗 Tech: Vue 3, Vuetify, Pinia, Algorand SDK                │
-│                                                              │
-│  ───────────────────────────────────────────────────────────│
-│                                                              │
-│  ⚡ Backend API                                              │
-│  📦 Repository: SIZERPBACKEND2-0                             │
-│  🎯 Purpose: Business logic, database, API endpoints         │
-│  🔗 Tech: Node.js, Express, PostgreSQL, Prisma               │
-│                                                              │
-│  ───────────────────────────────────────────────────────────│
-│                                                              │
-│  ⛓️  Algorand Blockchain                                     │
-│  🎯 Purpose: SIZ Token, payments, transparent transactions   │
-│  🔗 Tech: Algorand L1, ARC-0059, ASA                         │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Related Repositories
-
-**Main Repositories:**
-- [**SIZERP2-0**](https://github.com/Finteckinfo/SIZERP2-0) - Vue 3 ERP application
-- [**SIZERPBACKEND2-0**](../SIZERPBACKEND2-0) - Node.js backend API
-- [**web3-landing**](https://github.com/Finteckinfo/next-web3-template-main) - This repository
-
-**Local Paths** (if you have full ecosystem cloned):
-```bash
-~/SizLand/
-├── web3-landing/       # This repository (Next.js landing page)
-├── SIZERP2-0/         # Vue 3 ERP application
-└── SIZERPBACKEND2-0/  # Node.js backend API
-```
-
-### Running the Complete Ecosystem
-
-See the [**Complete SIZLAND System Guide**](../COMPLETE_SIZLAND_SYSTEM_GUIDE.md) for detailed setup of all components.
-
-**Quick Start (All Components):**
-
-```bash
-# Terminal 1 - Landing Page (Port 3000)
-cd ~/SizLand/web3-landing
-npm install
-npm run dev
-
-# Terminal 2 - ERP System (Port 5173)
-cd ~/SizLand/SIZERP2-0
-npm install
-npm run dev
-
-# Terminal 3 - Backend API (Port 4000)
-cd ~/SizLand/SIZERPBACKEND2-0
-npm install
-npm run dev
-```
-
 ## Related Documentation
 
-**In This Repository:**
-- `SECURITY_BREACH_RESPONSE.md` - Security incident handling
-- `BUG_FIXES_SUMMARY.md` - Recent bug fixes and improvements
-- `AUTOMATED_BUG_DETECTION_SETUP.md` - Pre-commit security hooks
-
-**Integration Guides:**
-- `ARC59_INTEGRATION.md` - Algorand ARC-0059 atomic transfers
-- `STRIPE_INTEGRATION.md` - Stripe payment processing
-- `PAYSTACK_INTEGRATION.md` - Paystack for African payments
-- `WALLET_GENERATION.md` - Automated wallet creation
-- `COMPLETE_INTEGRATION_GUIDE.md` - End-to-end setup
-
-**Deployment:**
-- `PRODUCTION_READINESS_CHECKLIST.md` - Pre-launch verification
+- `ARC59_INTEGRATION.md` - Detailed ARC-0059 integration guide
+- `STRIPE_INTEGRATION.md` - Stripe payment setup
+- `PAYSTACK_INTEGRATION.md` - Paystack integration guide
+- `WALLET_GENERATION.md` - Wallet creation documentation
+- `PRODUCTION_READINESS_CHECKLIST.md` - Pre-launch checklist
 - `PRODUCTION_TROUBLESHOOTING.md` - Common production issues
-- `DEPLOYMENT_CHECKLIST.md` - Deployment steps
-
-**System-Wide:**
-- [`../COMPLETE_SIZLAND_SYSTEM_GUIDE.md`](../COMPLETE_SIZLAND_SYSTEM_GUIDE.md) - Complete ecosystem documentation
-- [`../README.md`](../README.md) - Master README for entire SIZLAND system
-
-## Contributing
-
-### Development Workflow
-
-1. **Fork the repository**
-2. **Create feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. **Make your changes**
-4. **Run tests**
-   ```bash
-   npm run typecheck
-   npm run lint
-   npm run test
-   ```
-5. **Commit with conventional commits**
-   ```bash
-   git commit -m "feat: add awesome feature"
-   git commit -m "fix: resolve bug in wallet connection"
-   ```
-6. **Push and create PR**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-### Commit Convention
-
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting, etc.)
-- `refactor:` Code refactoring
-- `test:` Adding or updating tests
-- `chore:` Maintenance tasks
-
-## 📄 License
-
-**Proprietary License**
-
-This project is private and proprietary to **Finteck Information Systems**. All rights reserved.
-
-- ❌ Not open source
-- ❌ No public distribution
-- ❌ No commercial use without permission
-- ✅ Internal development and testing permitted
-- ✅ Client deployments authorized
-
-For licensing inquiries: contact@sizland.com
-
-## 💬 Support & Contact
-
-### Technical Support
-
-**For Bugs & Issues:**
-- Create an issue in the GitHub repository
-- Email: dev@sizland.com
-
-**For Feature Requests:**
-- Submit via GitHub Discussions
-- Email: features@sizland.com
-
-### Documentation
-
-**Primary Resources:**
-- This README (general overview)
-- [Complete System Guide](../COMPLETE_SIZLAND_SYSTEM_GUIDE.md) (full ecosystem)
-- [API Documentation](docs/API.md) (API reference)
-
-### Team Contacts
-
-- **Project Lead**: [Your Name]
-- **Technical Lead**: [Your Name]
-- **DevOps**: [Your Name]
-- **Security**: security@sizland.com
-
-## 🎯 Roadmap
-
-### Current Version: 1.0.0
-
-**Completed ✅**
-- Landing page with Web3 integration
-- Token distribution via Stripe/Paystack
-- Automated wallet generation
-- ARC-0059 atomic transfers
-- Admin dashboard
-- Multi-wallet support
-
-**In Progress 🚧**
-- Enhanced analytics dashboard
-- Mobile app development
-- Additional payment gateways
-- Multi-language support
-
-**Planned 📋**
-- NFT integration for achievements
-- DAO governance features
-- Cross-chain bridge support
-- Advanced smart contract features
-
-See [**Sizland Product Roadmap.pdf**](./Sizland%20Product%20Roadmap.pdf) for detailed roadmap.
-
-## 🙏 Acknowledgments
-
-**Built With:**
-- [Next.js](https://nextjs.org/) - React framework
-- [Algorand](https://www.algorand.com/) - Blockchain platform
-- [Stripe](https://stripe.com/) - Payment processing
-- [TailwindCSS](https://tailwindcss.com/) - CSS framework
-- [Shadcn/ui](https://ui.shadcn.com/) - Component library
-
-**Special Thanks:**
-- Algorand Foundation for blockchain support
-- CodedThemes for UI inspiration
-- The Web3 community for guidance
-
----
-
-**Made with ❤️ by Finteck Information Systems**
-
-**Last Updated:** November 2025
+- `Admin-README.md` - Admin dashboard guide
+- `COMPLETE_INTEGRATION_GUIDE.md` - End-to-end integration guide
