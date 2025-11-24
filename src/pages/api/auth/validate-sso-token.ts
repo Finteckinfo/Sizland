@@ -15,7 +15,11 @@ export default async function handler(
   try {
     const { ssoToken } = req.body;
 
+    console.log('[SSO Validate] Received validation request');
+    console.log('[SSO Validate] Has token:', !!ssoToken);
+
     if (!ssoToken) {
+      console.error('[SSO Validate] No SSO token provided');
       return res.status(400).json({ error: 'SSO token required' });
     }
 
@@ -24,6 +28,8 @@ export default async function handler(
       console.error('[SSO Validate] NEXTAUTH_SECRET is not set');
       return res.status(500).json({ error: 'Server configuration error' });
     }
+
+    console.log('[SSO Validate] Verifying token...');
 
     // Verify and decode the token
     const decoded = jwt.verify(ssoToken, secret, {
@@ -34,21 +40,30 @@ export default async function handler(
       email: string;
       name: string;
       type: string;
+      authMethod?: string;
     };
+
+    console.log('[SSO Validate] Token decoded:', {
+      userId: decoded.userId,
+      email: decoded.email,
+      type: decoded.type
+    });
 
     // Check token type
     if (decoded.type !== 'sso-token') {
+      console.error('[SSO Validate] Invalid token type:', decoded.type);
       return res.status(400).json({ error: 'Invalid token type' });
     }
 
-    console.log('[SSO Validate] Token validated for user:', decoded.email);
+    console.log('[SSO Validate] Token validated successfully for user:', decoded.email);
 
     // Return user information
     return res.status(200).json({
       user: {
         id: decoded.userId,
         email: decoded.email,
-        name: decoded.name
+        name: decoded.name,
+        authMethod: decoded.authMethod || 'standard'
       },
       sessionToken: ssoToken,
       validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
@@ -56,15 +71,19 @@ export default async function handler(
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       console.error('[SSO Validate] Token expired');
-      return res.status(401).json({ error: 'Token expired' });
+      return res.status(401).json({ error: 'Token expired', details: 'SSO token has expired. Please log in again.' });
     }
     
     if (error instanceof jwt.JsonWebTokenError) {
       console.error('[SSO Validate] Invalid token:', error.message);
-      return res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ error: 'Invalid token', details: error.message });
     }
 
     console.error('[SSO Validate] Validation error:', error);
-    return res.status(500).json({ error: 'Token validation failed' });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return res.status(500).json({ 
+      error: 'Token validation failed',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    });
   }
 }
