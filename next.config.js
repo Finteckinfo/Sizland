@@ -16,7 +16,7 @@ const nextConfig = {
     };
     return config;
   },
-  // CRITICAL FIX: Ensure webhook routes work properly
+  // CRITICAL FIX: Ensure webhook routes work properly and enable CORS for SSO
   async headers() {
     return [
       {
@@ -25,6 +25,50 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        // Enable CORS for SSO token endpoints
+        source: '/api/auth/sso-token',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: 'https://erp.siz.land',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+        ],
+      },
+      {
+        // Enable CORS for SSO validation endpoint
+        source: '/api/auth/validate-sso-token',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: 'https://erp.siz.land',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
           },
         ],
       },
