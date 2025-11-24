@@ -164,12 +164,26 @@ Generated on: ${new Date().toLocaleString()}
     if (!wallet) return
 
     try {
+      setError(null)
+      console.log('🔌 [Algorand Wallet] Connecting to wallet:', id)
       await wallet.connect()
       
-      // Get the connected wallet address
-      const accounts = wallet.accounts
+      // Wait a moment for accounts to populate (some wallets need this)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Get the connected wallet address with retry
+      let accounts = wallet.accounts
+      let retries = 3
+      while ((!accounts || accounts.length === 0) && retries > 0) {
+        console.log(`⏳ [Algorand Wallet] Waiting for accounts... (${retries} retries left)`)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        accounts = wallet.accounts
+        retries--
+      }
+      
       if (!accounts || accounts.length === 0) {
-        setError('No accounts found in wallet')
+        console.error('❌ [Algorand Wallet] No accounts found after retries')
+        setError('No accounts found in wallet. Please ensure your wallet has at least one account.')
         return
       }
       
@@ -178,29 +192,32 @@ Generated on: ${new Date().toLocaleString()}
       
       // Create NextAuth session using the wallet provider
       try {
+        console.log('🔐 [Algorand Wallet] Creating session for:', walletAddress)
         const result = await signIn('wallet', {
           redirect: false,
           walletAddress: walletAddress,
         })
 
+        console.log('📊 [Algorand Wallet] SignIn result:', { ok: result?.ok, error: result?.error, status: result?.status })
+
         if (result?.ok) {
           console.log('✅ [Algorand Wallet] NextAuth session created')
           router.push('/lobby')
         } else {
-          console.error('Failed to create NextAuth session:', result?.error)
-          setError('Failed to create session. Please try again.')
+          console.error('❌ [Algorand Wallet] Failed to create NextAuth session:', result?.error)
+          setError(`Failed to create session: ${result?.error || 'Unknown error'}. Check console for details.`)
         }
       } catch (authError) {
-        console.error('Error creating NextAuth session:', authError)
-        setError('Failed to authenticate. Please try again.')
+        console.error('❌ [Algorand Wallet] Error creating NextAuth session:', authError)
+        setError(`Authentication error: ${authError instanceof Error ? authError.message : 'Unknown error'}`)
       }
     } catch (err: any) {
-      console.error('Wallet connect error:', err)
+      console.error('❌ [Algorand Wallet] Connect error:', err)
       const canceled = err?.data?.type === 'CONNECT_MODAL_CLOSED' || 
                       err?.message?.includes('cancelled') ||
                       err?.message === 'Operation Cancelled'
       
-      setError(canceled ? 'Wallet connection was cancelled.' : 'Failed to connect wallet. Try again.')
+      setError(canceled ? 'Wallet connection was cancelled.' : `Failed to connect wallet: ${err?.message || 'Unknown error'}`)
     }
   }
 
