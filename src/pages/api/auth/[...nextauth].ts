@@ -192,12 +192,13 @@ export const authOptions: NextAuthOptions = {
     },
     csrfToken: {
       name: process.env.NODE_ENV === 'production'
-        ? '__Host-next-auth.csrf-token'
+        ? '__Secure-next-auth.csrf-token'
         : 'next-auth.csrf-token',
       options: {
         httpOnly: true,
-        sameSite: 'strict', // CSRF tokens should always be strict
+        sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-subdomain compatibility
         path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
         secure: process.env.NODE_ENV === 'production'
       }
     }
