@@ -22,19 +22,14 @@ const LobbyPage = () => {
 
   const isAuthed = !!session?.user || (!!activeAccount && isReady);
 
-  // Get access token from session (with type assertion as it's a custom property)
-  const accessToken = (session as any)?.accessToken;
-
-  // Dapp tiles configuration with dynamic URL for ERP
+  // Dapp tiles configuration
   const dappTiles = [
     {
       title: "ERP",
       description: "At the heart of Sizland lies the ERP solution created for today's decentralized world",
       icon: "Workflow",
-      // Pass token if available for SSO
-      href: accessToken 
-        ? `https://sizerp20.netlify.app?token=${accessToken}` 
-        : "https://sizerp20.netlify.app",
+      // SSO via shared NextAuth session cookies on .siz.land domain
+      href: "https://erp.siz.land",
       isExternal: true,
       isClickable: true,
       variant: "blue" as const
