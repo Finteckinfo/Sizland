@@ -15,12 +15,48 @@ const LobbyPage = () => {
   const { data: session, status } = useSession();
   const { activeAccount, isReady } = useWallet();
   const [mounted, setMounted] = useState(false);
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const isAuthed = !!session?.user || (!!activeAccount && isReady);
+
+  // Handle ERP navigation with SSO token
+  const handleERPClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    if (!session?.user) {
+      console.error('[Lobby] No session found for SSO');
+      return;
+    }
+
+    setIsGeneratingToken(true);
+    try {
+      // Generate SSO token
+      const response = await fetch('/api/auth/sso-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate SSO token');
+      }
+
+      const { ssoToken } = await response.json();
+      
+      // Redirect to ERP with SSO token
+      window.location.href = `https://erp.siz.land?ssoToken=${ssoToken}`;
+    } catch (error) {
+      console.error('[Lobby] Error generating SSO token:', error);
+      alert('Failed to access ERP. Please try again.');
+    } finally {
+      setIsGeneratingToken(false);
+    }
+  };
 
   // Dapp tiles configuration
   const dappTiles = [
@@ -166,6 +202,25 @@ const LobbyPage = () => {
               }
 
               if (tile.isExternal) {
+                // Special handling for ERP with SSO token
+                if (tile.title === "ERP") {
+                  return (
+                    <a
+                      key={index}
+                      href={tile.href}
+                      onClick={handleERPClick}
+                      className="relative"
+                    >
+                      {isGeneratingToken && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                          <Loader2 className="w-6 h-6 animate-spin text-white" />
+                        </div>
+                      )}
+                      {tileContent}
+                    </a>
+                  );
+                }
+                
                 return (
                   <a
                     key={index}
