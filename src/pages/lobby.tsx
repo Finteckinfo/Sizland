@@ -27,13 +27,46 @@ const LobbyPage = () => {
   const handleERPClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     
+    console.log('[Lobby] ERP clicked');
+    console.log('[Lobby] Session status:', status);
+    console.log('[Lobby] Has session user:', !!session?.user);
+    console.log('[Lobby] Has active account:', !!activeAccount);
+    
+    // For wallet users without NextAuth session, redirect directly
+    if (!session?.user && activeAccount) {
+      console.log('[Lobby] Wallet user detected, creating wallet session...');
+      // Try to create a session first by logging in with wallet
+      try {
+        const walletAddress = activeAccount.address;
+        const signInResponse = await fetch('/api/auth/wallet-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            walletAddress,
+            chainId: 'algorand',
+            domain: window.location.hostname
+          })
+        });
+
+        if (signInResponse.ok) {
+          // Session created, reload to get updated session
+          window.location.reload();
+          return;
+        }
+      } catch (walletError) {
+        console.error('[Lobby] Wallet session creation failed:', walletError);
+      }
+    }
+    
     if (!session?.user) {
       console.error('[Lobby] No session found for SSO');
+      alert('Please ensure you are logged in');
       return;
     }
 
     setIsGeneratingToken(true);
     try {
+      console.log('[Lobby] Generating SSO token...');
       // Generate SSO token
       const response = await fetch('/api/auth/sso-token', {
         method: 'POST',
@@ -42,11 +75,16 @@ const LobbyPage = () => {
         }
       });
 
+      console.log('[Lobby] SSO token response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to generate SSO token');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[Lobby] SSO token error:', errorData);
+        throw new Error(errorData.error || 'Failed to generate SSO token');
       }
 
       const { ssoToken } = await response.json();
+      console.log('[Lobby] SSO token generated, redirecting to ERP...');
       
       // Redirect to ERP with SSO token
       window.location.href = `https://erp.siz.land?ssoToken=${ssoToken}`;
