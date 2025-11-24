@@ -266,9 +266,9 @@ Generated on: ${new Date().toLocaleString()}
               </div>
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-4xl">🎉</span>
+                  <span className="text-4xl">🔐</span>
                 </div>
-                <h3 className="text-xl font-bold mb-2">Create SIZ Wallet</h3>
+                <h3 className="text-xl font-bold mb-2">Create Sizland Wallet</h3>
                 <p className="text-sm text-green-100">
                   Generate your own Sizland wallet instantly and securely
                 </p>
@@ -320,11 +320,11 @@ Generated on: ${new Date().toLocaleString()}
             </button>
 
             <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl">🎉</span>
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mb-4">
+                <span className="text-5xl"></span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Create Your SIZ Wallet
+                Create Your Sizland Wallet
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Your wallet will be generated locally in your browser. Nothing is sent to a server.
@@ -361,7 +361,7 @@ Generated on: ${new Date().toLocaleString()}
                   : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
               }`}
             >
-              {isGenerating ? 'Generating Wallet...' : '🎉 Generate SIZ Wallet Now'}
+              {isGenerating ? 'Generating Wallet...' : 'Generate Sizland Wallet Now'}
             </button>
           </div>
         ) : selectedOption === 'algorand' ? (

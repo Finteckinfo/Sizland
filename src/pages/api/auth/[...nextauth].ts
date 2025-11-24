@@ -77,8 +77,12 @@ export const authOptions: NextAuthOptions = {
           // Call backend wallet-login endpoint
           // Use NEXT_PUBLIC_BACKEND_URL if available, otherwise fallback to NEXTAUTH_URL (local API)
           const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          const apiUrl = `${backendUrl}/api/auth/wallet-login`;
           
-          const res = await fetch(`${backendUrl}/api/auth/wallet-login`, {
+          console.log('[NextAuth Wallet] Calling API:', apiUrl);
+          console.log('[NextAuth Wallet] Wallet address:', credentials.walletAddress);
+          
+          const res = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -88,7 +92,9 @@ export const authOptions: NextAuthOptions = {
             })
           });
 
+          console.log('[NextAuth Wallet] Response status:', res.status);
           const data = await res.json();
+          console.log('[NextAuth Wallet] Response data:', data);
 
           if (res.ok && data) {
             return {
@@ -102,9 +108,13 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
+          console.error('[NextAuth Wallet] API response not ok or data missing');
           return null;
         } catch (error) {
-          console.error('Wallet authorization error:', error);
+          console.error('[NextAuth Wallet] Authorization error:', error);
+          if (error instanceof Error) {
+            console.error('[NextAuth Wallet] Error details:', error.message);
+          }
           return null;
         }
       }

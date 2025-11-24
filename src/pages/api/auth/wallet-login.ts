@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { paymentDB } from '@/lib/database/payments';
 
 /**
  * Wallet Login Endpoint (Frontend/Local)
@@ -48,6 +47,8 @@ export default async function handler(
     try {
       // Only attempt if DB is configured
       if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('your_database_url')) {
+        // Lazy import to avoid module-level errors
+        const { paymentDB } = await import('@/lib/database/payments');
         balanceInfo = await paymentDB.getUserWalletBalance(normalizedAddress);
       }
     } catch (dbError) {
@@ -75,9 +76,12 @@ export default async function handler(
 
   } catch (error) {
     console.error('❌ [API] Wallet login error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('❌ [API] Error stack:', errorStack);
     return res.status(500).json({ 
       error: 'Internal server error during wallet login',
-      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
 }
