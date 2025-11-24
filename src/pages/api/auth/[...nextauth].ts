@@ -74,42 +74,37 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Call backend wallet-login endpoint
-          // Use NEXT_PUBLIC_BACKEND_URL if available, otherwise fallback to NEXTAUTH_URL (local API)
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
-          const apiUrl = `${backendUrl}/api/auth/wallet-login`;
-          
-          console.log('[NextAuth Wallet] Calling API:', apiUrl);
+          console.log('[NextAuth Wallet] Starting wallet authentication');
           console.log('[NextAuth Wallet] Wallet address:', credentials.walletAddress);
           
-          const res = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              walletAddress: credentials.walletAddress,
-              chainId: 'algorand',
-              domain: process.env.NEXTAUTH_URL
-            })
-          });
+          // IMPORTANT: In serverless environments, we can't reliably fetch our own domain
+          // So we'll create the user object directly here instead of calling an API
+          const walletAddress = credentials.walletAddress.toString().trim();
+          
+          // Construct user object for wallet authentication
+          const data = {
+            id: walletAddress,
+            email: `${walletAddress.substring(0, 8)}@wallet.local`,
+            name: `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`,
+            firstName: 'Wallet',
+            lastName: 'User',
+            walletAddress: walletAddress,
+            chainId: 'algorand',
+            authType: 'web3'
+          };
 
-          console.log('[NextAuth Wallet] Response status:', res.status);
-          const data = await res.json();
-          console.log('[NextAuth Wallet] Response data:', data);
+          console.log('[NextAuth Wallet] User object created:', data.id);
 
-          if (res.ok && data) {
-            return {
-              id: data.id,
-              email: data.email,
-              name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              walletAddress: data.walletAddress,
-              authType: 'web3'
-            };
-          }
-
-          console.error('[NextAuth Wallet] API response not ok or data missing');
-          return null;
+          // Return the user object for NextAuth session
+          return {
+            id: data.id,
+            email: data.email,
+            name: data.name,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            walletAddress: data.walletAddress,
+            authType: 'web3'
+          };
         } catch (error) {
           console.error('[NextAuth Wallet] Authorization error:', error);
           if (error instanceof Error) {
