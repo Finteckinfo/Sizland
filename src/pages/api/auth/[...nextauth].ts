@@ -75,7 +75,10 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Call backend wallet-login endpoint
-          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/wallet-login`, {
+          // Use NEXT_PUBLIC_BACKEND_URL if available, otherwise fallback to NEXTAUTH_URL (local API)
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          
+          const res = await fetch(`${backendUrl}/api/auth/wallet-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
