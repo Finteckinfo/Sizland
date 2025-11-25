@@ -13,9 +13,13 @@ export const authOptions: NextAuthOptions = {
         params: {
           prompt: "consent",
           access_type: "offline",
-          response_type: "code"
+          response_type: "code",
+          // Ensure we request email and profile
+          scope: "openid email profile"
         }
-      }
+      },
+      // Allow account linking by email
+      allowDangerousEmailAccountLinking: true
     }),
     // Web2 Authentication: Traditional Email/Password
     CredentialsProvider({
