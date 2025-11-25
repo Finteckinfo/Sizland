@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
     }),
-    
+
     // Web3 Authentication: Wallet Address (Algorand, etc.)
     CredentialsProvider({
       id: 'wallet',
@@ -80,11 +80,11 @@ export const authOptions: NextAuthOptions = {
         try {
           console.log('[NextAuth Wallet] Starting wallet authentication');
           console.log('[NextAuth Wallet] Wallet address:', credentials.walletAddress);
-          
+
           // IMPORTANT: In serverless environments, we can't reliably fetch our own domain
           // So we'll create the user object directly here instead of calling an API
           const walletAddress = credentials.walletAddress.toString().trim();
-          
+
           // Construct user object for wallet authentication
           const data = {
             id: walletAddress,
@@ -118,7 +118,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
     }),
-    
+
     // Web3 Authentication: MetaMask/SIWE
     CredentialsProvider({
       id: 'siwe',
@@ -171,8 +171,8 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === 'production' 
-        ? '__Secure-next-auth.session-token' 
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
         : 'next-auth.session-token',
       options: {
         httpOnly: true,
@@ -230,6 +230,8 @@ export const authOptions: NextAuthOptions = {
         token.id = (user as any).id;
         token.email = (user as any).email;
         token.name = (user as any).name;
+        token.walletAddress = (user as any).walletAddress || '';
+        token.authType = (user as any).authType || 'web2';
 
         const secret = process.env.NEXTAUTH_SECRET;
         if (secret) {
@@ -237,6 +239,8 @@ export const authOptions: NextAuthOptions = {
             id: token.id,
             email: token.email,
             name: token.name,
+            walletAddress: token.walletAddress,
+            authType: token.authType
           };
           token.accessToken = jwt.sign(payload, secret, {
             expiresIn: '30d',
@@ -250,6 +254,8 @@ export const authOptions: NextAuthOptions = {
         session.user.id = (token.id as string) || '';
         session.user.email = (token.email as string) || '';
         session.user.name = (token.name as string) || '';
+        (session.user as any).walletAddress = (token.walletAddress as string) || '';
+        (session.user as any).authType = (token.authType as string) || 'web2';
 
         if (token.accessToken) {
           (session as any).accessToken = token.accessToken as string;
