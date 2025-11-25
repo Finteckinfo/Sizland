@@ -63,6 +63,7 @@ export default async function handler(
       name: string;
       type: string;
       authMethod?: string;
+      walletAddress?: string;
     };
 
     console.log('[SSO Validate] Token decoded:', {
@@ -85,7 +86,8 @@ export default async function handler(
         id: decoded.userId,
         email: decoded.email,
         name: decoded.name,
-        authMethod: decoded.authMethod || 'standard'
+        authMethod: decoded.authMethod || 'standard',
+        walletAddress: decoded.walletAddress || ''
       },
       sessionToken: ssoToken,
       validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours

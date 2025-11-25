@@ -53,6 +53,7 @@ export default async function handler(
     const userId = session.user.id || session.user.email || 'unknown';
     const userEmail = session.user.email || `${userId}@wallet.local`;
     const userName = session.user.name || userId;
+    const walletAddress = (session.user as any).walletAddress || '';
 
     const ssoToken = jwt.sign(
       {
@@ -60,7 +61,8 @@ export default async function handler(
         email: userEmail,
         name: userName,
         type: 'sso-token',
-        authMethod: (session.user as any).authType || 'standard'
+        authMethod: (session.user as any).authType || 'standard',
+        walletAddress: walletAddress
       },
       secret,
       {
