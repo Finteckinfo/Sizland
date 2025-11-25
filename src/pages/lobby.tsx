@@ -26,12 +26,12 @@ const LobbyPage = () => {
   // Handle ERP navigation with SSO token
   const handleERPClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    
+
     console.log('[Lobby] ERP clicked');
     console.log('[Lobby] Session status:', status);
     console.log('[Lobby] Has session user:', !!session?.user);
     console.log('[Lobby] Has active account:', !!activeAccount);
-    
+
     // For wallet users without NextAuth session, redirect directly
     if (!session?.user && activeAccount) {
       console.log('[Lobby] Wallet user detected, creating wallet session...');
@@ -57,7 +57,7 @@ const LobbyPage = () => {
         console.error('[Lobby] Wallet session creation failed:', walletError);
       }
     }
-    
+
     if (!session?.user) {
       console.error('[Lobby] No session found for SSO');
       alert('Please ensure you are logged in');
@@ -84,10 +84,10 @@ const LobbyPage = () => {
       }
 
       const { ssoToken } = await response.json();
-      console.log('[Lobby] SSO token generated, redirecting to ERP...');
-      
-      // Redirect to ERP with SSO token
-      window.location.href = `https://erp.siz.land?ssoToken=${ssoToken}`;
+      console.log('[Lobby] SSO token generated and set as cookie, redirecting to ERP...');
+
+      // Redirect to ERP without token in URL (token is in cookie)
+      window.location.href = 'https://erp.siz.land';
     } catch (error) {
       console.error('[Lobby] Error generating SSO token:', error);
       alert('Failed to access ERP. Please try again.');
@@ -184,104 +184,100 @@ const LobbyPage = () => {
           {/* Tiles Grid */}
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
-            {dappTiles.map((tile, index) => {
-              const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
-              
-              const tileContent = (
-                <PixelCard
-                  variant={tile.variant}
-                  className={`w-full max-w-xs flex flex-col items-center text-center p-4 min-h-[220px] transition-all duration-300 ${
-                    tile.isClickable 
-                      ? 'cursor-pointer hover:shadow-lg hover:scale-105 transform' 
-                      : 'cursor-not-allowed opacity-60'
-                  }`}
-                >
-                  <div className="h-12 flex items-center justify-center mb-4">
-                    <Icon 
-                      size={32} 
-                      className={`${
-                        tile.isClickable 
-                          ? 'text-indigo-500' 
-                          : 'text-gray-400'
-                      }`} 
-                    />
-                  </div>
-                  <h3
-                    className={`text-lg font-semibold mb-2 ${
-                      theme === "dark" ? "text-gray-900" : "text-white"
-                    }`}
+              {dappTiles.map((tile, index) => {
+                const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
+
+                const tileContent = (
+                  <PixelCard
+                    variant={tile.variant}
+                    className={`w-full max-w-xs flex flex-col items-center text-center p-4 min-h-[220px] transition-all duration-300 ${tile.isClickable
+                        ? 'cursor-pointer hover:shadow-lg hover:scale-105 transform'
+                        : 'cursor-not-allowed opacity-60'
+                      }`}
                   >
-                    {tile.title}
-                  </h3>
-                  <p
-                    className={`text-xs leading-relaxed ${
-                      theme === "dark" ? "text-gray-600" : "text-gray-300"
-                    }`}
-                  >
-                    {tile.description}
-                  </p>
-                  
-                  {!tile.isClickable && (
-                    <div className="mt-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                        Coming Soon
-                      </span>
+                    <div className="h-12 flex items-center justify-center mb-4">
+                      <Icon
+                        size={32}
+                        className={`${tile.isClickable
+                            ? 'text-indigo-500'
+                            : 'text-gray-400'
+                          }`}
+                      />
                     </div>
-                  )}
-                </PixelCard>
-              );
+                    <h3
+                      className={`text-lg font-semibold mb-2 ${theme === "dark" ? "text-gray-900" : "text-white"
+                        }`}
+                    >
+                      {tile.title}
+                    </h3>
+                    <p
+                      className={`text-xs leading-relaxed ${theme === "dark" ? "text-gray-600" : "text-gray-300"
+                        }`}
+                    >
+                      {tile.description}
+                    </p>
 
-              if (!tile.isClickable) {
-                return (
-                  <div key={index}>
-                    {tileContent}
-                  </div>
+                    {!tile.isClickable && (
+                      <div className="mt-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                          Coming Soon
+                        </span>
+                      </div>
+                    )}
+                  </PixelCard>
                 );
-              }
 
-              if (tile.isExternal) {
-                // Special handling for ERP with SSO token
-                if (tile.title === "ERP") {
+                if (!tile.isClickable) {
+                  return (
+                    <div key={index}>
+                      {tileContent}
+                    </div>
+                  );
+                }
+
+                if (tile.isExternal) {
+                  // Special handling for ERP with SSO token
+                  if (tile.title === "ERP") {
+                    return (
+                      <a
+                        key={index}
+                        href={tile.href}
+                        onClick={handleERPClick}
+                        className="relative"
+                      >
+                        {isGeneratingToken && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                            <Loader2 className="w-6 h-6 animate-spin text-white" />
+                          </div>
+                        )}
+                        {tileContent}
+                      </a>
+                    );
+                  }
+
                   return (
                     <a
                       key={index}
                       href={tile.href}
-                      onClick={handleERPClick}
-                      className="relative"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
                     >
-                      {isGeneratingToken && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
-                          <Loader2 className="w-6 h-6 animate-spin text-white" />
-                        </div>
-                      )}
                       {tileContent}
                     </a>
                   );
                 }
-                
+
                 return (
-                  <a
+                  <button
                     key={index}
-                    href={tile.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
+                    onClick={() => router.push(tile.href)}
+                    className="block w-full text-left"
                   >
                     {tileContent}
-                  </a>
+                  </button>
                 );
-              }
-
-              return (
-                <button
-                  key={index}
-                  onClick={() => router.push(tile.href)}
-                  className="block w-full text-left"
-                >
-                  {tileContent}
-                </button>
-              );
-            })}
+              })}
             </div>
           </div>
 
