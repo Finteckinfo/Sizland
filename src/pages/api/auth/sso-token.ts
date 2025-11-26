@@ -74,10 +74,11 @@ export default async function handler(
 
     console.log('[SSO Token] Generated token for user:', userEmail);
 
-    // Set SSO token as HTTP-only cookie on .siz.land domain
-    // This allows both www.siz.land and erp.siz.land to access it
+    // Set SSO token as cookie on .siz.land domain
+    // IMPORTANT: HttpOnly must be FALSE to allow client-side reading in ERP
+    // This is required for the Vercel firewall bypass to work
     res.setHeader('Set-Cookie', [
-      `siz_sso_token=${ssoToken}; Domain=.siz.land; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=300`
+      `siz_sso_token=${ssoToken}; Domain=.siz.land; Path=/; Secure; SameSite=Lax; Max-Age=300`
     ]);
 
     console.log('[SSO Token] Cookie set on .siz.land domain');
