@@ -28,72 +28,9 @@ const nextConfig = {
           },
         ],
       },
-      {
-        // Enable CORS for SSO token endpoints
-        source: '/api/auth/sso-token',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://erp.siz.land',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'POST, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-        ],
-      },
-      {
-        // Enable CORS for SSO validation endpoint
-        source: '/api/auth/validate-sso-token',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://erp.siz.land',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'POST, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-        ],
-      },
-      {
-        // Global CORS for all API routes to allow ERP access
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://erp.siz.land',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-        ],
-      },
+      // Note: CORS with credentials requires dynamic origin handling in API routes
+      // Static headers here cannot use wildcards with credentials
+      // The actual CORS handling is done in the API route handlers
     ];
   },
 };

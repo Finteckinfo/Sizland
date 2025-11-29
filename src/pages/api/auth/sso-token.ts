@@ -11,8 +11,20 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Set CORS headers (in case needed for cross-origin requests)
-  res.setHeader('Access-Control-Allow-Origin', 'https://erp.siz.land');
+  // Set CORS headers - support all siz.land subdomains and apex domain
+  const allowedOrigins = [
+    'https://siz.land',
+    'https://www.siz.land',
+    'https://erp.siz.land',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
+  
+  const origin = req.headers.origin || '';
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');

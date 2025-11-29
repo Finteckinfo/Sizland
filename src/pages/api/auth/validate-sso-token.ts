@@ -8,10 +8,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Set CORS headers to allow requests from ERP subdomain and www
+  // Set CORS headers to allow requests from all siz.land domains
   const allowedOrigins = [
+    'https://siz.land',
+    'https://www.siz.land',
     'https://erp.siz.land',
-    'https://www.erp.siz.land',
     'http://localhost:5173',
     'http://localhost:3000'
   ];
