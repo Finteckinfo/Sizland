@@ -64,8 +64,8 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
           )}
         </div>
         
-        {/* Video Thumbnail with Enhanced Styling */}
-        <div className="relative z-10 w-full aspect-video overflow-hidden rounded-lg">
+        {/* Video Thumbnail with Enhanced Styling - image can bulge out */}
+        <div className="relative z-0 w-full aspect-video">
           <Image
             src={thumb}
             width={thumbWidth}
@@ -75,8 +75,8 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
           />
           
           {/* Enhanced Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-lg group-hover:bg-opacity-10 transition-all duration-300">
-            <div className="relative">
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-lg group-hover:bg-opacity-10 transition-all duration-300 pointer-events-none">
+            <div className="relative pointer-events-auto">
               {/* Glowing Background Circle */}
               <div className="absolute inset-0 w-20 h-20 bg-green-500 rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-all duration-300 group-hover:scale-110"></div>
               
@@ -93,10 +93,10 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
               </div>
             </div>
           </div>
-          
-          {/* Subtle Border Glow */}
-          <div className="absolute inset-0 rounded-lg border-2 border-green-400/30 group-hover:border-green-400/50 transition-all duration-300"></div>
         </div>
+        
+        {/* Border Glow - positioned on top, stays fixed while image bulges */}
+        <div className="absolute inset-0 rounded-lg border-2 border-green-400/30 group-hover:border-green-400/50 transition-all duration-300 pointer-events-none z-10"></div>
       </div>
 
       {/* Video Modal */}
