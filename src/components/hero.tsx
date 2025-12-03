@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Button1 } from "@/components/ui/button1";
 import ModalVideo from "@/components/modalVideo";
 import SplitText from "./ui/splittext";
@@ -36,11 +37,11 @@ const Hero = () => {
             Welcome to Sizland
           </h1>
           <SplitText
-            text=" Learn. Earn. Invest. Grow. "
+            text=" Learn. Earn. Invest. Grow."
             className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
             delay={100}
-            animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
-            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
+            animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             easing={(t) => t * (2 - t)} // easeOutQuad
             threshold={0.25}
             rootMargin="-50px"
@@ -50,7 +51,7 @@ const Hero = () => {
           />
 
           <p className="mt-3 text-md text-gray-500 dark:text-gray-400 sm:mt-5 font-inter max-w-2xl mx-auto">
-            We provide essential services to help founders and startups launch and grow their business.
+          Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain.
           </p>
 
           {/* Primary CTAs */}
@@ -150,9 +151,11 @@ const Hero = () => {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Video Section positioned under hero content */}
-        <div className="mt-16 flex justify-center">
+      {/* Video Section - separate section */}
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 mt-16">
+        <div className="flex justify-center">
           <div className="w-full max-w-5xl">
             <ModalVideo
               thumb="/video-thumb.jpg"
@@ -163,6 +166,52 @@ const Hero = () => {
               videoWidth={1920}
               videoHeight={1080}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Image + Content Section - separate section */}
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left: Image */}
+          <div className="w-full">
+            <Image
+              src="/pictureinaddedherosection.jpg"
+              alt="Sizland Ecosystem"
+              width={1200}
+              height={800}
+              className="w-full h-auto rounded-lg"
+              priority={false}
+            />
+          </div>
+
+          {/* Right: Text Content */}
+          <div className="w-full space-y-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+              Sizland is a thriving ecosystem built on a fully decentralized{" "}
+              <span className="text-emerald-500">foundation.</span>
+            </h2>
+
+            <div className="space-y-4 text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed">
+              <p>
+                Experience Blockchain-Powered Investment and Business Management with Sizland What sets us apart is our blockchain-powered ERP system, the heart of our ecosystem. Tailored specifically for remote teams, our ERP simplifies enterprise financial management by automating workflows and enabling real-time tracking, ensuring smooth operations and enhanced efficiency.
+              </p>
+              <p>
+                But that's not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you'll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
+              </p>
+            </div>
+
+            {/* Get Started Button */}
+            <div className="pt-4">
+              <Magnet padding={50} disabled={false} magnetStrength={50}>
+                <Button1
+                  onClick={handleGetStartedClick}
+                  className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-lg transition-all duration-200 w-full sm:w-auto cursor-pointer"
+                >
+                  Get Started
+                </Button1>
+              </Magnet>
+            </div>
           </div>
         </div>
       </div>

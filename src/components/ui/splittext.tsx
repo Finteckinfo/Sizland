@@ -1,5 +1,6 @@
-import { useSprings, animated, SpringValue } from '@react-spring/web';
-import { useEffect, useRef, useState, MutableRefObject } from 'react';
+import { useSprings, animated } from '@react-spring/web';
+import { useEffect, useRef, useState } from 'react';
+import AuroraText from "./aurora-text";
 
 interface SplitTextProps {
     text?: string;
@@ -28,6 +29,12 @@ const SplitText: React.FC<SplitTextProps> = ({
 }) => {
     const words = text.split(' ').map(word => word.split(''));
     const letters = words.flat();
+
+    // Find where the trailing "ow." of "Grow." starts so we can wrap it with AuroraText
+    const joined = letters.join('');
+    const pattern = 'ow.';
+    const auroraStartIndex = joined.lastIndexOf(pattern);
+    const auroraEndIndex = auroraStartIndex === -1 ? -1 : auroraStartIndex + pattern.length;
     const [inView, setInView] = useState(false);
     const ref = useRef<HTMLParagraphElement>(null);
     const animatedCount = useRef(0);
@@ -79,20 +86,31 @@ const SplitText: React.FC<SplitTextProps> = ({
             {words.map((word, wordIndex) => (
                 <span key={wordIndex} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
                     {word.map((letter, letterIndex) => {
-                        const index = words
+                        const globalIndex = words
                             .slice(0, wordIndex)
                             .reduce((acc, w) => acc + w.length, 0) + letterIndex;
 
+                        const isAurora =
+                            auroraStartIndex !== -1 &&
+                            globalIndex >= auroraStartIndex &&
+                            globalIndex < auroraEndIndex;
+
                         return (
                             <animated.span
-                                key={index}
+                                key={globalIndex}
                                 style={{
-                                    ...springs[index],
+                                    ...springs[globalIndex],
                                     display: 'inline-block',
                                     willChange: 'transform, opacity',
                                 }}
                             >
-                                {letter}
+                                {isAurora ? (
+                                    <AuroraText className="inline-block">
+                                        {letter}
+                                    </AuroraText>
+                                ) : (
+                                    letter
+                                )}
                             </animated.span>
                         );
                     })}

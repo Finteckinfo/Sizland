@@ -39,7 +39,7 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
   return (
     <>
       {/* Enhanced Thumbnail Button with MetaBalls Background */}
-      <div className="relative cursor-pointer group" onClick={() => setIsOpen(true)}>
+      <div className="relative cursor-pointer group w-full aspect-video" onClick={() => setIsOpen(true)}>
         {/* MetaBalls Background Effect with Delay */}
         <div className={`absolute inset-0 rounded-lg overflow-hidden transition-opacity duration-1000 ${showAnimation ? 'opacity-100' : 'opacity-0'}`}>
           {showAnimation ? (
@@ -65,13 +65,13 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
         </div>
         
         {/* Video Thumbnail with Enhanced Styling */}
-        <div className="relative z-10">
+        <div className="relative z-10 w-full aspect-video overflow-hidden rounded-lg">
           <Image
             src={thumb}
             width={thumbWidth}
             height={thumbHeight}
             alt={thumbAlt}
-            className="rounded-lg shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-3xl"
+            className="w-full h-full object-cover rounded-lg shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-3xl"
           />
           
           {/* Enhanced Play Button Overlay */}
