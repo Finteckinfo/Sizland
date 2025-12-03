@@ -14,8 +14,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import GlowBackground from "@/components/ui/GlowBackground";
+import AnimatedGrid from "@/components/ui/AnimatedGrid";
 
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 // Defensive theme check: Only allow valid theme values in localStorage
@@ -70,11 +70,12 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`relative min-h-screen overflow-hidden ${monsterrat.className}`}>
-      {/* Background glow system (replaces Waves) */}
+      {/* Background system for top + bottom glows and animated grid */}
       {mounted && (
         <>
-          <GlowBackground position="top" className="-z-10" />
-          <GlowBackground position="bottom" className="-z-10" />
+          <GlowBackground position="top" className="-z-20" />
+          <AnimatedGrid className="-z-10 h-[480px]" />
+          <GlowBackground position="bottom" className="-z-20" />
         </>
       )}
 
