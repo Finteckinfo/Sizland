@@ -126,35 +126,36 @@
 .glow-ellipse-primary {
   width: min(110rem, 150vw);
   height: 30rem;
-  background: radial-gradient(circle at center,
-      rgba(150, 196, 97, 0.65),
-      rgba(16, 185, 129, 0.45),
+  /* Softer, wide glow centered at the very top */
+  background: radial-gradient(circle at 50% 0%,
+      rgba(150, 196, 97, 0.18),
+      rgba(16, 185, 129, 0.12),
       transparent 70%);
-  opacity: 0.85;
+  opacity: 0.55;
 }
 
 .glow-ellipse-secondary {
   width: min(120rem, 170vw);
   height: 40rem;
-  background: radial-gradient(circle at center,
-      rgba(150, 196, 97, 0.9),
-      rgba(21, 128, 61, 0.7),
-      transparent 75%);
-  opacity: 0.95;
+  background: radial-gradient(circle at 50% 0%,
+      rgba(150, 196, 97, 0.22),
+      rgba(21, 128, 61, 0.16),
+      transparent 78%);
+  opacity: 0.6;
 }
 
 .dark .glow-ellipse-primary {
-  background: radial-gradient(circle at center,
-      rgba(34, 197, 94, 0.9),
-      rgba(16, 185, 129, 0.75),
-      transparent 70%);
+  background: radial-gradient(circle at 50% 0%,
+      rgba(34, 197, 94, 0.28),
+      rgba(16, 185, 129, 0.2),
+      transparent 72%);
 }
 
 .dark .glow-ellipse-secondary {
-  background: radial-gradient(circle at center,
-      rgba(34, 197, 94, 1),
-      rgba(22, 163, 74, 0.9),
-      transparent 78%);
+  background: radial-gradient(circle at 50% 0%,
+      rgba(34, 197, 94, 0.36),
+      rgba(22, 163, 74, 0.22),
+      transparent 82%);
 }
 
 /* === Animated hero grid (top of landing page) === */
@@ -177,8 +178,8 @@
     linear-gradient(to right, rgba(22, 101, 52, 0.35) 1px, transparent 1px),
     /* Rows (vertical spacing) */
     linear-gradient(to bottom, rgba(22, 101, 52, 0.35) 1px, transparent 1px);
-  /* Rectangular cells: width is ~2x height (2:1) */
-  background-size: 64px 32px;
+  /* Rectangular cells: width is ~2x height (2:1). Increased size for larger boxes */
+  background-size: 112px 56px;
   opacity: 0.6;
 
   /* Full-width grid that fades near the screen margins and towards the bottom */
@@ -195,7 +196,7 @@
   background-image:
     linear-gradient(to right, rgba(74, 222, 128, 0.18) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(74, 222, 128, 0.18) 1px, transparent 1px);
-  background-size: 64px 32px;
+  background-size: 112px 56px;
 }
 
 /* (streak logic removed for now – grid only) */
