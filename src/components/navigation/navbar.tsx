@@ -11,6 +11,7 @@ import { loadWallet } from "@/lib/algorand/walletGenerator";
 import { useRouter } from "next/router";
 import PillNav from "../ui/PillNav";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { User, LogOut } from "lucide-react";
 import {
   DropdownMenu,
@@ -96,7 +97,10 @@ export const Navbar: React.FC = () => {
   const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { data: session, status } = useSession();
+  const { theme, systemTheme } = useTheme();
   const isLoaded = status !== "loading";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
 
   useEffect(() => {
     setMounted(true);
@@ -159,7 +163,7 @@ export const Navbar: React.FC = () => {
             className="custom-nav"
             ease="power2.easeOut"
             baseColor="#10b981"
-            pillColor="#ffffff"
+            pillColor={isDark ? "#000000" : "#ffffff"}
             hoveredPillTextColor="#ffffff"
             pillTextColor="#10b981"
             productLinks={productLinks}
