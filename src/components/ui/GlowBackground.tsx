@@ -20,8 +20,8 @@ export const GlowBackground: React.FC<GlowBackgroundProps> = ({
 }) => {
   const basePositionClass =
     position === "top"
-      ? "top-[-18vh] md:top-[-22vh]"
-      : "bottom-[-28vh] md:bottom-[-36vh]";
+      ? "top-[-12vh] md:top-[-16vh]"
+      : "bottom-[-30vh] md:bottom-[-40vh]";
 
   return (
     <div
