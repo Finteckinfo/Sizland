@@ -173,10 +173,13 @@
   width: 100%;
   height: 100%;
   background-image:
-    linear-gradient(to right, rgba(34, 197, 94, 0.09) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(34, 197, 94, 0.09) 1px, transparent 1px);
-  background-size: 52px 52px;
-  opacity: 0.55;
+    /* Columns (horizontal spacing) */
+    linear-gradient(to right, rgba(22, 101, 52, 0.35) 1px, transparent 1px),
+    /* Rows (vertical spacing) */
+    linear-gradient(to bottom, rgba(22, 101, 52, 0.35) 1px, transparent 1px);
+  /* Rectangular cells: width is ~2x height (2:1) */
+  background-size: 64px 32px;
+  opacity: 0.6;
 
   /* Full-width grid that fades near the screen margins and towards the bottom */
   --fade-horizontal: linear-gradient(to right, transparent 0%, black 16%, black 84%, transparent 100%);
@@ -192,6 +195,7 @@
   background-image:
     linear-gradient(to right, rgba(74, 222, 128, 0.18) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(74, 222, 128, 0.18) 1px, transparent 1px);
+  background-size: 64px 32px;
 }
 
 /* (streak logic removed for now – grid only) */
