@@ -7,6 +7,7 @@ import SplitText from "./ui/splittext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Magnet from "./ui/magnet";
+import AnimatedGrid from "./ui/AnimatedGrid";
 
 const Hero = () => {
   const { data: session, status } = useSession();
@@ -25,8 +26,14 @@ const Hero = () => {
   };
 
   return (
-    <section id="hero" className="relative py-12 sm:py-16 lg:pt-5 xl:pb-0 transition-colors duration-300">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <section
+      id="hero"
+      className="relative py-12 sm:py-16 lg:pt-5 xl:pb-0 transition-colors duration-300"
+    >
+      {/* Top animated grid & subtle vignette background */}
+      <AnimatedGrid className="-z-10" />
+
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 relative">
         <div className="grid max-w-lg grid-cols-1 mx-auto lg:max-w-full lg:items-center lg:grid-cols-2 gap-y-12 lg:gap-x-8">
           <div>
             <div className="text-center lg:text-left">

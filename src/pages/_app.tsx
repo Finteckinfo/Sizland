@@ -13,7 +13,7 @@ import { config } from "../wagmi";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
-import Waves from "@/components/ui/wave"; // Import Waves
+import GlowBackground from "@/components/ui/GlowBackground";
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -62,7 +62,6 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const { theme } = useTheme(); // Use the `useTheme` hook to get the current theme
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -70,33 +69,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className={`relative overflow-hidden ${monsterrat.className}`}>
-      {/* Render Waves only after component has mounted to avoid SSR mismatches */}
+    <div className={`relative min-h-screen overflow-hidden ${monsterrat.className}`}>
+      {/* Background glow system (replaces Waves) */}
       {mounted && (
-        <div className="absolute inset-0 -z-10">
-          <Waves
-            key={theme} // Forces re-render on theme switch
-            lineColor={
-              theme === "dark"
-                ? "rgba(150, 196, 97, 0.2)"
-                : "rgba(29, 31, 72, 0.2)"
-            }
-            backgroundColor={
-              theme === "dark"
-                ? "rgba(29, 31, 72)"
-                : "rgba(150, 196, 97)"
-            }
-            waveSpeedX={0.02}
-            waveSpeedY={0.01}
-            waveAmpX={40}
-            waveAmpY={20}
-            friction={0.9}
-            tension={0.01}
-            maxCursorMove={120}
-            xGap={12}
-            yGap={36}
-          />
-        </div>
+        <>
+          <GlowBackground position="top" className="-z-10" />
+          <GlowBackground position="bottom" className="-z-10" />
+        </>
       )}
 
       <Navbar />
