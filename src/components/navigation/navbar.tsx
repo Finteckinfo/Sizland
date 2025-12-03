@@ -146,11 +146,11 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="fixed z-50 top-0 left-0 w-full flex justify-center px-4 pt-4">
+    <div className="fixed z-50 top-0 left-0 w-full flex justify-center px-4 pt-6">
       {/* Desktop Layout - Pill-style center bar */}
-      <div className="hidden lg:flex w-full max-w-6xl items-center rounded-full bg-white/60 dark:bg-black/70 border border-emerald-500/25 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-xl px-4 py-2">
+      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3">
         {/* Left Section - Navigation pills (keep existing PillNav design) */}
-        <div className="flex-1 flex justify-start items-center">
+        <div className="flex-1 flex justify-start items-center scale-[0.9] origin-left">
           <PillNav
             logo="/logo1.png"
             logoAlt="Sizland Logo"
@@ -168,7 +168,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Center Section - Brand title (keep existing animation, just centered) */}
-        <div className="flex-shrink-0 flex justify-center px-4">
+        <div className="flex-shrink-0 flex justify-center px-6 scale-[0.9] origin-center">
           <Link href="/" className="flex items-center justify-center">
             <button className="button1" data-text="Awesome">
               <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
@@ -180,7 +180,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Right Section - Theme + auth actions */}
-        <div className="flex-1 flex items-center justify-end gap-3">
+        <div className="flex-1 flex items-center justify-end gap-3 scale-[0.9] origin-right">
           <ThemeToggler />
           {isLoaded && (
             <>
@@ -226,7 +226,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden flex w-full items-center justify-between rounded-none border-b border-neutral-400/40 bg-white/60 dark:bg-black/70 px-4 py-3 backdrop-blur-xl">
+      <div className="lg:hidden flex w-full items-center justify-between rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-4 py-4 backdrop-blur-2xl">
         {/* Mobile Logo */}
         <Link href="/" className="flex items-center justify-start">
           <Image
