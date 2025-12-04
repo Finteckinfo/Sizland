@@ -8,6 +8,7 @@ import SplitText from "./ui/splittext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Magnet from "./ui/magnet";
+import AuroraText from "./ui/aurora-text";
 
 const Hero = () => {
   const { data: session, status } = useSession();
@@ -189,7 +190,9 @@ const Hero = () => {
           <div className="w-full space-y-6">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
               Sizland is a thriving ecosystem built on a fully decentralized{" "}
-              <span className="text-emerald-500">foundation.</span>
+              <AuroraText className="inline-block text-emerald-400">
+                foundation.
+              </AuroraText>
             </h2>
 
             <div className="space-y-4 text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed">
