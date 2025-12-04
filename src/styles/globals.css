@@ -433,14 +433,13 @@
 
 /* From Uiverse.io by Na3ar-17 */
 .card {
-  width: 200px;
-  background-color: rgba(36, 40, 50, 1);
-  background-image: linear-gradient(139deg, rgba(36, 40, 50, 1) 0%, rgba(36, 40, 50, 1) 0%, rgba(37, 28, 40, 1) 100%);
-  border-radius: 10px;
-  padding: 15px 0px;
+  width: 100%;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
 .card .list {
@@ -679,16 +678,15 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
+  text-align: left;
   position: relative;
-  aspect-ratio: 4/3;
-  min-height: 240px;
+  /* Fixed height independent of width so all cards stay short */
+  min-height: 220px;
   width: 100%;
   max-width: 100%;
-  padding: 2.5em;
-  border-radius: 20px;
-  border: 2px solid var(--green-border);
-  background: linear-gradient(135deg, var(--card-bg-dark) 0%, rgba(10, 10, 26, 0.8) 100%);
+  
+  border-radius:0px;
+  
   font-weight: 300;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -705,47 +703,45 @@
   border-color: var(--green-bright);
 }
 
-.card__header, .card__content {
+.card__header,
+.card__content {
   display: flex;
   flex-direction: column;
   position: relative;
-  color: var(--white);
   width: 100%;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .card__header {
-  gap: 0.5em;
-  justify-content: center;
-  margin-bottom: 1em;
-  width: 100%;
+  display: none; /* header hidden – we use image at very top instead */
 }
 
 .card__content {
   flex: 1;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
   width: 100%;
   gap: 0.5em;
-  padding: 0 0.25em;
+  padding: 0; /* no padding so image can touch left/right edges */
+}
+
+.card__image {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  object-fit: cover;
+  display: block;
+}
+
+.card__body {
+  width: 100%;
+  padding: 0.85rem 1rem 1rem; /* small inset for text only */
 }
 
 .card__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--green-bright);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  background: linear-gradient(45deg, var(--green-primary), var(--green-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
-  width: 100%;
-  padding: 0.25em 0;
-  margin-bottom: 0.25em;
+  display: none;
 }
 
 .card__title {
@@ -753,11 +749,11 @@
   font-size: 18px;
   margin: 0 0 0.5em;
   line-height: 1.1;
-  color: var(--white);
+  color: #020617;
   text-shadow: 0 0 10px rgba(150, 196, 97, 0.3);
-  text-align: center;
+  text-align: left;
   width: 100%;
-  padding: 0 0.25em;
+  padding: 0;
 }
 
 .card__description {
@@ -765,11 +761,11 @@
   line-height: 1.2;
   opacity: 0.9;
   margin-bottom: 0.75em;
-  color: rgba(255, 255, 255, 0.9);
-  text-align: center;
+  color: #4b5563;
+  text-align: left;
   width: 100%;
-  padding: 0 0.75em;
-  max-width: 95%;
+  padding: 0;
+  max-width: 100%;
 }
 
 .card__full-content {
@@ -778,13 +774,24 @@
   opacity: 0.8;
   margin-top: 0.5em;
   font-weight: 300;
-  text-align: center;
+  color: #4b5563;
+  text-align: left;
   width: 100%;
-  padding: 0 1em;
-  max-width: 90%;
+  padding: 0;
+  max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+/* Dark theme overrides for card text */
+.dark .card__title {
+  color: #f9fafb;
+}
+
+.dark .card__description,
+.dark .card__full-content {
+  color: rgba(249, 250, 251, 0.9);
 }
 
 .card--text-autohide .card__title,
@@ -861,34 +868,37 @@
 
 @media (min-width: 1024px) {
   .card-grid {
-    grid-template-columns: repeat(3, 1fr);
+    /* 6 equal columns so top cards span 2 each, bottom cards span 3 each */
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 2em;
     padding: 2.5em;
   }
 
+  /* Top row: three cards, each taking 2 columns */
   .card:nth-child(1) {
-    grid-column: span 2;
-    grid-row: span 2;
+    grid-column: 1 / span 2;
+    grid-row: 1;
   }
 
   .card:nth-child(2) {
-    grid-column: 3;
+    grid-column: 3 / span 2;
     grid-row: 1;
   }
 
   .card:nth-child(3) {
-    grid-column: 3;
+    grid-column: 5 / span 2;
+    grid-row: 1;
+  }
+
+  /* Bottom row: two cards, each taking 3 columns (full width of cards area) */
+  .card:nth-child(4) {
+    grid-column: 1 / span 3;
     grid-row: 2;
   }
 
-  .card:nth-child(4) {
-    grid-column: 1;
-    grid-row: 3;
-  }
-
   .card:nth-child(5) {
-    grid-column: 2;
-    grid-row: 3;
+    grid-column: 4 / span 3;
+    grid-row: 2;
   }
 }
 
@@ -960,28 +970,14 @@
   user-select: none;
 }
 
-.card__title, .card__description {
-  --clamp-title: 1;
-  --clamp-desc: 2;
-  text-align: center;
+/* Ensure MagicBento text aligns left and uses our latest sizes/colors */
+.bento-section .card__title,
+.bento-section .card__description,
+.bento-section .card__full-content {
+  text-align: left;
   width: 100%;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.card__full-content {
-  font-size: 12px;
-  line-height: 1.5;
-  opacity: 0.8;
-  margin-top: 0.75em;
-  font-weight: 300;
-  text-align: center;
-  width: 100%;
-  padding: 0 1.5em;
-  max-width: 90%;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
+  padding: 0;
+  max-width: 100%;
 }
 
 /* PillNav Component Styles */

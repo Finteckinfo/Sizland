@@ -97,7 +97,7 @@ const Features = () => {
   const dexCard = featuresData.find((f) => f.title === "DEX");
 
   return (
-    <section className="relative py-24">
+    <section className="relative pt-8 pb-20 lg:pt-10 lg:pb-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 lg:mb-16 grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)] items-start">
           {/* Left column: section intro */}

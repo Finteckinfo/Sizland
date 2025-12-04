@@ -12,6 +12,8 @@ interface CardData {
   description: string;
   label: string;
   content?: string;
+  image?: string;
+  imageAlt?: string;
 }
 
 const cardData: CardData[] = [
@@ -620,11 +622,20 @@ const MagicBento = ({
                   <div className="card__label">{card.label}</div>
                 </div>
                 <div className="card__content">
-                  <h2 className="card__title">{card.title}</h2>
-                  <p className="card__description">{card.description}</p>
-                  {card.content && (
-                    <p className="card__full-content">{card.content}</p>
+                  {card.image && (
+                    <img
+                      src={card.image}
+                      alt={card.imageAlt || card.title}
+                      className="card__image"
+                    />
                   )}
+                  <div className="card__body">
+                    <h2 className="card__title">{card.title}</h2>
+                    <p className="card__description">{card.description}</p>
+                    {card.content && (
+                      <p className="card__full-content">{card.content}</p>
+                    )}
+                  </div>
                 </div>
               </ParticleCard>
             );
@@ -742,16 +753,22 @@ const MagicBento = ({
                 el.addEventListener("click", handleClick);
               }}
             >
-              <div className="card__header">
-                <div className="card__label">{card.label}</div>
-              </div>
-              <div className="card__content">
-                <h2 className="card__title">{card.title}</h2>
-                <p className="card__description">{card.description}</p>
-                {card.content && (
-                  <p className="card__full-content">{card.content}</p>
-                )}
-              </div>
+                <div className="card__content">
+                  {card.image && (
+                    <img
+                      src={card.image}
+                      alt={card.imageAlt || card.title}
+                      className="card__image"
+                    />
+                  )}
+                  <div className="card__body">
+                    <h2 className="card__title">{card.title}</h2>
+                    <p className="card__description">{card.description}</p>
+                    {card.content && (
+                      <p className="card__full-content">{card.content}</p>
+                    )}
+                  </div>
+                </div>
             </div>
           );
         })}

@@ -29,7 +29,7 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative py-12 sm:py-16 lg:pt-5 xl:pb-0 transition-colors duration-300"
+      className="relative pt-10 pb-12 sm:pt-12 sm:pb-14 lg:pt-10 lg:pb-16 xl:pb-16 transition-colors duration-300"
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 relative">
         {/* Headline + subcopy */}
