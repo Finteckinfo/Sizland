@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import TweetEmbed from './tweet-embed';
@@ -19,6 +19,14 @@ const TwitterBlogCard: React.FC<TwitterBlogCardProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [showPlaceholder, setShowPlaceholder] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPlaceholder(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className={`group relative overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg ${
@@ -39,7 +47,7 @@ const TwitterBlogCard: React.FC<TwitterBlogCardProps> = ({
       )}
 
       {/* Tweet Embed - styled to match card design */}
-      <div className={showPlaceholder ? 'hidden' : ''}>
+      {!showPlaceholder && (
         <div className="p-4 sm:p-6">
           <TweetEmbed 
             tweetId={tweetId}
@@ -47,17 +55,7 @@ const TwitterBlogCard: React.FC<TwitterBlogCardProps> = ({
             title={title}
           />
         </div>
-      </div>
-
-      {/* Show tweet after a delay to replace placeholder */}
-      <div className="hidden">
-        <TweetEmbed 
-          tweetId={tweetId}
-          username={username}
-          title={title}
-        />
-        {setTimeout(() => setShowPlaceholder(false), 2000)}
-      </div>
+      )}
     </div>
   );
 };
