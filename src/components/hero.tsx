@@ -34,94 +34,94 @@ const Hero = () => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 relative">
         {/* Headline + subcopy */}
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl">
+              <h1 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl">
             Welcome to Sizland
-          </h1>
-          <SplitText
+              </h1>
+              <SplitText
             text=" Learn. Earn. Invest. Grow."
-            className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
-            delay={100}
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
-            easing={(t) => t * (2 - t)} // easeOutQuad
-            threshold={0.25}
-            rootMargin="-50px"
-            onLetterAnimationComplete={() => {
-              console.log("Hero heading animation done.");
-            }}
-          />
+                className="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl font-pj"
+                delay={100}
+                animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+                animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+                easing={(t) => t * (2 - t)} // easeOutQuad
+                threshold={0.25}
+                rootMargin="-50px"
+                onLetterAnimationComplete={() => {
+                  console.log("Hero heading animation done.");
+                }}
+              />
 
           <p className="mt-3 text-md text-gray-500 dark:text-gray-400 sm:mt-5 font-inter max-w-2xl mx-auto">
           Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain.
-          </p>
+              </p>
 
           {/* Primary CTAs */}
           <div className="mt-8 sm:mt-10">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Magnet padding={50} disabled={false} magnetStrength={50}>
-                <Button1
-                  onClick={handleGetStartedClick}
-                  className="px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 w-full sm:w-auto cursor-pointer"
-                >
+                  <Magnet padding={50} disabled={false} magnetStrength={50}>
+                    <Button1 
+                      onClick={handleGetStartedClick}
+                      className="px-8 py-3 text-lg font-bold text-white bg-indigo-600 dark:bg-indigo-500 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 w-full sm:w-auto cursor-pointer"
+                    >
                   {isLoaded && session?.user ? "Go to Dashboard" : "Get Started"}
-                </Button1>
-              </Magnet>
-
-              <Magnet padding={50} disabled={false} magnetStrength={50}>
-                <a
-                  href="https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button1 className="px-8 py-3 text-lg font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 w-full sm:w-auto border border-gray-300 dark:border-gray-600">
-                    Join Our Community
-                  </Button1>
-                </a>
-              </Magnet>
+                    </Button1>
+                  </Magnet>
+                  
+                  <Magnet padding={50} disabled={false} magnetStrength={50}>
+                    <a
+                      href="https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button1 className="px-8 py-3 text-lg font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 w-full sm:w-auto border border-gray-300 dark:border-gray-600">
+                        Join Our Community
+                      </Button1>
+                    </a>
+                  </Magnet>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
         {/* Stats row */}
         <div className="flex items-center justify-center mt-12 space-x-6 sm:space-x-10">
           {/* 08 Connected Wallets */}
           <div className="flex flex-col items-center text-center">
-            <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
+                <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
               08
-            </p>
+                </p>
             <p className="mt-1 text-sm text-gray-900 dark:text-gray-300 font-pj">
-              Connected Wallets
-            </p>
-          </div>
+                  Connected Wallets
+                </p>
+              </div>
 
           {/* spacer */}
-          <div className="hidden sm:block">
-            <svg
-              className="text-gray-400 dark:text-gray-600"
-              width="16"
-              height="39"
-              viewBox="0 0 16 39"
-              fill="none"
-              stroke="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <line x1="0.72265" y1="10.584" x2="15.7226" y2="0.583975"></line>
-              <line x1="0.72265" y1="17.584" x2="15.7226" y2="7.58398"></line>
-              <line x1="0.72265" y1="24.584" x2="15.7226" y2="14.584"></line>
-              <line x1="0.72265" y1="31.584" x2="15.7226" y2="21.584"></line>
-              <line x1="0.72265" y1="38.584" x2="15.7226" y2="28.584"></line>
-            </svg>
-          </div>
+              <div className="hidden sm:block">
+                <svg
+                  className="text-gray-400 dark:text-gray-600"
+                  width="16"
+                  height="39"
+                  viewBox="0 0 16 39"
+                  fill="none"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <line x1="0.72265" y1="10.584" x2="15.7226" y2="0.583975"></line>
+                  <line x1="0.72265" y1="17.584" x2="15.7226" y2="7.58398"></line>
+                  <line x1="0.72265" y1="24.584" x2="15.7226" y2="14.584"></line>
+                  <line x1="0.72265" y1="31.584" x2="15.7226" y2="21.584"></line>
+                  <line x1="0.72265" y1="38.584" x2="15.7226" y2="28.584"></line>
+                </svg>
+              </div>
 
           {/* $63k Transactions Processed */}
           <div className="flex flex-col items-center text-center">
-            <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
+                <p className="text-3xl font-medium text-gray-900 dark:text-white sm:text-4xl font-pj">
               $63k
-            </p>
+                </p>
             <p className="mt-1 text-sm text-gray-900 dark:text-gray-300 font-pj">
-              Transactions Processed
-            </p>
-          </div>
+                  Transactions Processed
+                </p>
+              </div>
 
           {/* spacer */}
           <div className="hidden sm:block">
@@ -151,12 +151,12 @@ const Hero = () => {
               Supported Blockchains
             </p>
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Video Section - separate section */}
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 mt-16">
-        <div className="flex justify-center">
+          <div className="flex justify-center">
           <div className="w-full max-w-5xl">
             <ModalVideo
               thumb="/video-thumb.jpg"
