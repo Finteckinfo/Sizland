@@ -1,4 +1,7 @@
 // next.config.js
+const path = require('path');
+const webpack = require('webpack');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcrypt'],
@@ -14,6 +17,28 @@ const nextConfig = {
       '@react-native-async-storage/async-storage': false,
       'pino-pretty': false,
     };
+    // Fix ESM resolution for nested dependencies (zustand/middleware, zustand/vanilla)
+    // Ensure proper module resolution for ESM packages
+    config.resolve.fullySpecified = false;
+    
+    // Use top-level zustand instead of nested one in @wagmi/core and @base-org/account
+    const zustandPath = path.resolve(__dirname, 'node_modules', 'zustand');
+    config.resolve.alias['zustand'] = zustandPath;
+    config.resolve.alias['zustand/vanilla'] = path.join(zustandPath, 'vanilla.js');
+    config.resolve.alias['zustand/middleware'] = path.join(zustandPath, 'middleware.js');
+    
+    // Use NormalModuleReplacementPlugin as a fallback for more reliable resolution
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(
+        /^zustand\/vanilla$/,
+        path.join(zustandPath, 'vanilla.js')
+      ),
+      new webpack.NormalModuleReplacementPlugin(
+        /^zustand\/middleware$/,
+        path.join(zustandPath, 'middleware.js')
+      )
+    );
+    
     return config;
   },
   // CRITICAL FIX: Ensure webhook routes work properly and enable CORS for SSO
