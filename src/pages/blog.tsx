@@ -178,12 +178,40 @@ const BlogPage: NextPage = () => {
               </p>
             </div>
 
-            {/* Twitter Timeline - Using the existing TwitterEmbed component */}
+            {/* Blog Grid - Individual Tweet Embeds */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {/* First Tweet */}
+              <div className="flex justify-center">
+                <div className="w-full max-w-sm sm:max-w-md">
+                  <TweetEmbed 
+                    tweetId="1958067960506900738"
+                    username="sizlandofficial"
+                    title="Building Remote Rails"
+                  />
+                </div>
+              </div>
+              
+              {/* Second Tweet */}
+              <div className="flex justify-center">
+                <div className="w-full max-w-sm sm:max-w-md">
+                  <TweetEmbed 
+                    tweetId="1980965670717190421"
+                    username="sizlandofficial"
+                    title="Latest Update"
+                  />
+                </div>
+              </div>
+
+              {/* Additional tweets can be added here */}
+              {/* You can add more TweetEmbed components with different tweet IDs */}
+            </div>
+
+            {/* Twitter Timeline - Additional tweets */}
             <div className="mb-12">
               <TwitterEmbed 
                 username="sizlandofficial"
                 showTimeline={true}
-                maxTweets={9}
+                maxTweets={5}
               />
             </div>
           </div>

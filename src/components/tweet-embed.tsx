@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, ExternalLink, MessageCircle, Image } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 // Extend Window interface for Twitter widgets
 declare global {
@@ -26,6 +27,8 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
   username = 'sizlandofficial',
   title = "Tweet"
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -121,16 +124,16 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
 
   if (error) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 text-center">
-        <div className="text-red-400 mb-4">
+      <div className={`${isDark ? 'bg-gray-800/50 border-gray-700/50' : 'bg-gray-100 border-gray-300'} backdrop-blur-sm rounded-xl p-6 border text-center`}>
+        <div className={`${isDark ? 'text-red-400' : 'text-red-600'} mb-4`}>
           <MessageCircle className="w-12 h-12 mx-auto mb-2" />
-          <h3 className="text-lg font-semibold">Failed to Load Tweet</h3>
+          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Failed to Load Tweet</h3>
         </div>
-        <p className="text-gray-400 mb-4">{error}</p>
+        <p className={`mb-4 ${isDark ? 'text-gray-400' : 'text-black'}`}>{error}</p>
         <Button 
           onClick={refreshWidgets}
           variant="outline"
-          className="border-gray-600 text-gray-300 hover:bg-gray-700"
+          className={isDark ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-400 text-black hover:bg-gray-200"}
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Try Again
@@ -140,7 +143,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
   }
 
   return (
-    <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/30">
+    <div className={`${isDark ? 'bg-gray-800/30 border-gray-700/30' : 'bg-white border-gray-200'} backdrop-blur-sm rounded-xl p-4 sm:p-6 border`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-3 mb-4">
         <div className="flex items-center gap-3 text-center sm:text-left">
@@ -148,8 +151,8 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
             <Image className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div>
-            <h4 className="text-base sm:text-lg font-semibold text-white">{title}</h4>
-            <p className="text-xs sm:text-sm text-gray-400">From @{username}</p>
+            <h4 className={`text-base sm:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>{title}</h4>
+            <p className={`text-xs sm:text-sm ${isDark ? 'text-gray-400' : 'text-black'}`}>From @{username}</p>
           </div>
         </div>
         
@@ -158,7 +161,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
             onClick={refreshWidgets}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-white"
+            className={isDark ? "text-gray-400 hover:text-white" : "text-black hover:text-gray-700"}
             disabled={isLoading}
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -168,7 +171,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
             asChild
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-white"
+            className={isDark ? "text-gray-400 hover:text-white" : "text-black hover:text-gray-700"}
           >
             <a 
               href={`https://twitter.com/${username}/status/${tweetId}`}
@@ -184,9 +187,9 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
 
       {/* Loading State */}
       {isLoading && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700/50 text-center">
+        <div className={`${isDark ? 'bg-gray-800/50 border-gray-700/50' : 'bg-gray-100 border-gray-300'} backdrop-blur-sm rounded-xl p-8 border text-center`}>
           <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading tweet...</p>
+          <p className={isDark ? "text-gray-400" : "text-black"}>Loading tweet...</p>
         </div>
       )}
 
@@ -198,7 +201,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
               <blockquote 
                 className="twitter-tweet w-full" 
                 data-media-max-width="560"
-                data-theme="dark"
+                data-theme={isDark ? "dark" : "light"}
                 data-chrome="noheader nofooter noborders"
                 data-dnt="true"
               >
@@ -209,12 +212,12 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
           
           {/* Fallback Link */}
           <div className="text-center">
-            <p className="text-xs text-gray-500 mb-2">Having trouble viewing the tweet?</p>
+            <p className={`text-xs mb-2 ${isDark ? 'text-gray-500' : 'text-black'}`}>Having trouble viewing the tweet?</p>
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className={isDark ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-400 text-black hover:bg-gray-200"}
             >
               <a 
                 href={`https://twitter.com/${username}/status/${tweetId}`}
