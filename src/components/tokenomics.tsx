@@ -45,11 +45,12 @@ const DonutChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: 
     
     const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
     
-    // Create a path that forms a donut segment (ring segment)
+    // Create a path that forms a donut segment with rounded corners
+    // Using stroke-linejoin="round" via CSS and adding a small stroke for rounded effect
     return [
       `M ${startOuter.x} ${startOuter.y}`, // Move to outer start point
       `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endOuter.x} ${endOuter.y}`, // Arc along outer edge
-      `L ${startInner.x} ${startInner.y}`, // Line to inner edge
+      `L ${startInner.x} ${startInner.y}`, // Line to inner edge (will be rounded)
       `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${endInner.x} ${endInner.y}`, // Arc along inner edge (reverse direction)
       `Z` // Close path
     ].join(' ');
@@ -67,8 +68,10 @@ const DonutChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: 
             key={index}
             d={createDonutSegment(startAngle, endAngle)}
             fill={item.color}
-            stroke={hoveredSegment === item.name ? '#10B981' : 'transparent'}
-            strokeWidth={hoveredSegment === item.name ? 3 : 0}
+            stroke={hoveredSegment === item.name ? '#10B981' : item.color}
+            strokeWidth={hoveredSegment === item.name ? 3 : 1}
+            strokeLinejoin="round"
+            strokeLinecap="round"
             className="transition-all duration-200 cursor-pointer"
             onMouseEnter={(e) => {
               setHoveredSegment(item.name);
