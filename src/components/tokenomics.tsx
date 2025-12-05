@@ -21,25 +21,13 @@ const barChartData = [
   { name: 'Founders', amount: 7000000, percentage: 7 },
 ];
 
-// SVG Pie Chart Component (Donut Chart)
+// SVG Donut Chart Component
 const DonutChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: any) => {
   const radius = 80;
-  const innerRadius = 40;
+  const innerRadius = 50;
   const centerX = 120;
   const centerY = 120;
   let cumulativePercentage = 0;
-
-  const createArcPath = (startAngle: number, endAngle: number, isInner: boolean = false) => {
-    const r = isInner ? innerRadius : radius;
-    const start = polarToCartesian(centerX, centerY, r, endAngle);
-    const end = polarToCartesian(centerX, centerY, r, startAngle);
-    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-    
-    if (isInner) {
-      return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
-    }
-    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} L ${centerX} ${centerY} Z`;
-  };
 
   const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
     const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
@@ -47,6 +35,24 @@ const DonutChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: 
       x: centerX + (radius * Math.cos(angleInRadians)),
       y: centerY + (radius * Math.sin(angleInRadians))
     };
+  };
+
+  const createDonutSegment = (startAngle: number, endAngle: number) => {
+    const startOuter = polarToCartesian(centerX, centerY, radius, startAngle);
+    const endOuter = polarToCartesian(centerX, centerY, radius, endAngle);
+    const startInner = polarToCartesian(centerX, centerY, innerRadius, endAngle);
+    const endInner = polarToCartesian(centerX, centerY, innerRadius, startAngle);
+    
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    
+    // Create a path that forms a donut segment (ring segment)
+    return [
+      `M ${startOuter.x} ${startOuter.y}`, // Move to outer start point
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endOuter.x} ${endOuter.y}`, // Arc along outer edge
+      `L ${startInner.x} ${startInner.y}`, // Line to inner edge
+      `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${endInner.x} ${endInner.y}`, // Arc along inner edge (reverse direction)
+      `Z` // Close path
+    ].join(' ');
   };
 
   return (
@@ -57,33 +63,27 @@ const DonutChartSVG = ({ data, hoveredSegment, setHoveredSegment, setTooltip }: 
         cumulativePercentage += item.value;
         
         return (
-          <g key={index}>
-            <path
-              d={createArcPath(startAngle, endAngle)}
-              fill={item.color}
-              stroke={hoveredSegment === item.name ? '#10B981' : 'transparent'}
-              strokeWidth={hoveredSegment === item.name ? 3 : 0}
-              className="transition-all duration-200 cursor-pointer"
-              onMouseEnter={(e) => {
-                setHoveredSegment(item.name);
-                setTooltip({
-                  visible: true,
-                  x: e.clientX,
-                  y: e.clientY,
-                  data: item
-                });
-              }}
-              onMouseLeave={() => {
-                setHoveredSegment(null);
-                setTooltip({ visible: false, x: 0, y: 0, data: null });
-              }}
-            />
-            <path
-              d={createArcPath(startAngle, endAngle, true)}
-              fill="transparent"
-              stroke="transparent"
-            />
-          </g>
+          <path
+            key={index}
+            d={createDonutSegment(startAngle, endAngle)}
+            fill={item.color}
+            stroke={hoveredSegment === item.name ? '#10B981' : 'transparent'}
+            strokeWidth={hoveredSegment === item.name ? 3 : 0}
+            className="transition-all duration-200 cursor-pointer"
+            onMouseEnter={(e) => {
+              setHoveredSegment(item.name);
+              setTooltip({
+                visible: true,
+                x: e.clientX,
+                y: e.clientY,
+                data: item
+              });
+            }}
+            onMouseLeave={() => {
+              setHoveredSegment(null);
+              setTooltip({ visible: false, x: 0, y: 0, data: null });
+            }}
+          />
         );
       })}
     </svg>
