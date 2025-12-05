@@ -8,10 +8,13 @@ import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import { generateAlgorandWallet, storeWallet, clearWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator'
 import { Copy, CheckCircle, Download, Trash2, Shield } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 export default function WalletAuth() {
   const router = useRouter()
   const { wallets, isReady } = useWallet()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   
   const [selectedOption, setSelectedOption] = useState<'create' | 'algorand' | 'metamask' | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -230,23 +233,39 @@ Generated on: ${new Date().toLocaleString()}
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="relative w-20 h-20">
-              <Image
-                src="/logo1.png"
-                alt="SIZ Logo"
-                width={80}
-                height={80}
-                className="object-contain drop-shadow-lg"
-              />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Large Title Section */}
+        <section className="relative pt-12 sm:pt-16 md:pt-24 pb-12 w-full">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+                <span className={isDark ? "text-white" : "text-black"}>
+                  Wallet
+                </span>
+              </h1>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Web3 Authentication
+        </section>
+
+        {/* Main Content */}
+        <div className="flex items-center justify-center">
+          <div className="max-w-4xl w-full space-y-8">
+            {/* Header */}
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="relative w-20 h-20">
+                  <Image
+                    src="/logo1.png"
+                    alt="SIZ Logo"
+                    width={80}
+                    height={80}
+                    className="object-contain drop-shadow-lg"
+                  />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Web3 Authentication
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
             Choose your preferred authentication method
@@ -515,6 +534,8 @@ Generated on: ${new Date().toLocaleString()}
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   )
