@@ -10,7 +10,7 @@ const PrivacyPage: NextPage = () => {
   return (
     <PageLayout 
       title="Privacy Policy - Sizland" 
-      description="Privacy Policy for Sizland platform"
+      description="Learn how Sizland protects your privacy and handles your data. Our commitment to transparency and security in our decentralized platform."
       flexDirection="col"
       justify="start"
       align="start"

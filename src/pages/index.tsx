@@ -11,7 +11,11 @@ import CTASection from "@/components/cta-section";
 const HomePage: NextPage = () => {
   return (
     <>
-      <PageLayout title="Homepage" description="Welcome to Sizland" requireAuth={false}>
+      <PageLayout 
+        title="Sizland - Decentralized Platform for Remote Teams" 
+        description="Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain. Experience blockchain-powered ERP and investment opportunities."
+        requireAuth={false}
+      >
         <section id="hero">
           <Hero /> {/* Use the Hero component */}
         </section>

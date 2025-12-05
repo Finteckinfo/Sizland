@@ -22,8 +22,8 @@ const WhitepaperPage: NextPage = () => {
 
   return (
     <PageLayout
-      title="Sizland Whitepaper"
-      description="Complete Sizland ecosystem documentation and technical specifications."
+      title="Sizland Whitepaper - Technical Documentation"
+      description="Complete Sizland ecosystem documentation and technical specifications. Learn about our blockchain-powered ERP system, tokenomics, and roadmap for remote teams."
       requireAuth={false}
     >
       <div className="min-h-screen w-full">

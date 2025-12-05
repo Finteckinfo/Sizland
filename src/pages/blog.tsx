@@ -25,8 +25,8 @@ const BlogPage: NextPage = () => {
 
   return (
     <PageLayout
-      title="Sizland Blog"
-      description="Stay updated with the latest news, updates, and insights from Sizland."
+      title="Sizland Blog - Latest Updates & Insights"
+      description="Stay updated with the latest news, updates, and insights from Sizland. Follow our journey building the future of remote team management and blockchain solutions."
       requireAuth={false}
     >
       <TwitterWidgetsLoader />

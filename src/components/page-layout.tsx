@@ -16,6 +16,8 @@ interface PageLayoutProps extends LayoutProps {
   title?: string;
   description?: string;
   requireAuth?: boolean;
+  image?: string; // Optional custom image for social sharing
+  url?: string; // Optional custom URL for social sharing
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -28,10 +30,12 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   gap = 8,
   background, // Destructure background from props
   requireAuth = true, // Default to requiring authentication
+  image, // Optional custom image
+  url, // Optional custom URL
 }) => {
   const content = (
     <>
-      <HeadComponent title={title} description={description} />
+      <HeadComponent title={title} description={description} image={image} url={url} />
       <MainContainer
         flexDirection={flexDirection}
         justify={justify}
