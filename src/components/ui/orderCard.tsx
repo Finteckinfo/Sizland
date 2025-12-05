@@ -1,5 +1,6 @@
 // src/components/ui/orderCard.tsx
 import React from 'react';
+import { useTheme } from 'next-themes';
 
 interface OrderCardProps {
   type: 'buy' | 'sell';
@@ -7,10 +8,16 @@ interface OrderCardProps {
 }
 
 export const OrderCard: React.FC<OrderCardProps> = ({ type, data }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const title = type === 'buy' ? 'Buy Order' : 'Sell Order';
 
   return (
-    <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 w-full bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className={`rounded-xl border p-4 sm:p-6 w-full transition-colors duration-200 ${
+      isDark
+        ? "bg-gray-800/50 border-gray-700/50"
+        : "bg-white border-gray-200"
+    } text-gray-900 dark:text-gray-100`}>
       <h2 className="text-lg font-bold mb-3 sm:mb-4 capitalize">{title}</h2>
       
       {/* Mobile-friendly table with horizontal scroll on small screens */}

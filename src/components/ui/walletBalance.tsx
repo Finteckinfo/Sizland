@@ -587,7 +587,7 @@ export const WalletBalance: React.FC = () => {
   // Don't render anything until mounted on client
   if (!mounted) {
     return (
-      <div className="rounded-2xl border border-gray-300 p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className="rounded-xl border p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
         <div className="flex items-center gap-3 mb-4">
           <WalletIcon className="h-6 w-6 text-gray-500" />
           <Typography variant="h3">Wallet Balance</Typography>
@@ -604,7 +604,7 @@ export const WalletBalance: React.FC = () => {
 
   if (!activeAccount) {
     return (
-      <div className="rounded-2xl border border-gray-300 p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className="rounded-xl border p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
         <div className="flex items-center gap-3 mb-4">
           <WalletIcon className="h-6 w-6 text-gray-500" />
           <Typography variant="h3">Wallet Balance</Typography>
@@ -654,7 +654,7 @@ export const WalletBalance: React.FC = () => {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="rounded-xl border p-4 sm:p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">

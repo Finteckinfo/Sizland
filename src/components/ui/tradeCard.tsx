@@ -5,8 +5,11 @@ import { Button1 } from '@/components/ui/button1';
 import { TokenPurchaseForm } from './token-purchase-form';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { calculateTokenPrice } from '@/lib/stripe/config';
+import { useTheme } from 'next-themes';
 
 export const TradeCard: React.FC = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [amount, setAmount] = useState<number>(0);
   const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
   const { activeAccount } = useWallet();
@@ -32,7 +35,11 @@ export const TradeCard: React.FC = () => {
 
   if (showPurchaseForm) {
     return (
-      <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 w-full space-y-4 sm:space-y-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className={`rounded-xl border p-4 sm:p-6 w-full space-y-4 sm:space-y-6 transition-colors duration-200 ${
+        isDark
+          ? "bg-gray-800/50 border-gray-700/50"
+          : "bg-white border-gray-200"
+      } text-gray-900 dark:text-gray-100`}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Purchase SIZ Tokens</h2>
           <Button
@@ -49,7 +56,11 @@ export const TradeCard: React.FC = () => {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-300 p-4 sm:p-6 w-full space-y-4 sm:space-y-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className={`rounded-xl border p-4 sm:p-6 w-full space-y-4 sm:space-y-6 transition-colors duration-200 ${
+      isDark
+        ? "bg-gray-800/50 border-gray-700/50"
+        : "bg-white border-gray-200"
+    } text-gray-900 dark:text-gray-100`}>
       {/* Header - Centered */}
       <div className="text-center">
         <h2 className="text-lg font-bold mb-2">Quick Trade</h2>

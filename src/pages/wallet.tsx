@@ -67,7 +67,7 @@ const WalletPage = () => {
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Wallet Title Section */}
         <div className="w-full">
-          <div className="mb-6">
+          <div className="mb-12 sm:mb-16 text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
               <AuroraText>Wallet</AuroraText>
             </h1>

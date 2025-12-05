@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import { useTheme } from 'next-themes';
 
 type CandlePoint = [number, number, number, number, number]; // [time(ms), open, high, low, close]
 
@@ -20,6 +21,8 @@ const getInitialData = (): CandlePoint[] => {
 };
 
 export const CandleStickChart = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const [data, setData] = useState<CandlePoint[]>(getInitialData());
 
@@ -50,18 +53,18 @@ export const CandleStickChart = () => {
     },
     title: {
       text: 'Siz (Live)',
-      style: { color: '#d1d5db' },
+      style: { color: isDark ? '#d1d5db' : '#000000' },
     },
     xAxis: {
       type: 'datetime',
-      labels: { style: { color: '#9ca3af' } },
+      labels: { style: { color: isDark ? '#9ca3af' : '#000000' } },
     },
     yAxis: {
       title: {
         text: 'Price (USD)',
-        style: { color: '#9ca3af' },
+        style: { color: isDark ? '#9ca3af' : '#000000' },
       },
-      labels: { style: { color: '#9ca3af' } },
+      labels: { style: { color: isDark ? '#9ca3af' : '#000000' } },
     },
     tooltip: {
       split: true,
@@ -85,9 +88,34 @@ export const CandleStickChart = () => {
     scrollbar: { enabled: false },
   };
 
+  // Update chart theme when theme changes
+  useEffect(() => {
+    if (chartRef.current?.chart) {
+      const chart = chartRef.current.chart;
+      chart.update({
+        title: {
+          style: { color: isDark ? '#d1d5db' : '#000000' },
+        },
+        xAxis: {
+          labels: { style: { color: isDark ? '#9ca3af' : '#000000' } },
+        },
+        yAxis: {
+          title: {
+            style: { color: isDark ? '#9ca3af' : '#000000' },
+          },
+          labels: { style: { color: isDark ? '#9ca3af' : '#000000' } },
+        },
+      }, true);
+    }
+  }, [isDark]);
+
   return (
-    <div className="w-full rounded-2xl border border-gray-300 p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors">
-      <h2 className="text-xl font-bold mb-4">Live SIZ Chart</h2>
+    <div className={`w-full rounded-xl border p-6 transition-colors duration-200 ${
+      isDark
+        ? "bg-gray-800/50 border-gray-700/50"
+        : "bg-white border-gray-200"
+    } text-gray-900 dark:text-gray-100`}>
+      <h2 className={`text-xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>Live SIZ Chart</h2>
       <HighchartsReact
         highcharts={Highcharts}
         constructorType="stockChart"
