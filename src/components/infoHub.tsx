@@ -8,25 +8,31 @@ const InfoHub = () => {
     
     const cardData = [
         {
-            title: "Sizland News",
-            description: "Sizland news around the clock for priority engagement with users",
+            title: "What We're Building",
+            description: "Task → Approval → Instant Payout. We're building the boring rails remote teams need for clean operations and fast payments.",
             icon: "https://www.svgrepo.com/show/530438/ddos-protection.svg",
-            iconAlt: "News Icon",
+            iconAlt: "Building Icon",
             variant: "default" as const,
+            buttonText: "Try Our Platform",
+            buttonLink: "/wallet",
         },
         {
-            title: "Sizland Announcements",
-            description: "All your favourite Sizland announcements for public inclusion",
+            title: "Community",
+            description: "Join our growing community of remote teams and blockchain enthusiasts. Follow our daily updates and be part of the journey.",
             icon: "https://www.svgrepo.com/show/530442/port-detection.svg",
-            iconAlt: "Announcements Icon",
+            iconAlt: "Community Icon",
             variant: "highlight" as const,
+            buttonText: "Join our community",
+            buttonLink: "https://twitter.com/sizlandofficial",
         },
         {
-            title: "Sizland Education",
-            description: "We educate the Sizland community on crypto, blockchain and web3",
+            title: "Daily Updates",
+            description: "We ship in public, daily. Follow our progress as we build the future of remote team management and blockchain solutions.",
             icon: "https://www.svgrepo.com/show/530444/availability.svg",
-            iconAlt: "Education Icon",
+            iconAlt: "Updates Icon",
             variant: "default" as const,
+            buttonText: "Follow Updates",
+            buttonLink: "https://twitter.com/sizlandofficial",
         },
     ];
 
@@ -58,6 +64,8 @@ const InfoHub = () => {
                             icon={card.icon} 
                             iconAlt={card.iconAlt}
                             variant={card.variant}
+                            buttonText={card.buttonText}
+                            buttonLink={card.buttonLink}
                         />
                     ))}
                 </div>

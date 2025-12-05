@@ -9,9 +9,21 @@ type InfoCardProps = {
     icon: string;
     iconAlt: string;
     variant?: "default" | "highlight";
+    buttonText?: string;
+    buttonLink?: string;
+    buttonOnClick?: () => void;
 };
 
-const InfoCard: React.FC<InfoCardProps> = ({ title, description, icon, iconAlt, variant = "default" }) => {
+const InfoCard: React.FC<InfoCardProps> = ({ 
+    title, 
+    description, 
+    icon, 
+    iconAlt, 
+    variant = "default",
+    buttonText,
+    buttonLink,
+    buttonOnClick
+}) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
 
@@ -36,7 +48,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, description, icon, iconAlt, 
             : "text-neutral-600";
 
     return (
-        <div className={`${cardClasses} rounded-xl p-6 transition-all hover:shadow-xl`}>
+        <div className={`${cardClasses} rounded-xl p-6 transition-all hover:shadow-xl flex flex-col`}>
             {/* Icon at top-left */}
             <div className="mb-4">
                 <img
@@ -59,9 +71,44 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, description, icon, iconAlt, 
             </h3>
 
             {/* Description */}
-            <p className={`${descriptionColor} text-sm leading-6 text-left`}>
+            <p className={`${descriptionColor} text-sm leading-6 text-left mb-4`}>
                 {description}
             </p>
+
+            {/* Button */}
+            {buttonText && (
+                <div className="mt-auto">
+                    {buttonLink ? (
+                        <a
+                            href={buttonLink}
+                            target={buttonLink.startsWith('http') ? '_blank' : undefined}
+                            rel={buttonLink.startsWith('http') ? 'noopener noreferrer' : undefined}
+                            className={`inline-block px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                                variant === "highlight"
+                                    ? "bg-black text-white hover:bg-gray-800"
+                                    : isDark
+                                        ? "bg-gray-800 text-white hover:bg-gray-700"
+                                        : "bg-gray-900 text-white hover:bg-gray-800"
+                            }`}
+                        >
+                            {buttonText}
+                        </a>
+                    ) : buttonOnClick ? (
+                        <button
+                            onClick={buttonOnClick}
+                            className={`inline-block px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                                variant === "highlight"
+                                    ? "bg-black text-white hover:bg-gray-800"
+                                    : isDark
+                                        ? "bg-gray-800 text-white hover:bg-gray-700"
+                                        : "bg-gray-900 text-white hover:bg-gray-800"
+                            }`}
+                        >
+                            {buttonText}
+                        </button>
+                    ) : null}
+                </div>
+            )}
         </div>
     );
 };
