@@ -15,19 +15,20 @@ const HomePage: NextPage = () => {
         title="Sizland - Decentralized Platform for Remote Teams" 
         description="Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain. Experience blockchain-powered ERP and investment opportunities."
         requireAuth={false}
+        setSocialMetadata={true}
       >
         <section id="hero">
           <Hero /> {/* Use the Hero component */}
         </section>
       </PageLayout>
       <Features />
-      <PageLayout title="#about" description="About sizland" requireAuth={false}>
+      <PageLayout title="#about" description="About sizland" requireAuth={false} setSocialMetadata={false}>
         <section id="about">
           <About />
         </section>
       </PageLayout>
       <InfoHub />
-      <PageLayout title="#roadmap" description="roadmap to sizland" requireAuth={false}>
+      <PageLayout title="#roadmap" description="roadmap to sizland" requireAuth={false} setSocialMetadata={false}>
         <section id="roadmap">
           <Roadmap />
         </section>
