@@ -6,6 +6,7 @@ import Features from "@/components/features";
 import About from "@/components/about";
 import InfoHub from "@/components/infoHub";
 import Roadmap from "@/components/roadmap";
+import CTASection from "@/components/cta-section";
 
 const HomePage: NextPage = () => {
   return (
@@ -27,6 +28,7 @@ const HomePage: NextPage = () => {
           <Roadmap />
         </section>
       </PageLayout>
+      <CTASection />
     </>
   );
 };

@@ -1,6 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useTheme } from 'next-themes';
+import { AuroraText } from './ui/aurora-text';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 
 // SIZ Logo Icon Component
 const SizLogoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -106,83 +115,234 @@ const roadmap: RoadmapItem[] = [
   },
 ];
 
+// Shortened roadmap data for the main display
+const shortenedRoadmap = [
+  {
+    number: '01',
+    title: 'Foundation',
+    description: 'Laying the groundwork with core infrastructure, wallet integration, and the initial ERP framework.',
+  },
+  {
+    number: '02',
+    title: 'Growth',
+    description: 'Expanding capabilities with advanced tasks, automated payments, and early DeFi tooling.',
+  },
+  {
+    number: '03',
+    title: 'Expansion',
+    description: 'Scaling the ecosystem through collaboration features, shared workspaces, and developer APIs.',
+  },
+  {
+    number: '04',
+    title: 'Future Vision',
+    description: 'The long-term evolution toward DAO governance, a global talent network, and a fully decentralized economy.',
+  },
+];
+
 const Roadmap = () => {
+  const { theme } = useTheme();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isDark = theme === 'dark';
+
   return (
-    <div className="flex flex-col items-center px-4 py-8">
-      <div className="max-w-4xl w-full mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
-          Sizland Product Roadmap
-        </h2>
-        <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed text-center mb-6">
-          Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
-        </p>
-      </div>
-      <ol className="relative border-s border-gray-200 dark:border-gray-700 max-w-4xl w-full">
-        {roadmap.map((item, index) => (
-          <li key={index} className="mb-12 ms-6">
-            <span className="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900">
-              <SizLogoIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
-            </span>
-            <h3 className="flex items-center mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-              {item.title}
-              {item.badge && (
-                <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300 ms-3">
-                  {item.badge}
+    <>
+      <section className="relative py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header Section */}
+          <div className="mb-12 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)] items-center">
+            <div className="space-y-4">
+              {/* Pill badge */}
+              <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300">
+                Roadmap
+              </span>
+
+              {/* Title */}
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+                <span className={isDark ? "text-white" : "text-black"}>
+                  Sizland Product{" "}
                 </span>
-              )}
-            </h3>
-            <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-              {item.date}
-            </time>
-            {item.description && (
-              <p className="text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                {item.description}
+                <AuroraText>Roadmap</AuroraText>
+              </h2>
+
+              {/* Description */}
+              <p className="text-base md:text-lg leading-relaxed max-w-2xl">
+                <span className={isDark ? "text-gray-300" : "text-gray-600"}>
+                  Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
+                </span>
               </p>
-            )}
-            {item.achievements && (
-              <div className="mt-6 mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {item.achievements.title}
-                </h4>
-                <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-                  {item.achievements.date}
-                </time>
-                <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {item.achievements.items.map((achievement, idx) => (
-                    <li key={idx}>{achievement}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {item.nextSteps && (
-              <div className="mt-6 mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {item.nextSteps.title}
-                </h4>
-                <time className="block mb-3 text-sm font-medium leading-none text-green-600 dark:text-green-400">
-                  {item.nextSteps.date}
-                </time>
-                <p className="text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
-                  The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {item.nextSteps.items.map((step, idx) => (
-                    <li key={idx}>{step}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {item.items && (
-              <ul className="list-disc list-inside space-y-2 text-base font-normal text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
-                {item.items.map((listItem, idx) => (
-                  <li key={idx}>{listItem}</li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ol>
-    </div>
+            </div>
+
+            {/* Learn More Button */}
+            <div className="flex lg:justify-end">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline - Shortened Version */}
+          <div className="relative">
+            {/* Dotted connecting line - only visible on desktop */}
+            <div className={`hidden lg:block absolute top-6 left-[1.5rem] right-[1.5rem] h-0.5 border-t-2 border-dashed ${
+              isDark ? "border-green-500/40" : "border-green-500/50"
+            }`} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {shortenedRoadmap.map((phase, index) => (
+                <div key={index} className="relative flex flex-col items-start">
+                  {/* Number Circle */}
+                  <div className={`relative z-10 mb-4 flex items-center justify-center w-12 h-12 rounded-full border-2 ${
+                    isDark 
+                      ? "border-green-500 bg-green-500/10" 
+                      : "border-green-500 bg-green-50"
+                  }`}>
+                    <span className={`text-lg font-bold ${
+                      isDark ? "text-green-400" : "text-green-600"
+                    }`}>
+                      {phase.number}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className={`text-xl font-bold mb-3 ${
+                    isDark ? "text-white" : "text-black"
+                  }`}>
+                    {phase.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className={`text-sm leading-6 ${
+                    isDark ? "text-gray-300" : "text-gray-600"
+                  }`}>
+                    {phase.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Full Roadmap Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              <span className={isDark ? "text-white" : "text-black"}>
+                Sizland Product{" "}
+              </span>
+              <AuroraText>Roadmap</AuroraText>
+            </DialogTitle>
+            <DialogDescription className={isDark ? "text-gray-300" : "text-gray-600"}>
+              Complete roadmap with detailed information about each phase
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6">
+            <ol className="relative border-s border-gray-200 dark:border-gray-700">
+              {roadmap.map((item, index) => (
+                <li key={index} className="mb-12 ms-6">
+                  <span className={`absolute flex items-center justify-center w-8 h-8 rounded-full -start-4 ring-4 ${
+                    isDark 
+                      ? "bg-green-900 ring-gray-900" 
+                      : "bg-green-100 ring-white"
+                  }`}>
+                    <SizLogoIcon className={`w-4 h-4 ${
+                      isDark ? "text-green-400" : "text-green-600"
+                    }`} />
+                  </span>
+                  <h3 className={`flex items-center mb-2 text-xl font-semibold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}>
+                    {item.title}
+                    {item.badge && (
+                      <span className={`text-sm font-medium me-2 px-2.5 py-0.5 rounded-full ms-3 ${
+                        isDark 
+                          ? "bg-green-900 text-green-300" 
+                          : "bg-green-100 text-green-800"
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </h3>
+                  <time className={`block mb-3 text-sm font-medium leading-none ${
+                    isDark ? "text-green-400" : "text-green-600"
+                  }`}>
+                    {item.date}
+                  </time>
+                  {item.description && (
+                    <p className={`text-base font-normal leading-relaxed mb-4 ${
+                      isDark ? "text-gray-300" : "text-gray-700"
+                    }`}>
+                      {item.description}
+                    </p>
+                  )}
+                  {item.achievements && (
+                    <div className="mt-6 mb-4">
+                      <h4 className={`text-lg font-semibold mb-2 ${
+                        isDark ? "text-white" : "text-gray-900"
+                      }`}>
+                        {item.achievements.title}
+                      </h4>
+                      <time className={`block mb-3 text-sm font-medium leading-none ${
+                        isDark ? "text-green-400" : "text-green-600"
+                      }`}>
+                        {item.achievements.date}
+                      </time>
+                      <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}>
+                        {item.achievements.items.map((achievement, idx) => (
+                          <li key={idx}>{achievement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {item.nextSteps && (
+                    <div className="mt-6 mb-4">
+                      <h4 className={`text-lg font-semibold mb-2 ${
+                        isDark ? "text-white" : "text-gray-900"
+                      }`}>
+                        {item.nextSteps.title}
+                      </h4>
+                      <time className={`block mb-3 text-sm font-medium leading-none ${
+                        isDark ? "text-green-400" : "text-green-600"
+                      }`}>
+                        {item.nextSteps.date}
+                      </time>
+                      <p className={`text-base font-normal leading-relaxed mb-2 ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}>
+                        The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
+                      </p>
+                      <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}>
+                        {item.nextSteps.items.map((step, idx) => (
+                          <li key={idx}>{step}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {item.items && (
+                    <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed mt-4 ${
+                      isDark ? "text-gray-300" : "text-gray-700"
+                    }`}>
+                      {item.items.map((listItem, idx) => (
+                        <li key={idx}>{listItem}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

@@ -35,11 +35,7 @@ const InfoHub = () => {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Pill badge */}
                 <div className="flex justify-center mb-4">
-                    <span className={`inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium ${
-                        theme === "dark" 
-                            ? "bg-neutral-800/80 text-neutral-300" 
-                            : "bg-neutral-200/80 text-neutral-700"
-                    }`}>
+                    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300">
                         Infohub
                     </span>
                 </div>
