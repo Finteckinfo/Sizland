@@ -10,9 +10,10 @@ interface ModalVideoProps {
   thumbWidth?: number;
   thumbHeight?: number;
   thumbAlt?: string;
-  video: string;
+  video?: string; // Optional for local video
   videoWidth?: number;
   videoHeight?: number;
+  youtubeUrl?: string; // YouTube embed URL
 }
 
 const ModalVideo: React.FC<ModalVideoProps> = ({
@@ -23,6 +24,7 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
   video,
   videoWidth = 1920,
   videoHeight = 1080,
+  youtubeUrl,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
@@ -114,14 +116,28 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
 
             {/* Video Container */}
             <div className="relative aspect-w-16 aspect-h-9 bg-black rounded-2xl overflow-hidden shadow-2xl">
-              <video
-                src={video}
-                width={videoWidth}
-                height={videoHeight}
-                controls
-                autoPlay
-                className="w-full h-full object-cover"
-              />
+              {youtubeUrl ? (
+                <iframe
+                  width="560"
+                  height="315"
+                  src={`${youtubeUrl}${youtubeUrl.includes('?') ? '&' : '?'}autoplay=1`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              ) : (
+                <video
+                  src={video}
+                  width={videoWidth}
+                  height={videoHeight}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           </div>
         </div>

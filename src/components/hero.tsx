@@ -163,9 +163,7 @@ const Hero = () => {
               thumbWidth={768}
               thumbHeight={432}
               thumbAlt="Watch Sizland Intro"
-              video="/videos/sizland-intro.mp4"
-              videoWidth={1920}
-              videoHeight={1080}
+              youtubeUrl="https://www.youtube.com/embed/uZ6vXVTzisw?si=8sNAT0YaHpmdae2v"
             />
           </div>
         </div>
