@@ -220,7 +220,7 @@ export const Navbar: React.FC = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
+                <Button variant="outline" size="sm" onClick={() => router.push("/auth-choice")}>
                   Sign In
                 </Button>
               )}
@@ -282,7 +282,7 @@ export const Navbar: React.FC = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => signIn()}>
+                <Button variant="outline" size="sm" onClick={() => router.push("/auth-choice")}>
                   Sign In
                 </Button>
               )}
