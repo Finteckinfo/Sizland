@@ -9,6 +9,8 @@ import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
+const ERP_URL = process.env.NEXT_PUBLIC_ERP_URL || "https://erp.siz.land";
+
 const LobbyPage = () => {
   const { theme } = useTheme();
   const router = useRouter();
@@ -87,7 +89,7 @@ const LobbyPage = () => {
       console.log('[Lobby] SSO token generated and set as cookie, redirecting to ERP...');
 
       // Redirect to ERP without token in URL (token is in cookie)
-      window.location.href = 'https://erp.siz.land';
+      window.location.href = ERP_URL;
     } catch (error) {
       console.error('[Lobby] Error generating SSO token:', error);
       alert('Failed to access ERP. Please try again.');
@@ -103,7 +105,7 @@ const LobbyPage = () => {
       description: "At the heart of Sizland lies the ERP solution created for today's decentralized world",
       icon: "Workflow",
       // SSO via shared NextAuth session cookies on .siz.land domain
-      href: "https://erp.siz.land",
+      href: ERP_URL,
       isExternal: true,
       isClickable: true,
       variant: "blue" as const

@@ -54,7 +54,7 @@ export default async function handler(
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    // Generate a short-lived SSO token (valid for 5 minutes)
+    // Generate an SSO token (valid for 60 minutes)
     const secret = process.env.NEXTAUTH_SECRET;
     if (!secret) {
       console.error('[SSO Token] NEXTAUTH_SECRET is not set');
@@ -78,7 +78,7 @@ export default async function handler(
       },
       secret,
       {
-        expiresIn: '5m', // Token expires in 5 minutes
+        expiresIn: '60m', // Token expires in 60 minutes
         issuer: 'siz.land',
         audience: 'erp.siz.land'
       }
@@ -90,14 +90,14 @@ export default async function handler(
     // IMPORTANT: HttpOnly must be FALSE to allow client-side reading in ERP
     // This is required for the Vercel firewall bypass to work
     res.setHeader('Set-Cookie', [
-      `siz_sso_token=${ssoToken}; Domain=.siz.land; Path=/; Secure; SameSite=Lax; Max-Age=300`
+      `siz_sso_token=${ssoToken}; Domain=.siz.land; Path=/; Secure; SameSite=Lax; Max-Age=3600`
     ]);
 
     console.log('[SSO Token] Cookie set on .siz.land domain');
 
     return res.status(200).json({
       ssoToken,
-      expiresIn: 300 // 5 minutes in seconds
+      expiresIn: 3600 // 60 minutes in seconds
     });
   } catch (error) {
     console.error('[SSO Token] Error generating token:', error);

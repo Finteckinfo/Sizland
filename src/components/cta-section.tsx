@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/router';
 import { AuroraText } from './ui/aurora-text';
 
 const CTASection = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const router = useRouter();
 
   return (
     <section className={`relative py-24 ${
@@ -47,6 +49,7 @@ const CTASection = () => {
                 ? "bg-white text-green-600 hover:bg-green-50"
                 : "bg-white text-green-600 hover:bg-green-50"
             }`}
+            onClick={() => router.push('/auth-choice')}
           >
             Start Free Trial
           </button>
