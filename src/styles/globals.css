@@ -176,7 +176,7 @@
 
   /* Rounded-rectangle grid using an SVG mask to match the design's soft vertices */
   --grid-stroke: rgba(22, 101, 52, 0.32);
-  --cell-size: 120px;
+  --cell-size: 90px;
 
   /* The pattern is an SVG of a rounded rectangle outline. We apply a color via background-color. */
   background-color: var(--grid-stroke);
