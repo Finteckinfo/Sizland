@@ -11,7 +11,7 @@
     "preexport": "npm run ensure:porto-tsconfig",
     "start": "next start",
     "prestart": "npm run ensure:porto-tsconfig",
-    "postinstall": "npm run ensure:porto-tsconfig",
+    "postinstall": "node scripts/ensure-porto-tsconfig.js",
     "typecheck": "tsc --noEmit",
     "pretypecheck": "npm run ensure:porto-tsconfig",
     "lint": "next lint",
