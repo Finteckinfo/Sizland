@@ -1,0 +1,75 @@
+name: e2e
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sizland
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            Sizland/package-lock.json
+            SIZERP2-0/package-lock.json
+            SIZERPBACKEND2-0/package-lock.json
+
+      - name: Install Sizland deps
+        working-directory: Sizland
+        run: npm ci
+
+      - name: Install ERP deps
+        working-directory: SIZERP2-0
+        run: npm ci
+
+      - name: Install ERP backend deps
+        working-directory: SIZERPBACKEND2-0
+        run: npm ci
+
+      - name: Run backend Vitest suite
+        working-directory: SIZERPBACKEND2-0
+        run: npm run test:api
+
+      - name: Start Next.js + ERP servers
+        working-directory: Sizland
+        run: npm run dev:full &
+      
+      - name: Wait for Next.js
+        run: npx wait-on http://localhost:3000
+
+      - name: Run Cypress E2E
+        working-directory: Sizland
+        env:
+          CI: true
+        run: npm run cypress:run
+
+      - name: Upload Cypress artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            Sizland/cypress/videos
+            Sizland/cypress/screenshots
