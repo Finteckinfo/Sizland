@@ -10,6 +10,66 @@ import { Loader2 } from "lucide-react";
 
 const ERP_URL = process.env.NEXT_PUBLIC_ERP_URL || "https://erp.siz.land";
 
+type OnboardingStep = {
+  title: string;
+  description: string;
+  bullets: string[];
+  icon: keyof typeof Icons;
+  pill: string;
+};
+
+type RoleQuickStart = {
+  role: string;
+  focus: string;
+  action: string;
+  helper: string;
+};
+
+const onboardingSteps: OnboardingStep[] = [
+  {
+    title: "Frame the Workspace",
+    description: "Spin up your Sizland org, invite collaborators, and map departments so every task inherits the right budget owner automatically.",
+    bullets: ["Create workspace + departments", "Assign project owners & reviewers", "Define payment currencies"],
+    icon: "LayoutDashboard",
+    pill: "Step 1"
+  },
+  {
+    title: "Plan & Fund Tasks",
+    description: "Break work into token-funded tasks, set clear deliverables, and allocate escrow in the same flow.",
+    bullets: ["Draft monthly sprints or milestones", "Attach SIZ or fiat payouts per task", "Fund escrow during assignment"],
+    icon: "Coins",
+    pill: "Step 2"
+  },
+  {
+    title: "Approve & Automate Payouts",
+    description: "Supervisors review submissions, approvals trigger instant releases, and accountants just monitor the audit trail.",
+    bullets: ["Supervisors review & approve tasks", "Escrow releases to contributor wallets", "Analytics + logs stay in sync"],
+    icon: "ShieldCheck",
+    pill: "Step 3"
+  }
+];
+
+const roleQuickStarts: RoleQuickStart[] = [
+  {
+    role: "Project Owners",
+    focus: "Spin up projects, set budgets, and delegate managers.",
+    action: "Create workspace",
+    helper: "Takes ~2 minutes · brings escrow + analytics online."
+  },
+  {
+    role: "Managers & Supervisors",
+    focus: "Group tasks, assign contributors, and monitor velocity.",
+    action: "Load Kanban board",
+    helper: "Drag-and-drop tasks, escalate blockers instantly."
+  },
+  {
+    role: "Contributors",
+    focus: "Deliver tasks, track payouts, and sync wallets.",
+    action: "Open ERP Workspace",
+    helper: "Built-in wallet tutorial + SLA reminders."
+  }
+];
+
 const LobbyPage = () => {
   const { theme } = useTheme();
   const router = useRouter();
@@ -201,6 +261,103 @@ const LobbyPage = () => {
 
         {/* Dapp Tiles Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* ERP Onboarding Overview */}
+          <section className="mb-12" data-testid="erp-onboarding-hero">
+            <div
+              className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white via-emerald-50 to-white p-8 shadow-2xl dark:border-white/10 dark:from-emerald-900/20 dark:via-slate-900/50 dark:to-slate-950"
+            >
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-500 dark:text-emerald-300">
+                    Sizland ERP onboarding
+                  </p>
+                  <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    Make every team ledger-ready in three guided passes
+                  </h2>
+                  <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
+                    We condensed the ERP workflow into a playbook that covers workspace design, escrow-backed tasking,
+                    and automated releases. Share it with every role so nobody gets stuck between SSO and the Kanban board.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-200">
+                  <div className="rounded-2xl bg-white/70 p-4 shadow-lg ring-1 ring-black/5 backdrop-blur dark:bg-white/5">
+                    <p className="text-xs uppercase tracking-widest text-emerald-500">Need a hand?</p>
+                    <p className="mt-1 font-semibold">Wallet + Escrow concierge</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Guided flows for Pera, Defly, WalletConnect.</p>
+                  </div>
+                  <div className="rounded-2xl bg-black/5 p-4 shadow-lg ring-1 ring-black/5 dark:bg-white/5">
+                    <p className="text-xs uppercase tracking-widest text-emerald-500">Average go-live time</p>
+                    <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">6h</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">From workspace creation to first payment.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 grid gap-6 lg:grid-cols-3">
+                {onboardingSteps.map((step, idx) => {
+                  const StepIcon = Icons[step.icon] as LucideIcon;
+                  return (
+                    <div
+                      key={step.title}
+                      className="group relative flex h-full flex-col rounded-2xl border border-emerald-500/10 bg-white/80 p-6 shadow-md ring-1 ring-black/5 transition hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-emerald-200/40 dark:bg-white/5"
+                    >
+                      <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-500 dark:text-emerald-300">
+                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                          {step.pill}
+                        </span>
+                        <span>ERP flow</span>
+                      </div>
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-200">
+                          <StepIcon size={24} />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{step.title}</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{step.description}</p>
+                      <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-200">
+                        {step.bullets.map((bullet) => (
+                          <li key={bullet} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-10 grid gap-4 md:grid-cols-3">
+                {roleQuickStarts.map((card) => (
+                  <div
+                    key={card.role}
+                    className="rounded-2xl border border-white/40 bg-white/90 p-4 shadow-lg backdrop-blur dark:border-white/10 dark:bg-white/5"
+                  >
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{card.role}</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900 dark:text-white">{card.focus}</p>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{card.helper}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-sm font-medium text-emerald-600 dark:text-emerald-300">{card.action}</span>
+                      <button
+                        className="rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
+                        onClick={() => {
+                          if (card.role === "Project Owners") {
+                            router.push("/projects/create");
+                          } else if (card.role === "Managers & Supervisors") {
+                            router.push("/kanban");
+                          } else {
+                            window.location.href = ERP_URL;
+                          }
+                        }}
+                      >
+                        Launch
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
           {/* Tiles Grid */}
           <div className="flex justify-center items-center">
@@ -251,6 +408,7 @@ const LobbyPage = () => {
                       <a
                         key={index}
                         href={tile.href}
+                        data-testid="erp-tile-link"
                         onClick={handleERPClick}
                         className="relative"
                       >

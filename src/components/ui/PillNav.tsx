@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { createPortal } from "react-dom";
 import FlowingMenu from "./FlowingMenu";
@@ -304,7 +305,7 @@ const PillNav = ({
               logoRef.current = el;
             }}
           >
-            <img src={logo} alt={logoAlt} ref={logoImgRef} />
+            <Image src={logo} alt={logoAlt} width={120} height={40} className="h-10 w-auto" ref={logoImgRef} />
           </Link>
         ) : (
           <a
@@ -316,7 +317,7 @@ const PillNav = ({
               logoRef.current = el;
             }}
           >
-            <img src={logo} alt={logoAlt} ref={logoImgRef} />
+            <Image src={logo} alt={logoAlt} width={120} height={40} className="h-10 w-auto" ref={logoImgRef} />
           </a>
         )}
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet, WalletId } from '@txnlab/use-wallet-react';
 import { Typography } from './typography';
 import { Button } from './button';
@@ -68,6 +68,49 @@ export const WalletBalance: React.FC = () => {
   const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
   const [isProcessingSuccess, setIsProcessingSuccess] = useState(false);
 
+  // Get the SIZ asset ID for the selected network
+  const getSizAssetId = (network: Network) => {
+    return SIZ_ASSET_IDS[network];
+  };
+
+  // Create Algorand client for the selected network
+  const getAlgorandClient = (network: Network) => {
+    const networkConfig = ALGORAND_NETWORKS[network];
+    return new algosdk.Algodv2('', networkConfig.algodUrl, '');
+  };
+
+  // Set mounted to true after component mounts on client
+  useEffect(() => {
+    setMounted(true);
+    
+    // Check environment variables on mount
+    console.log('[ENV] Checking environment variables on component mount...');
+    console.log('   ARC59_APP_ID:', process.env.NEXT_PUBLIC_ARC59_APP_ID || 'NOT SET ❌');
+    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
+    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.NEXT_PUBLIC_CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
+
+    if (!process.env.NEXT_PUBLIC_ARC59_APP_ID) {
+      console.error('[ENV] Critical environment variable missing: ARC59_APP_ID');
+      console.error('   This will prevent the claim functionality from working.');
+      console.error('   Please add NEXT_PUBLIC_ARC59_APP_ID=643020148 to your .env.local file for testnet.');
+    }
+  }, []);
+
+  // Fetch pending payments for the connected wallet
+  const fetchPendingPayments = useCallback(async () => {
+    if (!activeAccount?.address) return;
+
+    try {
+      const response = await fetch(`/api/payments/pending?walletAddress=${activeAccount.address}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPendingPayments(data.payments || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+    }
+  }, [activeAccount?.address]);
+
   // Check URL parameters on mount and when component updates
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -89,54 +132,11 @@ export const WalletBalance: React.FC = () => {
         }, 2000);
       }
     }
-  }, [activeAccount?.address]);
-
-  // Get the SIZ asset ID for the selected network
-  const getSizAssetId = (network: Network) => {
-    return SIZ_ASSET_IDS[network];
-  };
-
-  // Create Algorand client for the selected network
-  const getAlgorandClient = (network: Network) => {
-    const networkConfig = ALGORAND_NETWORKS[network];
-    return new algosdk.Algodv2('', networkConfig.algodUrl, '');
-  };
-
-  // Set mounted to true after component mounts on client
-  useEffect(() => {
-    setMounted(true);
-    
-    // Check environment variables on mount
-    console.log('🔍 [ENV] Checking environment variables on component mount...');
-    console.log('   ARC59_APP_ID:', process.env.NEXT_PUBLIC_ARC59_APP_ID || 'NOT SET ❌');
-    console.log('   SIZ_TOKEN_ASSET_ID:', process.env.NEXT_PUBLIC_SIZ_TOKEN_ASSET_ID || 'NOT SET ❌');
-    console.log('   CENTRAL_WALLET_ADDRESS:', process.env.NEXT_PUBLIC_CENTRAL_WALLET_ADDRESS || 'NOT SET ❌');
-
-    if (!process.env.NEXT_PUBLIC_ARC59_APP_ID) {
-      console.error('❌ [ENV] Critical environment variable missing: ARC59_APP_ID');
-      console.error('   This will prevent the claim functionality from working.');
-      console.error('   Please add NEXT_PUBLIC_ARC59_APP_ID=643020148 to your .env.local file for testnet.');
-    }
-  }, []);
-
-  // Fetch pending payments for the connected wallet
-  const fetchPendingPayments = async () => {
-    if (!activeAccount?.address) return;
-
-    try {
-      const response = await fetch(`/api/payments/pending?walletAddress=${activeAccount.address}`);
-      if (response.ok) {
-        const data = await response.json();
-        setPendingPayments(data.payments || []);
-      }
-    } catch (error) {
-      console.error('Error fetching pending payments:', error);
-    }
-  };
+  }, [activeAccount?.address, fetchPendingPayments]);
 
   // Handle confetti completion
   const handleConfettiComplete = () => {
-    console.log('🎊 [CONFETTI] Confetti animation completed, handling cleanup...');
+    console.log('[CONFETTI] Confetti animation completed, handling cleanup...');
     setShowConfetti(false);
     console.log('   Confetti state set to false');
     
@@ -153,7 +153,7 @@ export const WalletBalance: React.FC = () => {
 
   // Handle claim functionality
   const handleClaim = async () => {
-    console.log('🚀 [CLAIM] Starting claim process...');
+    console.log('[CLAIM] Starting claim process...');
     console.log('   Active account:', activeAccount?.address);
     console.log('   Pending payments count:', pendingPayments.length);
     
@@ -193,7 +193,7 @@ export const WalletBalance: React.FC = () => {
     try {
       // Check if there are any payments that can be claimed
       const claimablePayments = pendingPayments.filter(payment => payment.canClaim);
-      console.log('🔍 [CLAIM] Filtering claimable payments...');
+      console.log('[CLAIM] Filtering claimable payments...');
       console.log('   Total pending payments:', pendingPayments.length);
       console.log('   Claimable payments:', claimablePayments.length);
       console.log('   Claimable payment details:', claimablePayments.map(p => ({
@@ -357,7 +357,7 @@ export const WalletBalance: React.FC = () => {
 
 
   // Fetch account information using AlgoKit
-  const fetchAccountInfo = async () => {
+  const fetchAccountInfo = useCallback(async () => {
     if (!activeAccount?.address) return;
 
     setLoading(true);
@@ -442,7 +442,7 @@ export const WalletBalance: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeAccount?.address, selectedNetwork]);
 
   // Fetch account info when wallet connects or network changes (only on client)
   useEffect(() => {
@@ -453,7 +453,7 @@ export const WalletBalance: React.FC = () => {
       setAccountInfo(null);
       setPendingPayments([]);
     }
-  }, [mounted, activeAccount?.address, selectedNetwork]);
+  }, [mounted, activeAccount?.address, selectedNetwork, fetchAccountInfo, fetchPendingPayments]);
 
   // Also fetch when the component mounts and wallet is already connected
   useEffect(() => {
@@ -461,7 +461,7 @@ export const WalletBalance: React.FC = () => {
       fetchAccountInfo();
       fetchPendingPayments();
     }
-  }, [mounted, activeAccount?.address]);
+  }, [mounted, activeAccount?.address, accountInfo, fetchAccountInfo, fetchPendingPayments]);
 
   // Handle network change
   const handleNetworkChange = (network: Network) => {
@@ -530,33 +530,33 @@ export const WalletBalance: React.FC = () => {
     setCreateSuccess(null);
 
     try {
-      console.log('🚀 [Create Wallet] Starting wallet generation...');
+      console.log('[Create Wallet] Starting wallet generation...');
       
       // Generate wallet
       const wallet = generateAlgorandWallet();
-      console.log('✅ [Create Wallet] Wallet generated successfully:', wallet.address);
+      console.log('[Create Wallet] Wallet generated successfully:', wallet.address);
       
       // Store wallet locally
       storeWallet(wallet);
-      console.log('✅ [Create Wallet] Wallet stored locally');
+      console.log('[Create Wallet] Wallet stored locally');
 
       // Try to auto-connect the custom provider
       try {
         const customWallet = wallets.find(w => w.id === WalletId.CUSTOM);
         if (customWallet) {
           await customWallet.connect();
-          console.log('✅ [Create Wallet] Auto-connected to custom wallet');
+          console.log('[Create Wallet] Auto-connected to custom wallet');
           
           // Post wallet address to external database after successful connection
           if (wallet.address) {
-            console.log('🔍 [Create Wallet] Generated wallet connected, posting address to external DB:', wallet.address);
+            console.log('[Create Wallet] Generated wallet connected, posting address to external DB:', wallet.address);
             await postWalletToExternalDB(wallet.address);
           }
         } else {
-          console.error('🔍 [Create Wallet] Custom wallet not found in wallets list');
+          console.error('[Create Wallet] Custom wallet not found in wallets list');
         }
       } catch (connectError) {
-        console.error('🔍 [Create Wallet] Failed to auto-connect wallet:', connectError);
+        console.error('[Create Wallet] Failed to auto-connect wallet:', connectError);
         // Don't throw error here as wallet was still generated successfully
       }
 
@@ -619,7 +619,7 @@ export const WalletBalance: React.FC = () => {
             {/* Create Wallet Button */}
             <div className="flex flex-col items-center">
               <Typography variant="small" className="text-gray-400 mb-3">
-                Don't have a wallet?
+                Don&apos;t have a wallet?
               </Typography>
               <Button
                 onClick={handleCreateWallet}
@@ -758,7 +758,7 @@ export const WalletBalance: React.FC = () => {
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
             <div>
               <Typography variant="paragraph" className="text-green-700 dark:text-green-300 font-medium">
-                🎉 Payment Successful! Processing {urlParams.tokens} SIZ tokens...
+                Payment Successful! Processing {urlParams.tokens} SIZ tokens...
               </Typography>
               <Typography variant="small" className="text-green-600 dark:text-green-400">
                 Your tokens are being transferred to your wallet. This may take a few moments.
@@ -805,7 +805,7 @@ export const WalletBalance: React.FC = () => {
                   Congratulations!
                 </Typography>
                 <Typography variant="paragraph" className="text-green-600 dark:text-green-400 mb-3">
-                  You've successfully purchased {formatSizTokenAmount(mostRecentPayment.tokenAmount)} SIZ tokens!
+                  You&apos;ve successfully purchased {formatSizTokenAmount(mostRecentPayment.tokenAmount)} SIZ tokens!
                 </Typography>
                 <Typography variant="small" className="text-green-500 dark:text-green-400 mb-4">
                   Your tokens have been transferred directly to your wallet. You can now use them for trading, staking, or any other SIZ token activities.

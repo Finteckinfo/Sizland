@@ -198,7 +198,7 @@ const Hero = () => {
                 Experience Blockchain-Powered Investment and Business Management with Sizland What sets us apart is our blockchain-powered ERP system, the heart of our ecosystem. Tailored specifically for remote teams, our ERP simplifies enterprise financial management by automating workflows and enabling real-time tracking, ensuring smooth operations and enhanced efficiency.
               </p>
               <p>
-                But that's not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you'll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
+                But that&apos;s not all, our platform also provides access to various investment opportunities, from traditional assets to decentralized finance. With Sizland, you&apos;ll experience the power of having a cutting-edge business solution and a comprehensive investment platform, all in one place.
               </p>
             </div>
 

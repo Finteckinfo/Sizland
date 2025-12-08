@@ -72,7 +72,7 @@ export const OptInInstructions: React.FC<OptInInstructionsProps> = ({
               <strong>AlgoSigner:</strong> Go to Assets → Add Asset → Enter the Asset ID above
             </p>
             <p>
-              <strong>Other Wallets:</strong> Look for "Add Asset", "Import Asset", or "+" option
+              <strong>Other Wallets:</strong> Look for &quot;Add Asset&quot;, &quot;Import Asset&quot;, or &quot;+&quot; option
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export const OptInInstructions: React.FC<OptInInstructionsProps> = ({
             After Opt-In
           </h4>
           <p className="text-sm text-green-700 dark:text-green-300 mb-3">
-            Once you've completed the opt-in process in your wallet, click the button below to verify your wallet is ready:
+            Once you&apos;ve completed the opt-in process in your wallet, click the button below to verify your wallet is ready:
           </p>
           <Button
             onClick={() => window.location.reload()}

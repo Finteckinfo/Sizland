@@ -183,7 +183,7 @@ export const WalletGenerator: React.FC<WalletGeneratorProps> = ({ onWalletGenera
               <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
                 <li>• You can use this password to access your wallet quickly</li>
                 <li>• You can also use your 25-word recovery phrase to restore access</li>
-                <li>• Save your recovery phrase securely - it's your backup!</li>
+                <li>• Save your recovery phrase securely - it&apos;s your backup!</li>
               </ul>
             </div>
 
@@ -236,7 +236,7 @@ export const WalletGenerator: React.FC<WalletGeneratorProps> = ({ onWalletGenera
                 </Typography>
                 <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
                   <li>• Download and save your wallet credentials securely</li>
-                  <li>• You'll need your password or 25-word phrase to access your wallet</li>
+                  <li>• You&apos;ll need your password or 25-word phrase to access your wallet</li>
                   <li>• Your wallet is now connected and ready to use</li>
                 </ul>
               </div>

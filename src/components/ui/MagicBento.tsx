@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 
 const DEFAULT_PARTICLE_COUNT = 12;
@@ -623,11 +624,15 @@ const MagicBento = ({
                 </div>
                 <div className="card__content">
                   {card.image && (
-                    <img
-                      src={card.image}
-                      alt={card.imageAlt || card.title}
-                      className="card__image"
-                    />
+                    <div className="relative w-full h-32">
+                      <Image
+                        src={card.image}
+                        alt={card.imageAlt || card.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="card__image object-contain"
+                      />
+                    </div>
                   )}
                   <div className="card__body">
                     <h2 className="card__title">{card.title}</h2>
@@ -755,11 +760,15 @@ const MagicBento = ({
             >
                 <div className="card__content">
                   {card.image && (
-                    <img
-                      src={card.image}
-                      alt={card.imageAlt || card.title}
-                      className="card__image"
-                    />
+                    <div className="relative w-full h-32">
+                      <Image
+                        src={card.image}
+                        alt={card.imageAlt || card.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="card__image object-contain"
+                      />
+                    </div>
                   )}
                   <div className="card__body">
                     <h2 className="card__title">{card.title}</h2>

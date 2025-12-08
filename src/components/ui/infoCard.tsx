@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 
 type InfoCardProps = {
     title: string;
     description: string;
-    icon: string;
-    iconAlt: string;
+    icon: { src: string; alt: string; className?: string };
     variant?: "default" | "highlight";
     buttonText?: string;
     buttonLink?: string;
@@ -18,7 +18,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
     title, 
     description, 
     icon, 
-    iconAlt, 
     variant = "default",
     buttonText,
     buttonLink,
@@ -51,18 +50,15 @@ const InfoCard: React.FC<InfoCardProps> = ({
         <div className={`${cardClasses} rounded-xl p-6 transition-all hover:shadow-xl flex flex-col`}>
             {/* Icon at top-left */}
             <div className="mb-4">
-                <img
-                    src={icon}
-                    alt={iconAlt}
-                    className="h-10 w-10"
-                    style={{
-                        filter: variant === "highlight" 
-                            ? "brightness(0)" 
-                            : isDark 
-                                ? "brightness(0) invert(0.6)" 
-                                : "brightness(0) invert(0.3)"
-                    }}
-                />
+                <div className="relative h-12 w-12">
+                    <Image
+                        src={icon.src}
+                        alt={icon.alt}
+                        fill
+                        sizes="48px"
+                        className={cn("object-contain", icon.className)}
+                    />
+                </div>
             </div>
 
             {/* Title */}

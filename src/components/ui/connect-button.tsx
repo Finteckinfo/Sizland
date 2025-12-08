@@ -357,7 +357,7 @@ export const ConnectWalletButton = () => {
                   marginTop: '0.75rem',
                   paddingTop: '0.75rem'
                 }}>
-                  Don't have a wallet?{' '}
+                  Don&apos;t have a wallet?{' '}
                   <a
                     href="#"
                     onClick={(e) => {

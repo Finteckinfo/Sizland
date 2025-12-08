@@ -221,7 +221,7 @@ const LoginPage = () => {
             {/* Sign Up Link */}
             <div className="text-center">
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link 
                   href="/signup" 
                   className="font-medium text-primary hover:text-primary/80 transition-colors"

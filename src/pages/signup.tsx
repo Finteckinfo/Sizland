@@ -325,7 +325,7 @@ const SignUpPage = () => {
         {/* Features Preview */}
         <div className="mt-8 text-center">
           <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4`}>
-            What you'll get access to:
+            What you&apos;ll get access to:
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
             <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>

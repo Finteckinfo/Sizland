@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ExternalLink, MessageCircle, Image } from 'lucide-react';
+import { RefreshCw, ExternalLink, MessageCircle, Image as ImageIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 // Extend Window interface for Twitter widgets
@@ -148,7 +148,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-3 mb-4">
         <div className="flex items-center gap-3 text-center sm:text-left">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center">
-            <Image className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" aria-hidden="true" />
           </div>
           <div>
             <h4 className={`text-base sm:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'}`}>{title}</h4>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Button } from './button';
 import { sizTokenTransferService } from '@/lib/algorand/token-transfer';
@@ -17,13 +17,7 @@ export const WalletReadinessCheck: React.FC<WalletReadinessCheckProps> = ({
   const [isChecking, setIsChecking] = useState(false);
   const [status, setStatus] = useState<'checking' | 'ready' | 'not-ready' | 'error'>('checking');
 
-  useEffect(() => {
-    if (activeAccount?.address) {
-      checkWalletReadiness();
-    }
-  }, [activeAccount?.address]);
-
-  const checkWalletReadiness = async () => {
+  const checkWalletReadiness = useCallback(async () => {
     if (!activeAccount?.address) {
       setStatus('error');
       onNotReady('No wallet connected', 'Please connect your Algorand wallet first.');
@@ -51,7 +45,13 @@ export const WalletReadinessCheck: React.FC<WalletReadinessCheckProps> = ({
     } finally {
       setIsChecking(false);
     }
-  };
+  }, [activeAccount?.address, onNotReady, onReady]);
+
+  useEffect(() => {
+    if (activeAccount?.address) {
+      checkWalletReadiness();
+    }
+  }, [activeAccount?.address, checkWalletReadiness]);
 
   const renderStatus = () => {
     switch (status) {
@@ -154,7 +154,7 @@ export const WalletReadinessCheck: React.FC<WalletReadinessCheckProps> = ({
             Error Occurred
           </h4>
           <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-            We couldn't verify your wallet status. Please try again or contact support.
+            We couldn&apos;t verify your wallet status. Please try again or contact support.
           </p>
           <Button 
             onClick={checkWalletReadiness}

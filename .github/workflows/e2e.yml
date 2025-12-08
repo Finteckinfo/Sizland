@@ -32,7 +32,7 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: |
-            Sizland/package-lock.json
+            package-lock.json
             SIZERP2-0/package-lock.json
             SIZERPBACKEND2-0/package-lock.json
 

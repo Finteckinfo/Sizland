@@ -363,7 +363,7 @@ Generated on: ${new Date().toLocaleString()}
             )}
 
             <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">What you'll receive:</h4>
+              <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">What you&apos;ll receive:</h4>
               <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
                 <li>✓ Unique Algorand wallet address</li>
                 <li>✓ 25-word recovery phrase</li>

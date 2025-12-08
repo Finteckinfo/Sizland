@@ -438,7 +438,7 @@ const Waves: React.FC<WavesProps> = ({
         cancelAnimationFrame(frameIdRef.current);
       }
     };
-  }, []);
+  }, [invertedLineColor]);
 
   return (
     <div

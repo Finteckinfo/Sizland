@@ -108,7 +108,7 @@ export const WalletUnlock: React.FC<WalletUnlockProps> = ({ onUnlocked }) => {
           <Typography variant="h3">No Wallet Found</Typography>
         </div>
         <Typography variant="paragraph" className="text-gray-600 dark:text-gray-400 mb-4">
-          You don't have an encrypted wallet yet. Please create a new wallet first.
+          You don&apos;t have an encrypted wallet yet. Please create a new wallet first.
         </Typography>
         <Button onClick={() => router.push('/')} className="w-full">
           Go to Home

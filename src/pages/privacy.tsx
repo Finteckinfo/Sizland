@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { NextPage } from 'next';
 import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
@@ -18,13 +19,13 @@ const PrivacyPage: NextPage = () => {
       requireAuth={false}
     >
       <div className="w-full max-w-4xl">
-        <a 
+        <Link 
           href="/" 
           className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
-        </a>
+        </Link>
         
         <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-8 border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-6`}>
@@ -33,7 +34,7 @@ const PrivacyPage: NextPage = () => {
           
           <div className={`prose prose-lg max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
             <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-6`}>
-              This Privacy Policy describes how Sizland ("we," "us," or "our") collects, uses, and discloses your personal information when you use our website, products, and services (collectively, "Services").
+              This Privacy Policy describes how Sizland (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, and discloses your personal information when you use our website, products, and services (collectively, &quot;Services&quot;).
             </p>
 
             <section className="mb-8">
@@ -133,7 +134,7 @@ const PrivacyPage: NextPage = () => {
 
             <section className="mb-8">
               <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4`}>
-                8. Children's Privacy
+                8. Children&apos;s Privacy
               </h2>
               <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-4`}>
                 Our Services are not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected personal information from a child under 13, we will take steps to delete such information.
@@ -145,7 +146,7 @@ const PrivacyPage: NextPage = () => {
                 9. Changes to This Privacy Policy
               </h2>
               <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-4`}>
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. Your continued use of the Services after such changes constitutes your acceptance of the new Privacy Policy.
+                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last Updated&quot; date. Your continued use of the Services after such changes constitutes your acceptance of the new Privacy Policy.
               </p>
             </section>
 

@@ -10,8 +10,7 @@ const InfoHub = () => {
         {
             title: "What We're Building",
             description: "Task → Approval → Instant Payout. We're building the boring rails remote teams need for clean operations and fast payments.",
-            icon: "https://www.svgrepo.com/show/530438/ddos-protection.svg",
-            iconAlt: "Building Icon",
+            icon: { src: "https://www.svgrepo.com/show/530438/ddos-protection.svg", alt: "Building Icon" },
             variant: "default" as const,
             buttonText: "Try Our Platform",
             buttonLink: "/wallet",
@@ -19,8 +18,7 @@ const InfoHub = () => {
         {
             title: "Community",
             description: "Join our growing community of remote teams and blockchain enthusiasts. Follow our daily updates and be part of the journey.",
-            icon: "https://www.svgrepo.com/show/530442/port-detection.svg",
-            iconAlt: "Community Icon",
+            icon: { src: "https://www.svgrepo.com/show/530442/port-detection.svg", alt: "Community Icon" },
             variant: "highlight" as const,
             buttonText: "Join our community",
             buttonLink: "https://twitter.com/sizlandofficial",
@@ -28,8 +26,7 @@ const InfoHub = () => {
         {
             title: "Daily Updates",
             description: "We ship in public, daily. Follow our progress as we build the future of remote team management and blockchain solutions.",
-            icon: "https://www.svgrepo.com/show/530444/availability.svg",
-            iconAlt: "Updates Icon",
+            icon: { src: "https://www.svgrepo.com/show/530444/availability.svg", alt: "Updates Icon" },
             variant: "default" as const,
             buttonText: "Follow Updates",
             buttonLink: "https://twitter.com/sizlandofficial",
@@ -61,8 +58,7 @@ const InfoHub = () => {
                             key={index} 
                             title={card.title} 
                             description={card.description} 
-                            icon={card.icon} 
-                            iconAlt={card.iconAlt}
+                            icon={card.icon}
                             variant={card.variant}
                             buttonText={card.buttonText}
                             buttonLink={card.buttonLink}
