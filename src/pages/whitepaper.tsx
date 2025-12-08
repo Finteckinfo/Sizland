@@ -45,29 +45,29 @@ const WhitepaperPage: NextPage = () => {
               }`}>
                 Discover the complete technical documentation, tokenomics, and roadmap for the Sizland ecosystem. Our comprehensive whitepaper covers everything from blockchain integration to business solutions.
               </p>
-
-              {/* Action Buttons */}
+                
+                {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="/sizland-whitepaper.pdf"
-                  download="Sizland-Whitepaper-3.0.pdf"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
+                    <a 
+                      href="/sizland-whitepaper.pdf" 
+                      download="Sizland-Whitepaper-3.0.pdf"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
+                    >
                   <Download className="w-5 h-5" />
-                  Download PDF
-                </a>
+                      Download PDF
+                    </a>
 
                 <Link
                   href="/"
-                  className={`inline-flex items-center justify-center gap-2 px-8 py-3 text-lg font-bold rounded-lg transition-all duration-200 border-2 ${
+                  className={`inline-flex items-center justify-center gap-2 px-8 py-3 text-lg font-bold rounded-full transition-all duration-200 ${
                     isDark
-                      ? "border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500"
-                      : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                      ? "text-gray-900 bg-white hover:bg-gray-100"
+                      : "text-gray-900 bg-white hover:bg-gray-50 border border-gray-200"
                   }`}
                 >
                   Join our community
-                </Link>
-              </div>
+                    </Link>
+                </div>
 
               {/* Statistics - Below buttons, matching hero section design */}
               <div className="flex items-center justify-center mt-16 sm:mt-20 md:mt-24 space-x-10 sm:space-x-16 md:space-x-20">
@@ -83,8 +83,8 @@ const WhitepaperPage: NextPage = () => {
                   }`}>
                     Latest Release
                   </p>
-                </div>
-
+              </div>
+              
                 {/* spacer */}
                 <div className="hidden sm:block">
                   <svg
@@ -149,10 +149,10 @@ const WhitepaperPage: NextPage = () => {
                   }`}>
                     Updated
                   </p>
-                </div>
               </div>
             </div>
           </div>
+        </div>
         </section>
 
         {/* Middle Section: Interactive PDF Viewer */}
@@ -161,7 +161,7 @@ const WhitepaperPage: NextPage = () => {
             <div className="mb-8 text-center">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
                 <span className={isDark ? "text-white" : "text-black"}>
-                  Interactive PDF Viewer
+                Interactive PDF Viewer
                 </span>
               </h2>
               <p className={`text-base md:text-lg max-w-2xl mx-auto ${
@@ -172,15 +172,15 @@ const WhitepaperPage: NextPage = () => {
                 }`}>Ctrl+F</kbd> for fullscreen mode.
               </p>
             </div>
-
+            
             {/* PDF Viewer - No background/border container */}
             <div>
-              <PDFViewer 
-                pdfUrl="/sizland-whitepaper.pdf"
-                title="Sizland Whitepaper 3.0"
-              />
-            </div>
+            <PDFViewer 
+              pdfUrl="/sizland-whitepaper.pdf"
+              title="Sizland Whitepaper 3.0"
+            />
           </div>
+        </div>
         </section>
 
         {/* Bottom Section: Need More Information? */}
@@ -216,9 +216,9 @@ const WhitepaperPage: NextPage = () => {
                 }`}
               >
                 Visit Our Blogs
-              </Link>
+                  </Link>
+              </div>
             </div>
-          </div>
         </section>
       </div>
     </PageLayout>

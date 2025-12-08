@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTheme } from 'next-themes';
 import { AuroraText } from './ui/aurora-text';
+import { Button1 } from "@/components/ui/button1";
 import {
   Dialog,
   DialogContent,
@@ -174,12 +175,12 @@ const Roadmap = () => {
 
             {/* Learn More Button */}
             <div className="flex lg:justify-end">
-              <button
+              <Button1 
                 onClick={() => setIsModalOpen(true)}
-                className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
               >
                 Learn More
-              </button>
+              </Button1>
             </div>
           </div>
 

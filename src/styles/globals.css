@@ -173,30 +173,34 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background-image:
-    /* Columns (horizontal spacing) */
-    linear-gradient(to right, rgba(22, 101, 52, 0.35) 1px, transparent 1px),
-    /* Rows (vertical spacing) */
-    linear-gradient(to bottom, rgba(22, 101, 52, 0.35) 1px, transparent 1px);
-  /* Rectangular cells: width is ~1.5x height. Slightly narrower for 1.5:1 ratio */
-  background-size: 96px 64px;
-  opacity: 0.6;
 
-  /* Full-width grid that fades near the screen margins and towards the bottom */
-  --fade-horizontal: linear-gradient(to right, transparent 0%, black 16%, black 84%, transparent 100%);
-  --fade-vertical: linear-gradient(to bottom, black 0%, black 38%, transparent 100%);
+  /* Rounded-rectangle grid using an SVG mask to match the design's soft vertices */
+  --grid-stroke: rgba(22, 101, 52, 0.32);
+  --cell-size: 120px;
 
-  mask-image: var(--fade-horizontal), var(--fade-vertical);
-  mask-composite: intersect;
-  -webkit-mask-image: var(--fade-horizontal), var(--fade-vertical);
-  -webkit-mask-composite: source-in;
+  /* The pattern is an SVG of a rounded rectangle outline. We apply a color via background-color. */
+  background-color: var(--grid-stroke);
+  --grid-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect x='0.5' y='0.5' width='179' height='179' rx='28' ry='28' fill='none' stroke='white' stroke-width='1.2'/></svg>");
+
+  opacity: 0.75;
+
+  /* Fade the grid near the edges */
+  --fade-horizontal: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+  --fade-vertical: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
+
+  mask-image: var(--grid-pattern), var(--fade-horizontal), var(--fade-vertical);
+  mask-size: var(--cell-size) var(--cell-size), auto, auto;
+  mask-repeat: repeat, no-repeat, no-repeat;
+  mask-composite: intersect, intersect;
+
+  -webkit-mask-image: var(--grid-pattern), var(--fade-horizontal), var(--fade-vertical);
+  -webkit-mask-size: var(--cell-size) var(--cell-size), auto, auto;
+  -webkit-mask-repeat: repeat, no-repeat, no-repeat;
+  -webkit-mask-composite: source-in, source-in;
 }
 
 .dark .hero-grid-surface {
-  background-image:
-    linear-gradient(to right, rgba(74, 222, 128, 0.18) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(74, 222, 128, 0.18) 1px, transparent 1px);
-  background-size: 96px 64px;
+  --grid-stroke: rgba(74, 222, 128, 0.22);
 }
 
 /* (streak logic removed for now – grid only) */
