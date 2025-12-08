@@ -11,11 +11,11 @@ import { Loader2 } from "lucide-react";
 const ERP_URL = process.env.NEXT_PUBLIC_ERP_URL || "https://erp.siz.land";
 
 type OnboardingStep = {
+  step: number;
   title: string;
   description: string;
   bullets: string[];
   icon: keyof typeof Icons;
-  pill: string;
 };
 
 type RoleQuickStart = {
@@ -23,29 +23,31 @@ type RoleQuickStart = {
   focus: string;
   action: string;
   helper: string;
+  href: string;
+  external?: boolean;
 };
 
 const onboardingSteps: OnboardingStep[] = [
   {
+    step: 1,
     title: "Frame the Workspace",
     description: "Spin up your Sizland org, invite collaborators, and map departments so every task inherits the right budget owner automatically.",
     bullets: ["Create workspace + departments", "Assign project owners & reviewers", "Define payment currencies"],
     icon: "LayoutDashboard",
-    pill: "Step 1"
   },
   {
+    step: 2,
     title: "Plan & Fund Tasks",
     description: "Break work into token-funded tasks, set clear deliverables, and allocate escrow in the same flow.",
     bullets: ["Draft monthly sprints or milestones", "Attach SIZ or fiat payouts per task", "Fund escrow during assignment"],
     icon: "Coins",
-    pill: "Step 2"
   },
   {
+    step: 3,
     title: "Approve & Automate Payouts",
     description: "Supervisors review submissions, approvals trigger instant releases, and accountants just monitor the audit trail.",
     bullets: ["Supervisors review & approve tasks", "Escrow releases to contributor wallets", "Analytics + logs stay in sync"],
     icon: "ShieldCheck",
-    pill: "Step 3"
   }
 ];
 
@@ -54,19 +56,25 @@ const roleQuickStarts: RoleQuickStart[] = [
     role: "Project Owners",
     focus: "Spin up projects, set budgets, and delegate managers.",
     action: "Create workspace",
-    helper: "Takes ~2 minutes · brings escrow + analytics online."
+    helper: "Takes ~2 minutes · brings escrow + analytics online.",
+    href: `${ERP_URL}/projects/create`,
+    external: true
   },
   {
     role: "Managers & Supervisors",
     focus: "Group tasks, assign contributors, and monitor velocity.",
     action: "Load Kanban board",
-    helper: "Drag-and-drop tasks, escalate blockers instantly."
+    helper: "Drag-and-drop tasks, escalate blockers instantly.",
+    href: `${ERP_URL}/kanban?panel=board`,
+    external: true
   },
   {
     role: "Contributors",
     focus: "Deliver tasks, track payouts, and sync wallets.",
     action: "Open ERP Workspace",
-    helper: "Built-in wallet tutorial + SLA reminders."
+    helper: "Built-in wallet tutorial + SLA reminders.",
+    href: `${ERP_URL}/workspace?panel=tasks`,
+    external: true
   }
 ];
 
@@ -301,17 +309,13 @@ const LobbyPage = () => {
                       key={step.title}
                       className="group relative flex h-full flex-col rounded-2xl border border-emerald-500/10 bg-white/80 p-6 shadow-md ring-1 ring-black/5 transition hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-emerald-200/40 dark:bg-white/5"
                     >
-                      <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-500 dark:text-emerald-300">
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                          {step.pill}
-                        </span>
-                        <span>ERP flow</span>
-                      </div>
                       <div className="mb-4 flex items-center gap-3">
                         <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-200">
                           <StepIcon size={24} />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{step.title}</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          Step {step.step}: {step.title}
+                        </h3>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-300">{step.description}</p>
                       <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-200">
@@ -338,20 +342,24 @@ const LobbyPage = () => {
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{card.helper}</p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-sm font-medium text-emerald-600 dark:text-emerald-300">{card.action}</span>
-                      <button
-                        className="rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
-                        onClick={() => {
-                          if (card.role === "Project Owners") {
-                            router.push("/projects/create");
-                          } else if (card.role === "Managers & Supervisors") {
-                            router.push("/kanban");
-                          } else {
-                            window.location.href = ERP_URL;
-                          }
-                        }}
-                      >
-                        Launch
-                      </button>
+                      {card.external ? (
+                        <a
+                          href={card.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
+                        >
+                          Launch
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
+                          onClick={() => router.push(card.href)}
+                        >
+                          Launch
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
