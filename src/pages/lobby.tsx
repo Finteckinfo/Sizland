@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { PageLayout } from "@/components/page-layout";
-import PixelCard from "@/components/ui/pixelCard";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -163,6 +162,26 @@ const LobbyPage = () => {
     return null; // Will redirect via useEffect when unauthenticated and no wallet connected
   }
 
+  const baseCardClass = `w-full max-w-xs flex flex-col items-start text-left p-5 rounded-2xl border transition-all duration-300 backdrop-blur-xl ${
+    theme === "dark"
+      ? "bg-white/5 border-emerald-500/15 shadow-[0_10px_40px_rgba(16,185,129,0.15)]"
+      : "bg-white/85 border-emerald-500/15 shadow-[0_14px_50px_rgba(16,185,129,0.14)]"
+  }`;
+
+  const iconWrapClass = `mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${
+    theme === "dark"
+      ? "bg-emerald-500/15 text-emerald-300"
+      : "bg-emerald-500/10 text-emerald-600"
+  }`;
+
+  const titleClass = `text-lg font-semibold mb-2 ${
+    theme === "dark" ? "text-white" : "text-gray-900"
+  }`;
+
+  const descClass = `text-sm leading-relaxed ${
+    theme === "dark" ? "text-gray-300" : "text-gray-600"
+  }`;
+
   return (
     <PageLayout title="Dashboard - Sizland" description="Your Sizland Dashboard" requireAuth={true}>
       <div className="min-h-screen">
@@ -190,43 +209,31 @@ const LobbyPage = () => {
                 const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
 
                 const tileContent = (
-                  <PixelCard
-                    variant={tile.variant}
-                    className={`w-full max-w-xs flex flex-col items-center text-center p-4 min-h-[220px] transition-all duration-300 ${tile.isClickable
-                        ? 'cursor-pointer hover:shadow-lg hover:scale-105 transform'
-                        : 'cursor-not-allowed opacity-60'
-                      }`}
+                  <div
+                    className={`${baseCardClass} ${
+                      tile.isClickable
+                        ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_16px_60px_rgba(16,185,129,0.18)]"
+                        : "cursor-not-allowed opacity-60"
+                    }`}
                   >
-                    <div className="h-12 flex items-center justify-center mb-4">
-                      <Icon
-                        size={32}
-                        className={`${tile.isClickable
-                            ? 'text-indigo-500'
-                            : 'text-gray-400'
-                          }`}
-                      />
+                    <div className={iconWrapClass}>
+                      <Icon size={28} />
                     </div>
-                    <h3
-                      className={`text-lg font-semibold mb-2 ${theme === "dark" ? "text-gray-900" : "text-white"
-                        }`}
-                    >
-                      {tile.title}
-                    </h3>
-                    <p
-                      className={`text-xs leading-relaxed ${theme === "dark" ? "text-gray-600" : "text-gray-300"
-                        }`}
-                    >
-                      {tile.description}
-                    </p>
+                    <h3 className={titleClass}>{tile.title}</h3>
+                    <p className={descClass}>{tile.description}</p>
 
                     {!tile.isClickable && (
                       <div className="mt-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          theme === "dark"
+                            ? "bg-white/10 text-gray-100 border border-white/15"
+                            : "bg-gray-100 text-gray-800 border border-gray-200"
+                        }`}>
                           Coming Soon
                         </span>
                       </div>
                     )}
-                  </PixelCard>
+                  </div>
                 );
 
                 if (!tile.isClickable) {
@@ -283,23 +290,90 @@ const LobbyPage = () => {
             </div>
           </div>
 
-          {/* Quick Stats Section */}
-          <div className="mt-16 bg-black/20 dark:bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-white/20">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8 drop-shadow-lg">
+          {/* Quick Stats Section - match hero/whitepaper style */}
+          <div className="mt-16 flex flex-col items-center text-center space-y-12">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
               Your Sizland Journey
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-400 mb-2 drop-shadow-lg">4</div>
-                <p className="text-gray-700 dark:text-gray-300 drop-shadow-md">dApps Available</p>
+            <div className="flex items-center justify-center space-x-10 sm:space-x-16 md:space-x-20">
+              {/* dApps Available */}
+              <div className="flex flex-col items-center text-center">
+                <p className={`text-5xl font-medium sm:text-6xl md:text-7xl font-pj ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}>
+                  4
+                </p>
+                <p className={`mt-2 text-sm font-pj ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}>
+                  dApps Available
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2 drop-shadow-lg">3</div>
-                <p className="text-gray-700 dark:text-gray-300 drop-shadow-md">Active Services</p>
+
+              {/* spacer */}
+              <div className="hidden sm:block">
+                <svg
+                  className={theme === "dark" ? "text-gray-600" : "text-gray-400"}
+                  width="16"
+                  height="39"
+                  viewBox="0 0 16 39"
+                  fill="none"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <line x1="0.72265" y1="10.584" x2="15.7226" y2="0.583975"></line>
+                  <line x1="0.72265" y1="17.584" x2="15.7226" y2="7.58398"></line>
+                  <line x1="0.72265" y1="24.584" x2="15.7226" y2="14.584"></line>
+                  <line x1="0.72265" y1="31.584" x2="15.7226" y2="21.584"></line>
+                  <line x1="0.72265" y1="38.584" x2="15.7226" y2="28.584"></line>
+                </svg>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400 mb-2 drop-shadow-lg">1</div>
-                <p className="text-gray-700 dark:text-gray-300 drop-shadow-md">Unified Account</p>
+
+              {/* Active Services */}
+              <div className="flex flex-col items-center text-center">
+                <p className={`text-5xl font-medium sm:text-6xl md:text-7xl font-pj ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}>
+                  3
+                </p>
+                <p className={`mt-2 text-sm font-pj ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}>
+                  Active Services
+                </p>
+              </div>
+
+              {/* spacer */}
+              <div className="hidden sm:block">
+                <svg
+                  className={theme === "dark" ? "text-gray-600" : "text-gray-400"}
+                  width="16"
+                  height="39"
+                  viewBox="0 0 16 39"
+                  fill="none"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <line x1="0.72265" y1="10.584" x2="15.7226" y2="0.583975"></line>
+                  <line x1="0.72265" y1="17.584" x2="15.7226" y2="7.58398"></line>
+                  <line x1="0.72265" y1="24.584" x2="15.7226" y2="14.584"></line>
+                  <line x1="0.72265" y1="31.584" x2="15.7226" y2="21.584"></line>
+                  <line x1="0.72265" y1="38.584" x2="15.7226" y2="28.584"></line>
+                </svg>
+              </div>
+
+              {/* Unified Account */}
+              <div className="flex flex-col items-center text-center">
+                <p className={`text-5xl font-medium sm:text-6xl md:text-7xl font-pj ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}>
+                  1
+                </p>
+                <p className={`mt-2 text-sm font-pj ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}>
+                  Unified Account
+                </p>
               </div>
             </div>
           </div>
