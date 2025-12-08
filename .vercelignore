@@ -1,5 +1,4 @@
-# Exclude test scripts from production build
-scripts/
+# Exclude test scripts from production build (keep required automation helpers)
 *.test.ts
 *.test.js
 test-*.ts
