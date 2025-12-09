@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import { ArrowLeft } from 'lucide-react';
 
 const PrivacyPage: NextPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
 
   return (
     <PageLayout 

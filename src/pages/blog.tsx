@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 const BlogPage: NextPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const isDark = theme === 'dark';
 

@@ -8,7 +8,7 @@ interface OrderCardProps {
 }
 
 export const OrderCard: React.FC<OrderCardProps> = ({ type, data }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const title = type === 'buy' ? 'Buy Order' : 'Sell Order';
 

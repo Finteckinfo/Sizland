@@ -6,7 +6,7 @@ import type { LucideIcon } from "lucide-react";
 import AuroraText from "./ui/aurora-text";
 
 const Features = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const isDark = theme === "dark";
 

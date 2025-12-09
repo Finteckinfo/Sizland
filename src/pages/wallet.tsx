@@ -52,7 +52,7 @@ const candleChartOptions = {
 
 const WalletPage = () => {
   const { activeAccount } = useWallet();
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const isDark = theme === 'dark';
 

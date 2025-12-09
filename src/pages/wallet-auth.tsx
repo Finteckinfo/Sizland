@@ -13,7 +13,7 @@ import { useTheme } from 'next-themes'
 export default function WalletAuth() {
   const router = useRouter()
   const { wallets, isReady } = useWallet()
-  const { theme } = useTheme()
+  const { resolvedTheme: theme } = useTheme()
   const isDark = theme === 'dark'
   
   const [selectedOption, setSelectedOption] = useState<'create' | 'algorand' | 'metamask' | null>(null)

@@ -188,7 +188,7 @@ const Tooltip = ({ visible, x, y, data }: any) => {
 };
 
 const Tokenomics = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, data: null });

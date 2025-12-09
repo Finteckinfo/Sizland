@@ -23,7 +23,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
     buttonLink,
     buttonOnClick
 }) => {
-    const { theme } = useTheme();
+    const { resolvedTheme: theme } = useTheme();
     const isDark = theme === "dark";
 
     // Determine card styling based on variant

@@ -5,7 +5,7 @@ import MagicBento from "@/components/ui/MagicBento";
 import AuroraText from "./ui/aurora-text";
 
 const About = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

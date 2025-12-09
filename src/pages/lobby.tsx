@@ -79,7 +79,7 @@ const roleQuickStarts: RoleQuickStart[] = [
 ];
 
 const LobbyPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const { data: session, status } = useSession();
   const { activeAccount, isReady } = useWallet();

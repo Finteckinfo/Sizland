@@ -7,7 +7,7 @@ import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 const LoginPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

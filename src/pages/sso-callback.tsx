@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 const SSOCallbackPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
 
   useEffect(() => {
     if (status === 'loading') return;

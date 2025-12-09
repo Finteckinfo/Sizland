@@ -13,7 +13,7 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
   onSuccess,
   onError
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

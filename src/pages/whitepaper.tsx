@@ -298,7 +298,7 @@ const whitepaperContent: WhitepaperBlock[] = [
 ];
 
 const WhitepaperPage: NextPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const isDark = theme === 'dark';
 

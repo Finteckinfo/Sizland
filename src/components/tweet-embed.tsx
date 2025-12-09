@@ -27,7 +27,7 @@ const TweetEmbed: React.FC<TweetEmbedProps> = ({
   username = 'sizlandofficial',
   title = "Tweet"
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

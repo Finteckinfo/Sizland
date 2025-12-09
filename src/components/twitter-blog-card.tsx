@@ -16,7 +16,7 @@ const TwitterBlogCard: React.FC<TwitterBlogCardProps> = ({
   username = 'sizlandofficial',
   title,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [showPlaceholder, setShowPlaceholder] = useState(true);
 

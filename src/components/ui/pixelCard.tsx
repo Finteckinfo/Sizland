@@ -191,7 +191,7 @@ export default function PixelCard({
   className = "",
   children,
 }: PixelCardProps): JSX.Element {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelsRef = useRef<Pixel[]>([]);
