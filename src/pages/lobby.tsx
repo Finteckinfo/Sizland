@@ -392,6 +392,18 @@ const LobbyPage = () => {
                 </div>
               </div>
 
+              {/* Back to dApps */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowOnboarding(false)}
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 transition hover:bg-emerald-500 hover:text-white dark:text-emerald-200 dark:border-emerald-300/30"
+                >
+                  <Icons.ArrowLeft size={16} />
+                  Back to dApps
+                </button>
+              </div>
+
               <div className="mt-10 grid gap-6 lg:grid-cols-3">
                 {onboardingSteps.map((step, idx) => {
                   const StepIcon = Icons[step.icon] as LucideIcon;
