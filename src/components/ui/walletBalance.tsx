@@ -16,6 +16,12 @@ import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenera
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { TokenPurchaseForm } from './token-purchase-form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './dialog';
 
 interface Asset {
   assetId: number;
@@ -956,41 +962,37 @@ export const WalletBalance: React.FC = () => {
           </div>
 
           {/* Buy SIZ Tokens Button */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            {!showPurchaseForm ? (
-              <Button
-                onClick={() => {
-                  if (!activeAccount?.address) {
-                    alert('Please connect your wallet first to purchase SIZ tokens');
-                    return;
-                  }
-                  setShowPurchaseForm(true);
-                }}
-                className="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <PlusIcon className="h-5 w-5" />
-                Buy SIZ Tokens
-              </Button>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Purchase SIZ Tokens
-                  </h3>
-                  <Button
-                    onClick={() => setShowPurchaseForm(false)}
-                    variant="ghost"
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    ✕
-                  </Button>
-                </div>
-                <TokenPurchaseForm />
-              </div>
-            )}
+          <div className="mt-6">
+            <Button
+              onClick={() => {
+                if (!activeAccount?.address) {
+                  alert('Please connect your wallet first to purchase SIZ tokens');
+                  return;
+                }
+                setShowPurchaseForm(true);
+              }}
+              className="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <PlusIcon className="h-5 w-5" />
+              Buy SIZ Tokens
+            </Button>
           </div>
                  </div>
        )}
+
+       {/* Purchase SIZ Tokens Modal */}
+       <Dialog open={showPurchaseForm} onOpenChange={setShowPurchaseForm}>
+         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle className="text-2xl font-bold">
+               Purchase SIZ Tokens
+             </DialogTitle>
+           </DialogHeader>
+           <div className="mt-4">
+             <TokenPurchaseForm />
+           </div>
+         </DialogContent>
+       </Dialog>
 
        {/* Confetti Animation */}
        <Confetti 
