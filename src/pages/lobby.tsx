@@ -269,6 +269,95 @@ const LobbyPage = () => {
 
         {/* Dapp Tiles Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Tiles Grid */}
+          <div className="flex justify-center items-center mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
+              {dappTiles.map((tile, index) => {
+                const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
+
+                const tileContent = (
+                  <div
+                    className={`${baseCardClass} ${
+                      tile.isClickable
+                        ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_16px_60px_rgba(16,185,129,0.18)]"
+                        : "cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    <div className={iconWrapClass}>
+                      <Icon size={28} />
+                    </div>
+                    <h3 className={titleClass}>{tile.title}</h3>
+                    <p className={descClass}>{tile.description}</p>
+
+                    {!tile.isClickable && (
+                      <div className="mt-3">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          theme === "dark"
+                            ? "bg-white/10 text-gray-100 border border-white/15"
+                            : "bg-gray-100 text-gray-800 border border-gray-200"
+                        }`}>
+                          Coming Soon
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+
+                if (!tile.isClickable) {
+                  return (
+                    <div key={index}>
+                      {tileContent}
+                    </div>
+                  );
+                }
+
+                if (tile.isExternal) {
+                  // Special handling for ERP with SSO token
+                  if (tile.title === "ERP") {
+                    return (
+                      <a
+                        key={index}
+                        href={tile.href}
+                        data-testid="erp-tile-link"
+                        onClick={handleERPClick}
+                        className="relative"
+                      >
+                        {isGeneratingToken && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                            <Loader2 className="w-6 h-6 animate-spin text-white" />
+                          </div>
+                        )}
+                        {tileContent}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <a
+                      key={index}
+                      href={tile.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      {tileContent}
+                    </a>
+                  );
+                }
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => router.push(tile.href)}
+                    className="block w-full text-left"
+                  >
+                    {tileContent}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* ERP Onboarding Overview */}
           <section className="mb-12" data-testid="erp-onboarding-hero">
             <div
@@ -366,95 +455,6 @@ const LobbyPage = () => {
               </div>
             </div>
           </section>
-
-          {/* Tiles Grid */}
-          <div className="flex justify-center items-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
-              {dappTiles.map((tile, index) => {
-                const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
-
-                const tileContent = (
-                  <div
-                    className={`${baseCardClass} ${
-                      tile.isClickable
-                        ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_16px_60px_rgba(16,185,129,0.18)]"
-                        : "cursor-not-allowed opacity-60"
-                    }`}
-                  >
-                    <div className={iconWrapClass}>
-                      <Icon size={28} />
-                    </div>
-                    <h3 className={titleClass}>{tile.title}</h3>
-                    <p className={descClass}>{tile.description}</p>
-
-                    {!tile.isClickable && (
-                      <div className="mt-3">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          theme === "dark"
-                            ? "bg-white/10 text-gray-100 border border-white/15"
-                            : "bg-gray-100 text-gray-800 border border-gray-200"
-                        }`}>
-                          Coming Soon
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-
-                if (!tile.isClickable) {
-                  return (
-                    <div key={index}>
-                      {tileContent}
-                    </div>
-                  );
-                }
-
-                if (tile.isExternal) {
-                  // Special handling for ERP with SSO token
-                  if (tile.title === "ERP") {
-                    return (
-                      <a
-                        key={index}
-                        href={tile.href}
-                        data-testid="erp-tile-link"
-                        onClick={handleERPClick}
-                        className="relative"
-                      >
-                        {isGeneratingToken && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
-                            <Loader2 className="w-6 h-6 animate-spin text-white" />
-                          </div>
-                        )}
-                        {tileContent}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <a
-                      key={index}
-                      href={tile.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      {tileContent}
-                    </a>
-                  );
-                }
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => router.push(tile.href)}
-                    className="block w-full text-left"
-                  >
-                    {tileContent}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Quick Stats Section - match hero/whitepaper style */}
           <div className="mt-16 flex flex-col items-center text-center space-y-12">
