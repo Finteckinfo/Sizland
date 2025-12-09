@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useWallet, WalletId } from '@txnlab/use-wallet-react'
 import { MetaMaskSignIn } from '@/components/auth/metamask-signin'
 import { useRouter } from 'next/router'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
-import { generateAlgorandWallet, storeWallet, clearWallet, type GeneratedWallet } from '@/lib/algorand/walletGenerator'
+import { generateAlgorandWallet, storeWallet, clearWallet, type GeneratedWallet, recoverAlgorandWallet, loadWallet } from '@/lib/algorand/walletGenerator'
 import { Copy, CheckCircle, Download, Trash2, Shield } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { trackWalletAuthEvent, maskWalletAddress, type WalletAuthAnalyticsContext } from '@/lib/analytics'
 
 export default function WalletAuth() {
   const router = useRouter()
@@ -16,16 +17,170 @@ export default function WalletAuth() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   
-  const [selectedOption, setSelectedOption] = useState<'create' | 'algorand' | 'metamask' | null>(null)
+  const [selectedOption, setSelectedOption] = useState<'create' | 'returning' | 'algorand' | 'metamask' | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isSigningIn, setIsSigningIn] = useState(false)
+  const [isRecovering, setIsRecovering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [generatedWallet, setGeneratedWallet] = useState<GeneratedWallet | null>(null)
+  const [storedWallet, setStoredWallet] = useState<GeneratedWallet | null>(null)
   const [showSensitive, setShowSensitive] = useState(false)
   const [validationOpen, setValidationOpen] = useState(false)
   const [wordInputs, setWordInputs] = useState<string[]>(['', '', ''])
   const [validationError, setValidationError] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [mnemonicInput, setMnemonicInput] = useState('')
+  const [manualWalletAddress, setManualWalletAddress] = useState('')
+
+  useEffect(() => {
+    const refreshStoredWallet = () => {
+      try {
+        const saved = loadWallet()
+        setStoredWallet(saved)
+      } catch (err) {
+        console.error('Failed to load stored wallet:', err)
+      }
+    }
+
+    refreshStoredWallet()
+
+    const onWalletGenerated = () => refreshStoredWallet()
+    const onWalletCleared = () => {
+      refreshStoredWallet()
+      setGeneratedWallet(null)
+    }
+
+    window.addEventListener('walletGenerated', onWalletGenerated)
+    window.addEventListener('walletCleared', onWalletCleared)
+
+    return () => {
+      window.removeEventListener('walletGenerated', onWalletGenerated)
+      window.removeEventListener('walletCleared', onWalletCleared)
+    }
+  }, [])
+
+  const authenticateWallet = async (
+    walletAddress: string,
+    context: WalletAuthAnalyticsContext,
+    successMessage?: string
+  ) => {
+    setError(null)
+    setSuccess(successMessage || null)
+    setIsSigningIn(true)
+
+    trackWalletAuthEvent('attempt', {
+      ...context,
+      walletAddress: maskWalletAddress(walletAddress),
+      stage: 'nextauth-signin',
+    })
+
+    try {
+      const result = await signIn('wallet', {
+        redirect: false,
+        walletAddress,
+      })
+
+      if (result?.ok) {
+        trackWalletAuthEvent('success', {
+          ...context,
+          walletAddress: maskWalletAddress(walletAddress),
+          stage: 'nextauth-signin',
+        })
+        router.push('/lobby')
+      } else {
+        console.error('Failed to create NextAuth session:', result?.error)
+        setError(result?.error || 'Failed to create session. Please try again.')
+        trackWalletAuthEvent('error', {
+          ...context,
+          walletAddress: maskWalletAddress(walletAddress),
+          stage: 'nextauth-signin',
+          error: result?.error || 'unknown_error',
+        })
+      }
+    } catch (authError) {
+      console.error('Error creating NextAuth session:', authError)
+      setError('Failed to authenticate. Please try again.')
+      trackWalletAuthEvent('error', {
+        ...context,
+        walletAddress: maskWalletAddress(walletAddress),
+        stage: 'nextauth-signin',
+        error: authError instanceof Error ? authError.message : 'unknown_error',
+      })
+    } finally {
+      setIsSigningIn(false)
+    }
+  }
+
+  const handleStoredWalletSignIn = () => {
+    if (!storedWallet?.address) return
+    authenticateWallet(
+      storedWallet.address,
+      {
+        channel: 'stored-wallet',
+        surface: 'returning',
+        method: 'local-storage',
+        chain: 'algorand',
+        isNewWallet: false,
+      },
+      'Welcome back! Redirecting you to Sizland...'
+    )
+  }
+
+  const handleManualWalletSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!manualWalletAddress.trim()) {
+      setError('Please enter your wallet address.')
+      return
+    }
+    await authenticateWallet(
+      manualWalletAddress.trim(),
+      {
+        channel: 'manual-address',
+        surface: 'returning',
+        method: 'manual-input',
+        chain: 'algorand',
+        isNewWallet: false,
+      },
+      'Signing you in...'
+    )
+  }
+
+  const handleRecoverWallet = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!mnemonicInput.trim()) {
+      setError('Please paste your 25-word recovery phrase.')
+      return
+    }
+
+    setIsRecovering(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const wallet = recoverAlgorandWallet(mnemonicInput.trim())
+      storeWallet(wallet)
+      setStoredWallet(wallet)
+      setMnemonicInput('')
+      await authenticateWallet(
+        wallet.address,
+        {
+          channel: 'mnemonic-recovery',
+          surface: 'returning',
+          method: 'mnemonic-input',
+          chain: 'algorand',
+          isRecovery: true,
+          isNewWallet: false,
+        },
+        'Wallet recovered successfully! Redirecting...'
+      )
+    } catch (err) {
+      console.error('Failed to recover wallet:', err)
+      setError('Recovery failed. Please double-check your 25-word phrase.')
+    } finally {
+      setIsRecovering(false)
+    }
+  }
 
   const handleSuccess = () => {
     router.push('/lobby')
@@ -71,6 +226,7 @@ Generated on: ${new Date().toLocaleString()}
     if (confirm('Are you sure you want to clear this wallet? This action cannot be undone and you will lose access if you haven\'t saved your credentials.')) {
       clearWallet()
       setGeneratedWallet(null)
+      setStoredWallet(null)
       setShowSensitive(false)
       window.dispatchEvent(new CustomEvent('walletCleared'))
       setSuccess('Wallet cleared successfully. You can generate a new one.')
@@ -127,28 +283,20 @@ Generated on: ${new Date().toLocaleString()}
       
       // Create NextAuth session using the wallet provider
       try {
-        const result = await signIn('wallet', {
-          redirect: false,
-          walletAddress: wallet.address,
-        })
+        window.dispatchEvent(new CustomEvent('walletGenerated'))
+        console.log('✅ [Create Wallet] Dispatched walletGenerated event')
 
-        if (result?.ok) {
-          console.log('✅ [Create Wallet] NextAuth session created')
-          
-          // Notify that a wallet has been generated
-          window.dispatchEvent(new CustomEvent('walletGenerated'))
-          console.log('✅ [Create Wallet] Dispatched walletGenerated event')
-          
-          setSuccess('Wallet created successfully! Redirecting to your Sizland dashboard...')
-          
-          // NextAuth redirect callback will handle sending to /lobby
-          setTimeout(() => {
-            router.push('/lobby')
-          }, 1500)
-        } else {
-          console.error('Failed to create NextAuth session:', result?.error)
-          setError('Failed to create session. Please try again.')
-        }
+        await authenticateWallet(
+          wallet.address,
+          {
+            channel: 'siz-generated',
+            surface: 'create',
+            method: 'local-generator',
+            chain: 'algorand',
+            isNewWallet: true,
+          },
+          'Wallet created successfully! Redirecting to your Sizland dashboard...'
+        )
       } catch (authError) {
         console.error('Error creating NextAuth session:', authError)
         setError('Failed to authenticate. Please try again.')
@@ -196,20 +344,18 @@ Generated on: ${new Date().toLocaleString()}
       // Create NextAuth session using the wallet provider
       try {
         console.log('🔐 [Algorand Wallet] Creating session for:', walletAddress)
-        const result = await signIn('wallet', {
-          redirect: false,
-          walletAddress: walletAddress,
-        })
-
-        console.log('📊 [Algorand Wallet] SignIn result:', { ok: result?.ok, error: result?.error, status: result?.status })
-
-        if (result?.ok) {
-          console.log('✅ [Algorand Wallet] NextAuth session created')
-          router.push('/lobby')
-        } else {
-          console.error('❌ [Algorand Wallet] Failed to create NextAuth session:', result?.error)
-          setError(`Failed to create session: ${result?.error || 'Unknown error'}. Check console for details.`)
-        }
+        await authenticateWallet(
+          walletAddress,
+          {
+            channel: 'algorand',
+            surface: 'algorand',
+            method: 'wallet-provider',
+            providerId: id,
+            chain: 'algorand',
+            isNewWallet: false,
+          },
+          'Connecting your Algorand wallet...'
+        )
       } catch (authError) {
         console.error('❌ [Algorand Wallet] Error creating NextAuth session:', authError)
         setError(`Authentication error: ${authError instanceof Error ? authError.message : 'Unknown error'}`)
@@ -274,7 +420,7 @@ Generated on: ${new Date().toLocaleString()}
 
         {!selectedOption ? (
           /* Wallet Selection Screen */
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* 1. Create SIZ Wallet - PRIMARY/RECOMMENDED */}
             <button
               onClick={() => setSelectedOption('create')}
@@ -294,7 +440,25 @@ Generated on: ${new Date().toLocaleString()}
               </div>
             </button>
 
-            {/* 2. Algorand Wallets */}
+            {/* 2. Returning Siz Wallet */}
+            <button
+              onClick={() => setSelectedOption('returning')}
+              className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-green-500 text-left"
+            >
+              <div className="flex flex-col items-start">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4 text-emerald-600 dark:text-emerald-300">
+                  <Shield className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Returning with Siz Wallet
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Sign in using a wallet you previously generated or recovered on Sizland.
+                </p>
+              </div>
+            </button>
+
+            {/* 3. Algorand Wallets */}
             <button
               onClick={() => setSelectedOption('algorand')}
               className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-blue-500"
@@ -312,7 +476,7 @@ Generated on: ${new Date().toLocaleString()}
               </div>
             </button>
 
-            {/* 3. MetaMask */}
+            {/* 4. MetaMask */}
             <button
               onClick={() => setSelectedOption('metamask')}
               className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-orange-500"
@@ -382,6 +546,137 @@ Generated on: ${new Date().toLocaleString()}
             >
               {isGenerating ? 'Generating Wallet...' : 'Generate Sizland Wallet Now'}
             </button>
+          </div>
+        ) : selectedOption === 'returning' ? (
+          /* Returning Siz Wallet */
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+            <button
+              onClick={() => setSelectedOption(null)}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6"
+            >
+              ← Back to options
+            </button>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300">
+                    <CheckCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                      Welcome back to Sizland
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Use a stored wallet, manually enter an address, or recover with your 25-word phrase.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-900/20 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
+                        Stored wallet
+                      </p>
+                      <p className="text-xl font-semibold text-gray-900 dark:text-white">
+                        {storedWallet?.address
+                          ? `${storedWallet.address.slice(0, 8)}...${storedWallet.address.slice(-6)}`
+                          : 'No wallet saved'}
+                      </p>
+                    </div>
+                    {storedWallet?.address && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(storedWallet.address, 'stored')}
+                        className="inline-flex items-center gap-1 text-sm text-emerald-700 dark:text-emerald-300 hover:underline"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={handleStoredWalletSignIn}
+                      disabled={!storedWallet?.address || isSigningIn}
+                      className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${
+                        storedWallet?.address && !isSigningIn
+                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {isSigningIn ? 'Signing in...' : 'Use stored wallet'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearWallet}
+                      className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    Have your wallet address handy?
+                  </p>
+                  <form onSubmit={handleManualWalletSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="manual-wallet" className="text-sm text-gray-600 dark:text-gray-400">
+                        Wallet address
+                      </label>
+                      <input
+                        id="manual-wallet"
+                        type="text"
+                        value={manualWalletAddress}
+                        onChange={e => setManualWalletAddress(e.target.value)}
+                        placeholder="SIZXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isSigningIn}
+                      className="w-full py-3 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold hover:opacity-90 transition"
+                    >
+                      {isSigningIn ? 'Verifying...' : 'Sign in with address'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 p-6">
+                <h4 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  Recover using 25-word phrase
+                </h4>
+                <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+                  Paste the exact phrase you saved when you generated your Siz Wallet. We&apos;ll restore it locally and sign you in.
+                </p>
+                <form onSubmit={handleRecoverWallet} className="space-y-4">
+                  <textarea
+                    value={mnemonicInput}
+                    onChange={e => setMnemonicInput(e.target.value)}
+                    rows={5}
+                    className="w-full rounded-lg border border-blue-200 dark:border-blue-700 bg-white/80 dark:bg-blue-950/40 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="enter each word separated by a single space"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isRecovering}
+                    className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                  >
+                    {isRecovering ? 'Recovering wallet...' : 'Recover & sign in'}
+                  </button>
+                </form>
+                <p className="mt-3 text-xs text-blue-800 dark:text-blue-200">
+                  We never send your recovery phrase to our servers. The wallet is rebuilt entirely in your browser.
+                </p>
+              </div>
+            </div>
           </div>
         ) : selectedOption === 'algorand' ? (
           /* Algorand Wallets Selection */

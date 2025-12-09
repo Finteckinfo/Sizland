@@ -3,6 +3,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { SiweMessage } from 'siwe';
 import { useTheme } from 'next-themes';
+import { maskWalletAddress, trackWalletAuthEvent } from '@/lib/analytics';
 
 interface MetaMaskSignInProps {
   onSuccess?: () => void;
@@ -23,6 +24,14 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
     setLoading(true);
 
     try {
+      trackWalletAuthEvent('attempt', {
+        channel: 'metamask',
+        surface: 'metamask',
+        method: 'siwe',
+        chain: 'evm',
+        stage: 'metamask-init',
+      });
+
       // Check if MetaMask is installed
       if (typeof window.ethereum === 'undefined') {
         throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
@@ -38,6 +47,14 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
       }
 
       const address = accounts[0];
+      trackWalletAuthEvent('attempt', {
+        channel: 'metamask',
+        surface: 'metamask',
+        method: 'siwe',
+        chain: 'evm',
+        stage: 'metamask-account-selected',
+        walletAddress: maskWalletAddress(address),
+      });
 
       // Get network info
       const chainId = await window.ethereum.request({ 
@@ -87,6 +104,14 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
       }
 
       if (result?.ok) {
+        trackWalletAuthEvent('success', {
+          channel: 'metamask',
+          surface: 'metamask',
+          method: 'siwe',
+          chain: 'evm',
+          stage: 'nextauth-siwe',
+          walletAddress: maskWalletAddress(address),
+        });
         if (onSuccess) {
           onSuccess();
         } else {
@@ -97,6 +122,14 @@ export const MetaMaskSignIn: React.FC<MetaMaskSignInProps> = ({
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to sign in with MetaMask';
       setError(errorMessage);
+      trackWalletAuthEvent('error', {
+        channel: 'metamask',
+        surface: 'metamask',
+        method: 'siwe',
+        chain: 'evm',
+        stage: 'metamask-flow',
+        error: errorMessage,
+      });
       if (onError) {
         onError(errorMessage);
       }
