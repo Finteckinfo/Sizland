@@ -15,6 +15,7 @@ import { ClaimSuccessMessage } from './ClaimSuccessMessage';
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
+import { TokenPurchaseForm } from './token-purchase-form';
 
 interface Asset {
   assetId: number;
@@ -63,6 +64,9 @@ export const WalletBalance: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+
+  // Buy SIZ Tokens state
+  const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
 
   // Get URL parameters for success state
   const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
@@ -949,6 +953,41 @@ export const WalletBalance: React.FC = () => {
                 {formatNumber(minBalance)} ALGO
               </Typography>
             </div>
+          </div>
+
+          {/* Buy SIZ Tokens Button */}
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            {!showPurchaseForm ? (
+              <Button
+                onClick={() => {
+                  if (!activeAccount?.address) {
+                    alert('Please connect your wallet first to purchase SIZ tokens');
+                    return;
+                  }
+                  setShowPurchaseForm(true);
+                }}
+                className="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <PlusIcon className="h-5 w-5" />
+                Buy SIZ Tokens
+              </Button>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Purchase SIZ Tokens
+                  </h3>
+                  <Button
+                    onClick={() => setShowPurchaseForm(false)}
+                    variant="ghost"
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <TokenPurchaseForm />
+              </div>
+            )}
           </div>
                  </div>
        )}
