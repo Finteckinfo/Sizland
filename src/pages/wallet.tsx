@@ -36,7 +36,7 @@ const WalletPage = () => {
         </div>
 
         {/* Wallet Balance Section */}
-        <div className="w-full">
+        <div className="w-full max-w-6xl sm:max-w-7xl mx-auto">
           <WalletBalance />
         </div>
       </div>
