@@ -9,11 +9,11 @@ export function generateNonce(): string {
 export function getCSP(nonce: string, isDev: boolean = false): string {
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://vercel.live ${isDev ? "'unsafe-eval'" : ''}`,
+    `script-src 'self' 'nonce-${nonce}' https://vercel.live https://pulse.walletconnect.org https://api.web3modal.org ${isDev ? "'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
-    "font-src 'self'",
-    `connect-src 'self' https://*.vercel.live https://sizerpbackend.onrender.com`,
+    "font-src 'self' https://db.onlinewebfonts.com",
+    `connect-src 'self' https://*.vercel.live https://sizerpbackend.onrender.com https://pulse.walletconnect.org https://api.web3modal.org`,
     "frame-src 'self' https://vercel.live",
     "object-src 'none'",
     "base-uri 'self'",
