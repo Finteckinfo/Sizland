@@ -2,21 +2,22 @@ import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { AppProps } from "next/app";
 import { Montserrat } from "next/font/google";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { Providers } from '@/providers/index'
 import { SessionProvider } from "next-auth/react";
-
 import { config } from "../wagmi";
-
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import GlowBackground from "@/components/ui/GlowBackground";
 import AnimatedGrid from "@/components/ui/AnimatedGrid";
-
-import { useEffect, useState } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { generateNonce, getCSP } from '@/utils/security';
 
 // Defensive theme check: Only allow valid theme values in localStorage
 if (typeof window !== "undefined") {
@@ -35,29 +36,39 @@ export const monsterrat = Montserrat({
   weight: "500",
 });
 
-import { SpeedInsights } from "@vercel/speed-insights/next";
-
 function MyApp({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const nonce = generateNonce();
+  const cspHeader = getCSP(nonce, process.env.NODE_ENV === 'development');
+
   return (
-    <SessionProvider session={pageProps.session}>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={client}>
-          <Providers>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </ThemeProvider>
-          </Providers>
-        </QueryClientProvider>
-      </WagmiProvider>
-      <SpeedInsights />
-    </SessionProvider>
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta httpEquiv="Content-Security-Policy" content={cspHeader} />
+        <link rel="icon" href="/favicon.ico" />
+        <meta property="csp-nonce" content={nonce} />
+      </Head>
+      <SessionProvider session={pageProps.session}>
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={client}>
+            <Providers>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </ThemeProvider>
+            </Providers>
+          </QueryClientProvider>
+        </WagmiProvider>
+        <SpeedInsights />
+      </SessionProvider>
+    </>
   );
 }
 
@@ -68,17 +79,18 @@ function Layout({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className={`relative min-h-screen overflow-hidden ${monsterrat.className}`}>
-      {/* Background system for top + bottom glows and animated grid */}
-      {mounted && (
+    <div className={`${monsterrat.variable} font-sans`}>
+      {process.env.NODE_ENV === 'production' && (
         <>
-          <GlowBackground position="top" className="-z-20" />
-          <AnimatedGrid className="-z-10 h-[480px]" />
-          <GlowBackground position="bottom" className="-z-20" />
+          <GlowBackground />
+          <AnimatedGrid />
         </>
       )}
-
       <Navbar />
       {children}
       <Footer />
