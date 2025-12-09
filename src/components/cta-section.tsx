@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { AuroraText } from './ui/aurora-text';
 
 const CTASection = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const router = useRouter();
 

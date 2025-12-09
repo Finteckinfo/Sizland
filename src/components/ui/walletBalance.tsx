@@ -15,6 +15,13 @@ import { ClaimSuccessMessage } from './ClaimSuccessMessage';
 import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
+import { TokenPurchaseForm } from './token-purchase-form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './dialog';
 
 interface Asset {
   assetId: number;
@@ -63,6 +70,9 @@ export const WalletBalance: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+
+  // Buy SIZ Tokens state
+  const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
 
   // Get URL parameters for success state
   const [urlParams, setUrlParams] = useState<{ success?: string; tokens?: string }>({});
@@ -654,7 +664,7 @@ export const WalletBalance: React.FC = () => {
   }
 
   return (
-    <div className="rounded-xl border p-4 sm:p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
+    <div className="w-full rounded-xl border p-4 sm:p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
@@ -914,7 +924,8 @@ export const WalletBalance: React.FC = () => {
             </div>
           )}
 
-          {/* ALGO Balance */}
+          {/* ALGO Balance - temporarily hidden */}
+          {/*
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <CoinsIcon className="h-5 w-5 text-yellow-500" />
@@ -950,8 +961,40 @@ export const WalletBalance: React.FC = () => {
               </Typography>
             </div>
           </div>
+          */}
+
+          {/* Buy SIZ Tokens Button */}
+          <div className="mt-6">
+            <Button
+              onClick={() => {
+                if (!activeAccount?.address) {
+                  alert('Please connect your wallet first to purchase SIZ tokens');
+                  return;
+                }
+                setShowPurchaseForm(true);
+              }}
+              className="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <PlusIcon className="h-5 w-5" />
+              Buy SIZ Tokens
+            </Button>
+          </div>
                  </div>
        )}
+
+       {/* Purchase SIZ Tokens Modal */}
+       <Dialog open={showPurchaseForm} onOpenChange={setShowPurchaseForm}>
+         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle className="text-2xl font-bold">
+               Purchase SIZ Tokens
+             </DialogTitle>
+           </DialogHeader>
+           <div className="mt-4">
+             <TokenPurchaseForm />
+           </div>
+         </DialogContent>
+       </Dialog>
 
        {/* Confetti Animation */}
        <Confetti 

@@ -7,7 +7,7 @@ import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import Link from 'next/link';
 
 const SignUpPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',

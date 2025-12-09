@@ -104,7 +104,7 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
       {/* Video Modal */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-90 backdrop-blur-sm">
-          <div className="relative w-full max-w-5xl mx-4">
+          <div className="relative w-full max-w-6xl mx-4">
             {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
@@ -115,7 +115,7 @@ const ModalVideo: React.FC<ModalVideoProps> = ({
             </button>
 
             {/* Video Container */}
-            <div className="relative aspect-w-16 aspect-h-9 bg-black rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative w-full aspect-video max-h-[80vh] min-h-[360px] bg-black rounded-2xl overflow-hidden shadow-2xl">
               {youtubeUrl ? (
                 <iframe
                   width="560"

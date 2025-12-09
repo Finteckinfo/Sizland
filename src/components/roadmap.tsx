@@ -141,7 +141,7 @@ const shortenedRoadmap = [
 ];
 
 const Roadmap = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isDark = theme === 'dark';
 

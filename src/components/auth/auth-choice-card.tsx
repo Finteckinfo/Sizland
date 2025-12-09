@@ -20,7 +20,7 @@ export const AuthChoiceCard: React.FC<AuthChoiceCardProps> = ({
   flavor,
   onClick,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [supportsHover, setSupportsHover] = useState(false);
   const IconComponent = flavor === 'web3' ? Web3Icon : Web2Icon;
   const isDark = theme === 'dark';

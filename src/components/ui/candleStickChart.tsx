@@ -21,7 +21,7 @@ const getInitialData = (): CandlePoint[] => {
 };
 
 export const CandleStickChart = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const [data, setData] = useState<CandlePoint[]>(getInitialData());

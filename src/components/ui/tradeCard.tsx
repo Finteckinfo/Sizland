@@ -8,7 +8,7 @@ import { calculateTokenPrice } from '@/lib/stripe/config';
 import { useTheme } from 'next-themes';
 
 export const TradeCard: React.FC = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [amount, setAmount] = useState<number>(0);
   const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);

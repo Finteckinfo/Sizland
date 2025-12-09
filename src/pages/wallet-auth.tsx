@@ -14,7 +14,7 @@ import { trackWalletAuthEvent, maskWalletAddress, type WalletAuthAnalyticsContex
 export default function WalletAuth() {
   const router = useRouter()
   const { wallets, isReady } = useWallet()
-  const { theme } = useTheme()
+  const { resolvedTheme: theme } = useTheme()
   const isDark = theme === 'dark'
   
   const [selectedOption, setSelectedOption] = useState<'create' | 'returning' | 'algorand' | 'metamask' | null>(null)

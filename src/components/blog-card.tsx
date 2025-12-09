@@ -20,7 +20,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
   tweetUrl,
   isLoading = false,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [imageError, setImageError] = useState(false);
 

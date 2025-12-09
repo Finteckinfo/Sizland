@@ -79,12 +79,13 @@ const roleQuickStarts: RoleQuickStart[] = [
 ];
 
 const LobbyPage = () => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const { data: session, status } = useSession();
   const { activeAccount, isReady } = useWallet();
   const [mounted, setMounted] = useState(false);
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -93,8 +94,8 @@ const LobbyPage = () => {
   const isAuthed = !!session?.user || (!!activeAccount && isReady);
 
   // Handle ERP navigation with SSO token
-  const handleERPClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
+  const handleERPClick = async (e?: React.MouseEvent, destination?: string) => {
+    if (e) e.preventDefault();
 
     console.log('[Lobby] ERP clicked');
     console.log('[Lobby] Session status:', status);
@@ -156,7 +157,7 @@ const LobbyPage = () => {
       console.log('[Lobby] SSO token generated and set as cookie, redirecting to ERP...');
 
       // Redirect to ERP without token in URL (token is in cookie)
-      window.location.href = ERP_URL;
+      window.location.href = destination || ERP_URL;
     } catch (error) {
       console.error('[Lobby] Error generating SSO token:', error);
       alert('Failed to access ERP. Please try again.');
@@ -199,9 +200,9 @@ const LobbyPage = () => {
       title: "Fund Manager",
       description: "Manage your assets efficiently with our decentralized fund management system.",
       icon: "PieChart",
-      href: "#",
-      isExternal: false,
-      isClickable: false,
+      href: "https://fund.siz.land",
+      isExternal: true,
+      isClickable: true,
       variant: "default" as const
     }
   ];
@@ -230,7 +231,7 @@ const LobbyPage = () => {
     return null; // Will redirect via useEffect when unauthenticated and no wallet connected
   }
 
-  const baseCardClass = `w-full max-w-xs flex flex-col items-start text-left p-5 rounded-2xl border transition-all duration-300 backdrop-blur-xl ${
+  const baseCardClass = `w-full max-w-xs h-full min-h-[240px] flex flex-col items-start text-left p-5 rounded-2xl border transition-all duration-300 backdrop-blur-xl ${
     theme === "dark"
       ? "bg-white/5 border-emerald-500/15 shadow-[0_10px_40px_rgba(16,185,129,0.15)]"
       : "bg-white/85 border-emerald-500/15 shadow-[0_14px_50px_rgba(16,185,129,0.14)]"
@@ -269,12 +270,138 @@ const LobbyPage = () => {
 
         {/* Dapp Tiles Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Tiles Grid */}
+          {!showOnboarding && (
+            <div className="flex justify-center items-center mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
+                {dappTiles.map((tile, index) => {
+                  const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
+
+                  const tileContent = (
+                    <div
+                      className={`${baseCardClass} ${
+                        tile.isClickable
+                          ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_16px_60px_rgba(16,185,129,0.18)]"
+                          : "cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <div className={iconWrapClass}>
+                        <Icon size={28} />
+                      </div>
+                      <h3 className={titleClass}>{tile.title}</h3>
+                      <p className={descClass}>{tile.description}</p>
+
+                      {!tile.isClickable && (
+                        <div className="mt-3">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            theme === "dark"
+                              ? "bg-white/10 text-gray-100 border border-white/15"
+                              : "bg-gray-100 text-gray-800 border border-gray-200"
+                          }`}>
+                            Coming Soon
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+
+                  if (!tile.isClickable) {
+                    return (
+                      <div key={index}>
+                        {tileContent}
+                      </div>
+                    );
+                  }
+
+                  if (tile.isExternal) {
+                    // Special handling for ERP: reveal onboarding instead of redirect
+                    if (tile.title === "ERP") {
+                      return (
+                        <button
+                          key={index}
+                          data-testid="erp-tile-link"
+                          onClick={() => setShowOnboarding(true)}
+                          className="relative block w-full text-left"
+                        >
+                          {isGeneratingToken && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                              <Loader2 className="w-6 h-6 animate-spin text-white" />
+                            </div>
+                          )}
+                          {tileContent}
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <a
+                        key={index}
+                        href={tile.href}
+                        rel="noopener noreferrer"
+                        className="block w-full h-full"
+                      >
+                        {tileContent}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => router.push(tile.href)}
+                      className="block w-full text-left h-full"
+                    >
+                      {tileContent}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* ERP Onboarding Overview */}
+          {showOnboarding && (
           <section className="mb-12" data-testid="erp-onboarding-hero">
             <div
               className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white via-emerald-50 to-white p-8 shadow-2xl dark:border-white/10 dark:from-emerald-900/20 dark:via-slate-900/50 dark:to-slate-950"
             >
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+              {/* Top controls: Launch ERP (left) and Back (right) */}
+              <div className="flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center">
+                <button
+                  type="button"
+                  onClick={(e) => handleERPClick(e, ERP_URL)}
+                  className="relative inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_35px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:ring-offset-2 focus:ring-offset-emerald-50"
+                  style={{
+                    background: `linear-gradient(180deg, #10b981 0%, #059669 100%)`,
+                    position: "relative",
+                    overflow: "hidden",
+                    isolation: "isolate",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-80"
+                    style={{
+                      backgroundImage:
+                        theme === "dark"
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.28), transparent)"
+                          : "linear-gradient(135deg, rgba(0,0,0,0.16), transparent)",
+                    }}
+                  />
+                  <span className="relative z-10">Launch ERP</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowOnboarding(false)}
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 transition hover:bg-emerald-500 hover:text-white dark:text-emerald-200 dark:border-emerald-300/30"
+                >
+                  <Icons.ArrowLeft size={16} />
+                  Back to dApps
+                </button>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center">
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-500 dark:text-emerald-300">
                     Sizland ERP onboarding
@@ -342,119 +469,20 @@ const LobbyPage = () => {
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{card.helper}</p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-sm font-medium text-emerald-600 dark:text-emerald-300">{card.action}</span>
-                      {card.external ? (
-                        <a
-                          href={card.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
-                        >
-                          Launch
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
-                          onClick={() => router.push(card.href)}
-                        >
-                          Launch
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 transition hover:bg-emerald-500 hover:text-white dark:border-emerald-300/30 dark:text-emerald-200"
+                        onClick={() => handleERPClick(undefined, card.href)}
+                      >
+                        Launch
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </section>
-
-          {/* Tiles Grid */}
-          <div className="flex justify-center items-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
-              {dappTiles.map((tile, index) => {
-                const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
-
-                const tileContent = (
-                  <div
-                    className={`${baseCardClass} ${
-                      tile.isClickable
-                        ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_16px_60px_rgba(16,185,129,0.18)]"
-                        : "cursor-not-allowed opacity-60"
-                    }`}
-                  >
-                    <div className={iconWrapClass}>
-                      <Icon size={28} />
-                    </div>
-                    <h3 className={titleClass}>{tile.title}</h3>
-                    <p className={descClass}>{tile.description}</p>
-
-                    {!tile.isClickable && (
-                      <div className="mt-3">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          theme === "dark"
-                            ? "bg-white/10 text-gray-100 border border-white/15"
-                            : "bg-gray-100 text-gray-800 border border-gray-200"
-                        }`}>
-                          Coming Soon
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-
-                if (!tile.isClickable) {
-                  return (
-                    <div key={index}>
-                      {tileContent}
-                    </div>
-                  );
-                }
-
-                if (tile.isExternal) {
-                  // Special handling for ERP with SSO token
-                  if (tile.title === "ERP") {
-                    return (
-                      <a
-                        key={index}
-                        href={tile.href}
-                        data-testid="erp-tile-link"
-                        onClick={handleERPClick}
-                        className="relative"
-                      >
-                        {isGeneratingToken && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
-                            <Loader2 className="w-6 h-6 animate-spin text-white" />
-                          </div>
-                        )}
-                        {tileContent}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <a
-                      key={index}
-                      href={tile.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      {tileContent}
-                    </a>
-                  );
-                }
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => router.push(tile.href)}
-                    className="block w-full text-left"
-                  >
-                    {tileContent}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          )}
 
           {/* Quick Stats Section - match hero/whitepaper style */}
           <div className="mt-16 flex flex-col items-center text-center space-y-12">

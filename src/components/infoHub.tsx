@@ -4,7 +4,7 @@ import InfoCard from "./ui/infoCard";
 import { AuroraText } from "./ui/aurora-text";
 
 const InfoHub = () => {
-    const { theme } = useTheme();
+    const { resolvedTheme: theme } = useTheme();
     
     const cardData = [
         {

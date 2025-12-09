@@ -29,7 +29,7 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({
   showTimeline = true,
   maxTweets = 5
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
