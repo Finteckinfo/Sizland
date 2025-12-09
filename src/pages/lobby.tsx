@@ -200,9 +200,9 @@ const LobbyPage = () => {
       title: "Fund Manager",
       description: "Manage your assets efficiently with our decentralized fund management system.",
       icon: "PieChart",
-      href: "#",
-      isExternal: false,
-      isClickable: false,
+      href: "https://fund.siz.land",
+      isExternal: true,
+      isClickable: true,
       variant: "default" as const
     }
   ];
