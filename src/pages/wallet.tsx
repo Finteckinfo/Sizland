@@ -24,6 +24,7 @@ const WalletPage = () => {
     <PageLayout 
       title="Sizland Wallet - Manage Your Crypto Assets" 
       description="Trade, manage, and track your SIZ tokens and other crypto assets on the Sizland platform. View your wallet balance, place orders, and access tokenomics data."
+      align="stretch"
     >
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Wallet Title Section */}
