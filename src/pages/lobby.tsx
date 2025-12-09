@@ -251,11 +251,6 @@ const LobbyPage = () => {
     theme === "dark" ? "text-gray-300" : "text-gray-600"
   }`;
 
-  const erpButtonGradient =
-    theme === "dark"
-      ? "linear-gradient(135deg, rgba(255,255,255,0.28), transparent)"
-      : "linear-gradient(135deg, rgba(0,0,0,0.16), transparent)";
-
   return (
     <PageLayout title="Dashboard - Sizland" description="Your Sizland Dashboard" requireAuth={true}>
       <div className="min-h-screen">
@@ -275,30 +270,6 @@ const LobbyPage = () => {
 
         {/* Dapp Tiles Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Launch ERP CTA (far left) */}
-          {!showOnboarding && (
-            <div className="mb-6 flex justify-start">
-              <button
-                type="button"
-                onClick={(e) => handleERPClick(e, ERP_URL)}
-                className="relative inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_35px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:ring-offset-2 focus:ring-offset-emerald-50"
-                style={{
-                  background: `linear-gradient(180deg, #10b981 0%, #059669 100%)`,
-                  position: "relative",
-                  overflow: "hidden",
-                  isolation: "isolate",
-                }}
-              >
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-80"
-                  style={{ backgroundImage: erpButtonGradient }}
-                />
-                <span className="relative z-10">Launch ERP</span>
-              </button>
-            </div>
-          )}
-
           {/* Tiles Grid */}
           {!showOnboarding && (
             <div className="flex justify-center items-center mb-12">
@@ -394,8 +365,32 @@ const LobbyPage = () => {
             <div
               className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white via-emerald-50 to-white p-8 shadow-2xl dark:border-white/10 dark:from-emerald-900/20 dark:via-slate-900/50 dark:to-slate-950"
             >
-              {/* Top right back control */}
-              <div className="flex justify-end">
+              {/* Top controls: Launch ERP (left) and Back (right) */}
+              <div className="flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center">
+                <button
+                  type="button"
+                  onClick={(e) => handleERPClick(e, ERP_URL)}
+                  className="relative inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_35px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:ring-offset-2 focus:ring-offset-emerald-50"
+                  style={{
+                    background: `linear-gradient(180deg, #10b981 0%, #059669 100%)`,
+                    position: "relative",
+                    overflow: "hidden",
+                    isolation: "isolate",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-80"
+                    style={{
+                      backgroundImage:
+                        theme === "dark"
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.28), transparent)"
+                          : "linear-gradient(135deg, rgba(0,0,0,0.16), transparent)",
+                    }}
+                  />
+                  <span className="relative z-10">Launch ERP</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowOnboarding(false)}
