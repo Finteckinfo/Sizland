@@ -664,7 +664,7 @@ export const WalletBalance: React.FC = () => {
   }
 
   return (
-    <div className="rounded-xl border p-4 sm:p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
+    <div className="w-full rounded-xl border p-4 sm:p-6 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
@@ -924,7 +924,8 @@ export const WalletBalance: React.FC = () => {
             </div>
           )}
 
-          {/* ALGO Balance */}
+          {/* ALGO Balance - temporarily hidden */}
+          {/*
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <CoinsIcon className="h-5 w-5 text-yellow-500" />
@@ -960,6 +961,7 @@ export const WalletBalance: React.FC = () => {
               </Typography>
             </div>
           </div>
+          */}
 
           {/* Buy SIZ Tokens Button */}
           <div className="mt-6">
