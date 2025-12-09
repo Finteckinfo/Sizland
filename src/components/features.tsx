@@ -43,6 +43,10 @@ const Features = () => {
           ? "bg-neutral-900/80 text-white border-white/10"
           : "bg-black/5 text-gray-900 border-black/5";
 
+    const hoverClasses = isHighlight
+      ? "hover:-translate-y-1 hover:shadow-[0_18px_55px_rgba(16,185,129,0.45)]"
+      : "hover:-translate-y-1 hover:shadow-[0_16px_50px_rgba(16,185,129,0.18)] hover:border-emerald-400/35";
+
     const iconClasses = isHighlight
       ? "text-emerald-900"
       : isDark
@@ -69,7 +73,7 @@ const Features = () => {
         className="no-underline"
       >
         <div
-          className={`flex h-full flex-col justify-between border px-6 py-6 md:px-7 md:py-7 transition-colors duration-200 cursor-pointer ${cardBaseClasses}`}
+          className={`group flex h-full flex-col justify-between border px-6 py-6 md:px-7 md:py-7 transition-all duration-300 cursor-pointer ${cardBaseClasses} ${hoverClasses}`}
         >
           <div
             className={
