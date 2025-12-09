@@ -365,7 +365,19 @@ const LobbyPage = () => {
             <div
               className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white via-emerald-50 to-white p-8 shadow-2xl dark:border-white/10 dark:from-emerald-900/20 dark:via-slate-900/50 dark:to-slate-950"
             >
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+              {/* Top right back control */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowOnboarding(false)}
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 transition hover:bg-emerald-500 hover:text-white dark:text-emerald-200 dark:border-emerald-300/30"
+                >
+                  <Icons.ArrowLeft size={16} />
+                  Back to dApps
+                </button>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center">
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-500 dark:text-emerald-300">
                     Sizland ERP onboarding
@@ -390,18 +402,6 @@ const LobbyPage = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400">From workspace creation to first payment.</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Back to dApps */}
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowOnboarding(false)}
-                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 transition hover:bg-emerald-500 hover:text-white dark:text-emerald-200 dark:border-emerald-300/30"
-                >
-                  <Icons.ArrowLeft size={16} />
-                  Back to dApps
-                </button>
               </div>
 
               <div className="mt-10 grid gap-6 lg:grid-cols-3">
