@@ -6,9 +6,10 @@ import { Button } from './button'
 import { Button1 } from './button1'
 import Image from 'next/image'
 import { Toast } from './Toast'
-import { generateAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
+import { generateAlgorandWallet, recoverAlgorandWallet, storeWallet } from '@/lib/algorand/walletGenerator'
 import { useSession } from 'next-auth/react'
-import { Copy, LogOut, ChevronDown } from 'lucide-react'
+import { Copy, LogOut, ChevronDown, X } from 'lucide-react'
+import algosdk from 'algosdk'
  
 import { useRouter } from 'next/router'
 
@@ -21,6 +22,13 @@ export const ConnectWalletButton = () => {
   const [isWalletDropdownOpen, setIsWalletDropdownOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [showSizConnect, setShowSizConnect] = useState(false)
+  const [recoverMode, setRecoverMode] = useState(false)
+  const [manualAddress, setManualAddress] = useState('')
+  const [manualPrivateKey, setManualPrivateKey] = useState('')
+  const [mnemonicInput, setMnemonicInput] = useState('')
+  const [manualError, setManualError] = useState<string | null>(null)
+  const [manualLoading, setManualLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -208,6 +216,76 @@ export const ConnectWalletButton = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const closeSizConnect = () => {
+    setShowSizConnect(false)
+    setRecoverMode(false)
+    setManualAddress('')
+    setManualPrivateKey('')
+    setMnemonicInput('')
+    setManualError(null)
+  }
+
+  const handleManualConnect = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setManualError(null)
+    setManualLoading(true)
+    try {
+      const trimmedPk = manualPrivateKey.trim()
+      const trimmedAddress = manualAddress.trim()
+
+      if (!trimmedPk) {
+        throw new Error('Private key is required')
+      }
+
+      // Convert base64 private key to mnemonic + derive address
+      const skBytes = new Uint8Array(Buffer.from(trimmedPk, 'base64'))
+      const mnemonic = algosdk.secretKeyToMnemonic(skBytes)
+      const { addr } = algosdk.mnemonicToSecretKey(mnemonic)
+      const derivedAddress = typeof addr === 'string' ? addr : addr.toString()
+      const finalAddress = trimmedAddress || derivedAddress
+
+      if (!finalAddress) {
+        throw new Error('Could not derive address from private key')
+      }
+
+      storeWallet({
+        address: finalAddress,
+        privateKey: trimmedPk,
+        mnemonic
+      })
+
+      await connectWallet(WalletId.CUSTOM)
+      setShowSizConnect(false)
+      setToastMsg('Wallet connected')
+      setTimeout(() => setToastMsg(''), 3000)
+    } catch (err: any) {
+      console.error('Manual connect error:', err)
+      setManualError(err?.message || 'Failed to connect wallet. Check your inputs.')
+    } finally {
+      setManualLoading(false)
+    }
+  }
+
+  const handleMnemonicRecover = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setManualError(null)
+    setManualLoading(true)
+    try {
+      const wallet = recoverAlgorandWallet(mnemonicInput.trim())
+      storeWallet(wallet)
+      await connectWallet(WalletId.CUSTOM)
+      setShowSizConnect(false)
+      setRecoverMode(false)
+      setToastMsg('Wallet recovered and connected')
+      setTimeout(() => setToastMsg(''), 3000)
+    } catch (err: any) {
+      console.error('Mnemonic recover error:', err)
+      setManualError(err?.message || 'Failed to recover wallet. Check your phrase.')
+    } finally {
+      setManualLoading(false)
+    }
+  }
+
   if (!isReady) {
     return <Button disabled>Loading...</Button>
   }
@@ -346,6 +424,45 @@ export const ConnectWalletButton = () => {
                       <p className="label" style={{ margin: 0, fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>WalletConnect</p>
                     </button>
                   </li>
+                <li className="element" style={{ marginBottom: '0.5rem' }}>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      setShowSizConnect(true)
+                    }}
+                    className="element"
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.75rem',
+                      backgroundColor: '#f0fdf4',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#dcfce7';
+                      e.currentTarget.style.borderColor = '#bbf7d0';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f0fdf4';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <Image src="/logo1.png" alt="Siz Connect" width={18} height={18} />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <p style={{ margin: 0, fontWeight: 700, color: '#064e3b', fontSize: '0.95rem' }}>Siz Connect</p>
+                      <span style={{ margin: 0, color: '#0f172a', fontSize: '0.78rem' }}>Reconnect with address & key</span>
+                    </div>
+                  </button>
+                </li>
                   <div className="line" style={{ margin: '0.75rem 0' }}></div>
                 </ul>
                 <div style={{ 
@@ -603,6 +720,246 @@ export const ConnectWalletButton = () => {
                 {isGenerating ? 'Generating...' : 'Generate Wallet'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Siz Connect Modal */}
+      {showSizConnect && (
+        <div
+          onClick={closeSizConnect}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              background: 'linear-gradient(180deg, #0f172a 0%, #0b1a14 100%)',
+              color: 'white',
+              borderRadius: '1rem',
+              padding: '1.75rem',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.35)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              position: 'relative',
+            }}
+          >
+            <button
+              onClick={closeSizConnect}
+              aria-label="Close"
+              style={{
+                position: 'absolute',
+                top: '0.85rem',
+                right: '0.85rem',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '9999px',
+                width: '34px',
+                height: '34px',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'white',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={16} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ width: 38, height: 38, position: 'relative' }}>
+                <Image src="/logo1.png" alt="Siz connect" fill style={{ objectFit: 'contain' }} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>Siz Connect</h3>
+                <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem' }}>
+                  Reconnect your Sizland wallet with your keys
+                </p>
+              </div>
+            </div>
+
+            {!recoverMode ? (
+              <form onSubmit={handleManualConnect} className="space-y-4">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.35rem', color: '#e2e8f0', fontWeight: 600 }}>
+                    Wallet address
+                  </label>
+                  <input
+                    value={manualAddress}
+                    onChange={(e) => setManualAddress(e.target.value)}
+                    placeholder="Optional: auto-derived from key"
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      borderRadius: '0.75rem',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.04)',
+                      color: 'white',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.35rem', color: '#e2e8f0', fontWeight: 600 }}>
+                    Private key (base64)
+                  </label>
+                  <textarea
+                    value={manualPrivateKey}
+                    onChange={(e) => setManualPrivateKey(e.target.value)}
+                    placeholder="Paste your base64 private key"
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      borderRadius: '0.75rem',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.04)',
+                      color: 'white',
+                      resize: 'vertical'
+                    }}
+                  />
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Forgot private key?</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecoverMode(true)
+                        setManualError(null)
+                      }}
+                      style={{ color: '#34d399', fontWeight: 600, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Reset with mnemonic
+                    </button>
+                  </div>
+                </div>
+
+                {manualError && (
+                  <div style={{
+                    padding: '0.75rem 0.85rem',
+                    borderRadius: '0.75rem',
+                    background: 'rgba(248,113,113,0.12)',
+                    border: '1px solid rgba(248,113,113,0.4)',
+                    color: '#fecdd3'
+                  }}>
+                    {manualError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={manualLoading}
+                  className="w-full"
+                  style={{
+                    width: '100%',
+                    padding: '0.95rem 1rem',
+                    borderRadius: '999px',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    background:
+                      "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(90deg, #34d399 0%, #10b981 60%, #0ea970 100%)",
+                    cursor: manualLoading ? 'not-allowed' : 'pointer',
+                    opacity: manualLoading ? 0.8 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 10px 25px rgba(16, 185, 129, 0.25)'
+                  }}
+                >
+                  {manualLoading && (
+                    <div className="h-5 w-5 animate-spin border-2 border-gray-200 border-t-emerald-400 rounded-full" />
+                  )}
+                  Connect wallet
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleMnemonicRecover} className="space-y-4">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.35rem', color: '#e2e8f0', fontWeight: 600 }}>
+                    Recovery phrase (25-word mnemonic)
+                  </label>
+                  <textarea
+                    value={mnemonicInput}
+                    onChange={(e) => setMnemonicInput(e.target.value)}
+                    placeholder="enter your mnemonic phrase in order"
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      borderRadius: '0.75rem',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.04)',
+                      color: 'white',
+                      resize: 'vertical'
+                    }}
+                  />
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecoverMode(false)
+                        setManualError(null)
+                      }}
+                      style={{ color: '#34d399', fontWeight: 600, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Back to private key
+                    </button>
+                  </div>
+                </div>
+
+                {manualError && (
+                  <div style={{
+                    padding: '0.75rem 0.85rem',
+                    borderRadius: '0.75rem',
+                    background: 'rgba(248,113,113,0.12)',
+                    border: '1px solid rgba(248,113,113,0.4)',
+                    color: '#fecdd3'
+                  }}>
+                    {manualError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={manualLoading}
+                  className="w-full"
+                  style={{
+                    width: '100%',
+                    padding: '0.95rem 1rem',
+                    borderRadius: '999px',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    background:
+                      "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(90deg, #34d399 0%, #10b981 60%, #0ea970 100%)",
+                    cursor: manualLoading ? 'not-allowed' : 'pointer',
+                    opacity: manualLoading ? 0.8 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 10px 25px rgba(16, 185, 129, 0.25)'
+                  }}
+                >
+                  {manualLoading && (
+                    <div className="h-5 w-5 animate-spin border-2 border-gray-200 border-t-emerald-400 rounded-full" />
+                  )}
+                  Recover & connect
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
