@@ -5,6 +5,7 @@ import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import Link from 'next/link';
+import AuroraText from '@/components/ui/aurora-text';
 
 const SignUpPage = () => {
   const { resolvedTheme: theme } = useTheme();
@@ -110,8 +111,13 @@ const SignUpPage = () => {
           </Link>
           
           <div className="text-center">
-            <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
-              Get Started with Sizland
+            <h1
+              className={`text-4xl sm:text-5xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}
+            >
+              Get Started{' '}
+              <AuroraText className="inline-block">
+                with Sizland
+              </AuroraText>
             </h1>
             <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               Join our ecosystem and start your journey
@@ -120,7 +126,13 @@ const SignUpPage = () => {
         </div>
 
         {/* Sign Up Form */}
-        <div className={`p-8 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+        <div
+          className={`p-8 rounded-2xl shadow-xl border ${
+            theme === 'dark'
+              ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
+              : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]'
+          }`}
+        >
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg">
@@ -148,11 +160,11 @@ const SignUpPage = () => {
                     autoComplete="given-name"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                    }`}
+                  className={`block w-full pl-10 pr-3 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400' 
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
+                  }`}
                     placeholder="John"
                   />
                 </div>
@@ -172,10 +184,10 @@ const SignUpPage = () => {
                   autoComplete="family-name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  className={`block w-full px-3 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
                     theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400' 
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
                   }`}
                   placeholder="Doe"
                 />
@@ -202,10 +214,10 @@ const SignUpPage = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  className={`block w-full pl-10 pr-3 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
                     theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400' 
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
                   }`}
                   placeholder="you@example.com"
                 />
@@ -232,10 +244,10 @@ const SignUpPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  className={`block w-full pl-10 pr-10 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
                     theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400' 
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
                   }`}
                   placeholder="At least 8 characters"
                 />
@@ -273,10 +285,10 @@ const SignUpPage = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  className={`block w-full pl-10 pr-10 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
                     theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400' 
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
                   }`}
                   placeholder="Confirm your password"
                 />
@@ -298,22 +310,34 @@ const SignUpPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors duration-200 ${
+              className={`w-full py-3.5 px-4 rounded-full font-semibold text-white transition-all duration-200 shadow-lg ${
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-primary hover:bg-primary/90'
+                  : 'hover:brightness-105'
               }`}
+              style={
+                loading
+                  ? undefined
+                  : {
+                      background:
+                        "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(90deg, #34d399 0%, #10b981 60%, #0ea970 100%)"
+                    }
+              }
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
 
             {/* Sign In Link */}
             <div className="text-center">
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                 Already have an account?{' '}
                 <Link 
                   href="/login" 
-                  className="font-medium text-primary hover:text-primary/80 transition-colors"
+                  className={`font-semibold transition-colors ${
+                    theme === 'dark'
+                      ? 'text-emerald-300 hover:text-emerald-200'
+                      : 'text-emerald-600 hover:text-emerald-700'
+                  }`}
                 >
                   Sign in
                 </Link>
@@ -328,17 +352,17 @@ const SignUpPage = () => {
             What you&apos;ll get access to:
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className="font-medium text-indigo-600 mb-1">ERP System</div>
-              <div className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Business management tools</div>
+            <div className={`${theme === 'dark' ? 'bg-[#0f1d2b]' : 'bg-white'} p-4 rounded-xl border ${theme === 'dark' ? 'border-[#1f2f3f]' : 'border-[#e5efe7]'} shadow-sm`}>
+              <div className={`${theme === 'dark' ? 'text-emerald-300' : 'text-emerald-700'} font-semibold mb-1`}>ERP System</div>
+              <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Business management tools</div>
             </div>
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className="font-medium text-indigo-600 mb-1">Investment Platform</div>
-              <div className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Access to DeFi opportunities</div>
+            <div className={`${theme === 'dark' ? 'bg-[#0f1d2b]' : 'bg-white'} p-4 rounded-xl border ${theme === 'dark' ? 'border-[#1f2f3f]' : 'border-[#e5efe7]'} shadow-sm`}>
+              <div className={`${theme === 'dark' ? 'text-emerald-300' : 'text-emerald-700'} font-semibold mb-1`}>Investment Platform</div>
+              <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Access to DeFi opportunities</div>
             </div>
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className="font-medium text-indigo-600 mb-1">SIZ Tokens</div>
-              <div className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Ecosystem utility tokens</div>
+            <div className={`${theme === 'dark' ? 'bg-[#0f1d2b]' : 'bg-white'} p-4 rounded-xl border ${theme === 'dark' ? 'border-[#1f2f3f]' : 'border-[#e5efe7]'} shadow-sm`}>
+              <div className={`${theme === 'dark' ? 'text-emerald-300' : 'text-emerald-700'} font-semibold mb-1`}>SIZ Tokens</div>
+              <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Ecosystem utility tokens</div>
             </div>
           </div>
         </div>

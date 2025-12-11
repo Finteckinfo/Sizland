@@ -5,6 +5,7 @@ import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import Link from 'next/link';
+import AuroraText from '@/components/ui/aurora-text';
 
 const LoginPage = () => {
   const { resolvedTheme: theme } = useTheme();
@@ -61,8 +62,13 @@ const LoginPage = () => {
           </Link>
           
           <div className="text-center">
-            <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
-              Welcome Back
+            <h1
+              className={`text-4xl sm:text-5xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}
+            >
+              Welcome{' '}
+              <AuroraText className="inline-block">
+                Back
+              </AuroraText>
             </h1>
             <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               Sign in to your Sizland account
@@ -71,15 +77,158 @@ const LoginPage = () => {
         </div>
 
         {/* Sign In Form */}
-        <div className={`p-8 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <div className="mb-6">
+        <div
+          className={`p-8 rounded-2xl shadow-xl border ${
+            theme === 'dark'
+              ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
+              : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]'
+          }`}
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Email Field */}
+            <div>
+              <label 
+                htmlFor="email" 
+                className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+              >
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`block w-full pl-10 pr-3 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400'
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
+                  }`}
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label 
+                htmlFor="password" 
+                className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+              >
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`block w-full pl-10 pr-10 py-3.5 border rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-400'
+                      : 'bg-white border-[#d1d9d2] text-gray-900 placeholder-gray-500'
+                  }`}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+                  ) : (
+                    <Eye className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Stay logged in + Forgot password */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-400"
+                  defaultChecked
+                />
+                <span className={theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}>Stay logged in</span>
+              </label>
+              <Link
+                href="/forgot-password"
+                className={`underline-offset-4 ${
+                  theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3.5 px-4 rounded-full font-semibold text-white transition-all duration-200 shadow-lg ${
+                loading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'hover:brightness-105'
+              }`}
+              style={
+                loading
+                  ? undefined
+                  : {
+                      background:
+                        "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(90deg, #34d399 0%, #10b981 60%, #0ea970 100%)"
+                    }
+              }
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className={`w-full border-t ${theme === 'dark' ? 'border-[#233446]' : 'border-[#dbe6dc]'}`}></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span
+                  className={`px-3 py-1 rounded ${
+                    theme === 'dark'
+                      ? 'bg-[#141f2d] text-gray-300'
+                      : 'bg-white text-gray-600'
+                  }`}
+                >
+                  Or sign in with
+                </span>
+              </div>
+            </div>
+
+            {/* Google button */}
             <button
               type="button"
               onClick={() => signIn('google', { callbackUrl: '/lobby' })}
-              className={`w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border font-medium transition-all duration-200 ${
+              className={`w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-full font-semibold transition-all duration-200 ${
                 theme === 'dark'
-                  ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 shadow-sm'
+                  ? 'bg-[#dff6e9] text-gray-800 border border-[#bde7ce] hover:bg-[#e9f9ef]'
+                  : 'bg-[#e6f9ef] text-gray-800 border border-[#c9ecdc] hover:bg-[#f2fcf6]'
               }`}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -114,117 +263,18 @@ const LoginPage = () => {
               </svg>
               Continue with Google
             </button>
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className={`w-full border-t ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className={`px-2 ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'}`}>
-                Or sign in with email
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {/* Email Field */}
-            <div>
-              <label 
-                htmlFor="email" 
-                className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
-              >
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                    theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label 
-                htmlFor="password" 
-                className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                    theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeOff className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                  ) : (
-                    <Eye className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors duration-200 ${
-                loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-primary hover:bg-primary/90'
-              }`}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
 
             {/* Sign Up Link */}
             <div className="text-center">
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                 Don&apos;t have an account?{' '}
                 <Link 
                   href="/signup" 
-                  className="font-medium text-primary hover:text-primary/80 transition-colors"
+                  className={`font-semibold transition-colors ${
+                    theme === 'dark'
+                      ? 'text-emerald-300 hover:text-emerald-200'
+                      : 'text-emerald-600 hover:text-emerald-700'
+                  }`}
                 >
                   Sign up
                 </Link>
