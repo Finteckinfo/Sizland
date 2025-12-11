@@ -150,7 +150,7 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="fixed z-50 top-0 left-0 w-full max-w-full overflow-x-hidden flex justify-center px-4 pt-6">
+    <div className="fixed z-50 top-0 left-0 w-screen max-w-screen overflow-x-hidden flex justify-center px-2 sm:px-4 pt-4 sm:pt-6 box-border">
       {/* Desktop Layout - Pill-style center bar */}
       <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3 overflow-hidden">
         {/* Left Section - Navigation pills (keep existing PillNav design) */}
@@ -202,7 +202,7 @@ export const Navbar: React.FC = () => {
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuContent align="end" className="w-56 max-w-[calc(100vw-1.5rem)]">
                       <DropdownMenuLabel>
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
@@ -230,7 +230,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden flex w-full max-w-full items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-4 py-4 backdrop-blur-2xl overflow-hidden">
+      <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-hidden min-w-0">
         {/* Mobile Logo */}
         <Link href="/" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
           <Image
@@ -249,9 +249,9 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Mobile Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 min-w-0">
           <div className="shrink-0">
-          <ThemeToggler />
+            <ThemeToggler />
           </div>
           {isLoaded && (
             <>
@@ -267,7 +267,7 @@ export const Navbar: React.FC = () => {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 max-w-[calc(100vw-1.5rem)]">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
