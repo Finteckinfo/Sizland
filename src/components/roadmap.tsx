@@ -163,12 +163,12 @@ const Roadmap = () => {
                   Sizland Product{" "}
                 </span>
                 <AuroraText>Roadmap</AuroraText>
-              </h2>
+        </h2>
 
               {/* Description */}
               <p className="text-base md:text-lg leading-relaxed max-w-2xl">
                 <span className={isDark ? "text-gray-300" : "text-gray-600"}>
-                  Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
+          Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
                 </span>
               </p>
             </div>
@@ -219,8 +219,8 @@ const Roadmap = () => {
                     isDark ? "text-gray-300" : "text-gray-600"
                   }`}>
                     {phase.description}
-                  </p>
-                </div>
+        </p>
+      </div>
               ))}
             </div>
           </div>
@@ -244,8 +244,8 @@ const Roadmap = () => {
 
           <div className="mt-6">
             <ol className="relative border-s border-gray-200 dark:border-gray-700">
-              {roadmap.map((item, index) => (
-                <li key={index} className="mb-12 ms-6">
+        {roadmap.map((item, index) => (
+          <li key={index} className="mb-12 ms-6">
                   <span className={`absolute flex items-center justify-center w-8 h-8 rounded-full -start-4 ring-4 ${
                     isDark 
                       ? "bg-green-900 ring-gray-900" 
@@ -254,93 +254,93 @@ const Roadmap = () => {
                     <SizLogoIcon className={`w-4 h-4 ${
                       isDark ? "text-green-400" : "text-green-600"
                     }`} />
-                  </span>
+            </span>
                   <h3 className={`flex items-center mb-2 text-xl font-semibold ${
                     isDark ? "text-white" : "text-gray-900"
                   }`}>
-                    {item.title}
-                    {item.badge && (
+              {item.title}
+              {item.badge && (
                       <span className={`text-sm font-medium me-2 px-2.5 py-0.5 rounded-full ms-3 ${
                         isDark 
                           ? "bg-green-900 text-green-300" 
                           : "bg-green-100 text-green-800"
                       }`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </h3>
+                  {item.badge}
+                </span>
+              )}
+            </h3>
                   <time className={`block mb-3 text-sm font-medium leading-none ${
                     isDark ? "text-green-400" : "text-green-600"
                   }`}>
-                    {item.date}
-                  </time>
-                  {item.description && (
+              {item.date}
+            </time>
+            {item.description && (
                     <p className={`text-base font-normal leading-relaxed mb-4 ${
                       isDark ? "text-gray-300" : "text-gray-700"
                     }`}>
-                      {item.description}
-                    </p>
-                  )}
-                  {item.achievements && (
-                    <div className="mt-6 mb-4">
+                {item.description}
+              </p>
+            )}
+            {item.achievements && (
+              <div className="mt-6 mb-4">
                       <h4 className={`text-lg font-semibold mb-2 ${
                         isDark ? "text-white" : "text-gray-900"
                       }`}>
-                        {item.achievements.title}
-                      </h4>
+                  {item.achievements.title}
+                </h4>
                       <time className={`block mb-3 text-sm font-medium leading-none ${
                         isDark ? "text-green-400" : "text-green-600"
                       }`}>
-                        {item.achievements.date}
-                      </time>
+                  {item.achievements.date}
+                </time>
                       <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
                         isDark ? "text-gray-300" : "text-gray-700"
                       }`}>
-                        {item.achievements.items.map((achievement, idx) => (
-                          <li key={idx}>{achievement}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {item.nextSteps && (
-                    <div className="mt-6 mb-4">
+                  {item.achievements.items.map((achievement, idx) => (
+                    <li key={idx}>{achievement}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {item.nextSteps && (
+              <div className="mt-6 mb-4">
                       <h4 className={`text-lg font-semibold mb-2 ${
                         isDark ? "text-white" : "text-gray-900"
                       }`}>
-                        {item.nextSteps.title}
-                      </h4>
+                  {item.nextSteps.title}
+                </h4>
                       <time className={`block mb-3 text-sm font-medium leading-none ${
                         isDark ? "text-green-400" : "text-green-600"
                       }`}>
-                        {item.nextSteps.date}
-                      </time>
+                  {item.nextSteps.date}
+                </time>
                       <p className={`text-base font-normal leading-relaxed mb-2 ${
                         isDark ? "text-gray-300" : "text-gray-700"
                       }`}>
-                        The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
-                      </p>
+                  The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
+                </p>
                       <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
                         isDark ? "text-gray-300" : "text-gray-700"
                       }`}>
-                        {item.nextSteps.items.map((step, idx) => (
-                          <li key={idx}>{step}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {item.items && (
+                  {item.nextSteps.items.map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {item.items && (
                     <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed mt-4 ${
                       isDark ? "text-gray-300" : "text-gray-700"
                     }`}>
-                      {item.items.map((listItem, idx) => (
-                        <li key={idx}>{listItem}</li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </div>
+                {item.items.map((listItem, idx) => (
+                  <li key={idx}>{listItem}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
         </DialogContent>
       </Dialog>
     </>

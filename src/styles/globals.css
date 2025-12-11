@@ -108,7 +108,28 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
+    overflow-x: hidden;
   }
+}
+
+/* Prevent horizontal scrolling across the site */
+html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Ensure the Next.js root never overflows horizontally */
+#__next {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Clamp structural containers to viewport width to prevent horizontal scroll */
+main, header, nav, footer, section {
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 /* === Landing background system === */

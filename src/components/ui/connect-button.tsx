@@ -309,10 +309,13 @@ export const ConnectWalletButton = () => {
                   background: 'white',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '0.5rem',
-                  minWidth: '280px',
-                  maxWidth: '320px',
+                  minWidth: '260px',
+                  maxWidth: 'calc(100vw - 24px)',
+                  width: 'min(320px, 100vw - 24px)',
                   padding: '1rem',
                   minHeight: '320px',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
                 }}
               >
                 <ul className="list">
@@ -548,8 +551,12 @@ export const ConnectWalletButton = () => {
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '0.5rem',
                   minWidth: '200px',
+                  maxWidth: 'calc(100vw - 24px)',
+                  width: 'min(240px, 100vw - 24px)',
                   padding: '0.5rem',
-                  border: '1px solid #e5e7eb'
+                  border: '1px solid #e5e7eb',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
                 }}
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -732,7 +739,8 @@ export const ConnectWalletButton = () => {
             position: 'fixed',
             inset: 0,
             backgroundColor: 'rgba(0,0,0,0.55)',
-            backdropFilter: 'blur(8px)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

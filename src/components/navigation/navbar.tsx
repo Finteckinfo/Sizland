@@ -150,9 +150,9 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="fixed z-50 top-0 left-0 w-full flex justify-center px-4 pt-6">
+    <div className="fixed z-50 top-0 left-0 w-full max-w-full overflow-x-hidden flex justify-center px-4 pt-6">
       {/* Desktop Layout - Pill-style center bar */}
-      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3">
+      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3 overflow-hidden">
         {/* Left Section - Navigation pills (keep existing PillNav design) */}
         <div className="flex-1 flex justify-start items-center scale-[0.9] origin-left">
           <PillNav
@@ -230,9 +230,9 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden flex w-full items-center justify-between rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-4 py-4 backdrop-blur-2xl">
+      <div className="lg:hidden flex w-full max-w-full items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-4 py-4 backdrop-blur-2xl overflow-hidden">
         {/* Mobile Logo */}
-        <Link href="/" className="flex items-center justify-start">
+        <Link href="/" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
           <Image
             src="/logo1.png"
             alt="Sizland Logo"
@@ -240,7 +240,7 @@ export const Navbar: React.FC = () => {
             height={40}
             className="h-10 w-auto object-contain mr-2"
           />
-          <button className="button1-mobile" data-text="Awesome">
+          <button className="button1-mobile truncate" data-text="Awesome">
             <span className="actual-text1-mobile font-pj">&nbsp;SIZLAND&nbsp;</span>
             <span aria-hidden="true" className="hover-text1-mobile font-pj">
               &nbsp;SIZLAND&nbsp;
@@ -249,14 +249,16 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Mobile Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="shrink-0">
           <ThemeToggler />
+          </div>
           {isLoaded && (
             <>
               {session?.user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full shrink-0">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
                         <AvatarFallback>
@@ -282,13 +284,20 @@ export const Navbar: React.FC = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => router.push("/auth-choice")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 max-w-[110px] px-3 text-sm"
+                  onClick={() => router.push("/auth-choice")}
+                >
                   Sign In
                 </Button>
               )}
             </>
           )}
+          <div className="shrink-0">
           <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
+          </div>
         </div>
       </div>
     </div>
