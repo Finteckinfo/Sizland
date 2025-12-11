@@ -15,7 +15,9 @@ export const AnimatedGrid: React.FC<AnimatedGridProps> = ({ className = "" }) =>
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 top-0 overflow-hidden ${className}`}
+      className={`pointer-events-none absolute inset-x-0 top-0 overflow-hidden -z-10 ${
+        className || "h-[420px] sm:h-[520px] lg:h-[620px]"
+      }`}
     >
       <div className="hero-grid-layer h-full">
         <div className="hero-grid-surface h-full" />

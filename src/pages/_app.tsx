@@ -85,12 +85,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`${monsterrat.variable} font-sans`}>
-      {process.env.NODE_ENV === 'production' && (
-        <>
-          <GlowBackground />
-          <AnimatedGrid />
-        </>
-      )}
+      <GlowBackground />
+      <AnimatedGrid />
       <Navbar />
       {children}
       <Footer />
