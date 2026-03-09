@@ -1,5 +1,31 @@
 {
   "buildCommand": "next build",
   "installCommand": "bun install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "redirects": [
+    {
+      "source": "/solutions",
+      "destination": "https://solutions.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/solutions/:path*",
+      "destination": "https://solutions.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/solutions",
+      "has": [{ "type": "host", "value": "solutions.siz.land" }]
+    },
+    {
+      "source": "/:path*",
+      "destination": "/solutions",
+      "has": [{ "type": "host", "value": "solutions.siz.land" }]
+    }
+  ]
 }

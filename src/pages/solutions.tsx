@@ -196,7 +196,7 @@ const SolutionsPage: NextPage = () => {
                   </span>
                   <h2
                     id="modules-heading"
-                    className={`font-helvetica-97-condensed-oblique text-3xl sm:text-4xl lg:text-5xl tracking-tight leading-tight ${
+                    className={`text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight ${
                       isDark ? "text-white" : "text-gray-900"
                     }`}
                   >
@@ -368,19 +368,13 @@ const SolutionsPage: NextPage = () => {
                 >
                   READY FOR DEPLOYMENT
                 </span>
-                <div className="flex flex-col gap-0.5">
-                  <span
-                    className={`uppercase font-bold text-xl md:text-[28px] tracking-[0.10em] md:tracking-[0.12em] leading-[1.05] ${
-                      isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
-                    }`}
-                  >
+                <div className={`flex flex-col gap-0.5 font-helvetica-97-condensed-oblique text-3xl sm:text-4xl lg:text-5xl tracking-tight leading-tight ${
+                  isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
+                }`}>
+                  <span className="uppercase font-bold tracking-[0.10em] md:tracking-[0.12em] leading-[1.05]">
                     SYSTEM READY.
                   </span>
-                  <span
-                    className={`uppercase font-semibold text-base md:text-[20px] tracking-[0.04em] md:tracking-[0.06em] leading-[1.2] ${
-                      isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
-                    }`}
-                  >
+                  <span className="uppercase font-semibold tracking-[0.04em] md:tracking-[0.06em] leading-[1.2]">
                     INITIALIZE DEPLOYMENT?
                   </span>
                 </div>

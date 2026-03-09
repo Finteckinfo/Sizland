@@ -33,8 +33,16 @@ const publicApiRoutes = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Subdomain solutions.siz.land → rewrite to /solutions
-  if (request.nextUrl.hostname === 'solutions.siz.land') {
+  const host = request.headers.get('host') || request.nextUrl.hostname
+
+  // siz.land/solutions → redirect to solutions.siz.land (only subdomain has the page)
+  if ((host === 'siz.land' || host.startsWith('siz.land:')) && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
+    const url = new URL(pathname, 'https://solutions.siz.land')
+    return NextResponse.redirect(url.toString(), 308)
+  }
+
+  // solutions.siz.land → rewrite to /solutions page
+  if (host === 'solutions.siz.land' || host.startsWith('solutions.siz.land:')) {
     const url = request.nextUrl.clone()
     url.pathname = '/solutions'
     return NextResponse.rewrite(url)
@@ -56,9 +64,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     // Skip Next.js internals and all static files
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 }
