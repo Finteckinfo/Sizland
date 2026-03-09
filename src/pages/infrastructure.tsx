@@ -312,55 +312,71 @@ const InfrastructurePage: NextPage = () => {
           </div>
         </section>
 
-        {/* CTA / Deployment Section */}
+        {/* CTA / Deployment Section - matches reference design */}
         <section
-          className={`relative w-full py-[18px] md:py-7 ${
+          className={`relative w-full py-12 md:py-14 ${
             isDark
-              ? "bg-gradient-to-t from-green-950/40 via-green-900/25 to-transparent"
+              ? "bg-[#0a0f0d]"
               : "bg-gradient-to-t from-green-100/90 via-green-50/70 to-white"
           }`}
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center text-center font-inter antialiased">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-500 dark:text-emerald-300 mb-6">
+            <div className="flex flex-col items-center text-center font-inter antialiased space-y-4">
+              {/* READY FOR DEPLOYMENT - vivid green */}
+              <span
+                className={`text-xs font-semibold uppercase tracking-[0.25em] ${
+                  isDark ? "text-[#00E07A]" : "text-emerald-600"
+                }`}
+              >
                 READY FOR DEPLOYMENT
               </span>
-              {/* SYSTEM READY. INITIALIZE DEPLOYMENT? - Inter typography spec */}
-              <div className="flex flex-col gap-0 max-w-2xl">
+
+              {/* SYSTEM READY. INITIALIZE DEPLOYMENT? - both lines light mint/primary */}
+              <div className="flex flex-col gap-0.5">
                 <span
-                  className={`uppercase font-bold ${
+                  className={`uppercase font-bold text-xl md:text-[28px] tracking-[0.10em] md:tracking-[0.12em] leading-[1.05] ${
                     isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
-                  } text-xl md:text-[28px] tracking-[0.10em] md:tracking-[0.12em] leading-[1.05]`}
+                  }`}
                 >
                   SYSTEM READY.
                 </span>
                 <span
-                  className="uppercase font-semibold text-[#00E07A] text-base md:text-[20px] tracking-[0.04em] md:tracking-[0.06em] leading-[1.2]"
+                  className={`uppercase font-semibold text-base md:text-[20px] tracking-[0.04em] md:tracking-[0.06em] leading-[1.2] ${
+                    isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
+                  }`}
                 >
                   INITIALIZE DEPLOYMENT?
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+
+              {/* Buttons - 18–24px spacing from heading */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link
                   href="/auth-choice"
-                  className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
+                    isDark
+                      ? "bg-[#00E07A] text-[#E6FFF2] hover:bg-[#00c96a]"
+                      : "bg-emerald-500 text-white hover:bg-emerald-600"
+                  }`}
                 >
                   CONTACT ARCHITECTS
                 </Link>
                 <Link
                   href="/whitepaper"
-                  className={`inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full transition-all duration-200 ${
+                  className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all border ${
                     isDark
-                      ? "border border-white/30 text-white hover:bg-white/10"
-                      : "border border-gray-800 text-gray-900 hover:bg-gray-100"
+                      ? "border-[#00E07A] text-[#E6FFF2] hover:bg-white/5"
+                      : "border-emerald-600 text-[#0B1F16] hover:bg-emerald-50"
                   }`}
                 >
                   REQUEST ARCHITECTURE DOCS
                 </Link>
               </div>
+
+              {/* Response time - vivid green in dark mode */}
               <p
-                className={`text-sm font-medium uppercase tracking-wider ${
-                  isDark ? "text-gray-400" : "text-gray-500"
+                className={`text-xs font-medium uppercase tracking-wider pt-2 ${
+                  isDark ? "text-[#00E07A]" : "text-emerald-600"
                 }`}
               >
                 ARCHITECTURAL RESPONSE TIME: &lt; 2 HOURS
