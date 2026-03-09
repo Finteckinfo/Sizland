@@ -35,22 +35,19 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || request.nextUrl.hostname
   const hostname = request.nextUrl.hostname
 
-  // DEBUG: log host info (remove after fixing subdomain)
-  console.log('[Middleware] host:', host, '| hostname:', hostname, '| pathname:', pathname)
-  console.log('[Middleware] isSolutionsSubdomain:', host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:'))
-
   // siz.land/solutions → redirect to solutions.siz.land (only subdomain has the page)
   if ((host === 'siz.land' || host.startsWith('siz.land:')) && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
     const url = new URL(pathname, 'https://solutions.siz.land')
     return NextResponse.redirect(url.toString(), 308)
   }
 
-  // solutions.siz.land → rewrite to /solutions page
+  // solutions.siz.land → rewrite to /solutions page (exclude /api, /_next, static files)
   if (host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:')) {
-    console.log('[Middleware] REWRITE: solutions.siz.land -> /solutions')
-    const url = request.nextUrl.clone()
-    url.pathname = '/solutions'
-    return NextResponse.rewrite(url)
+    if (!pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/solutions'
+      return NextResponse.rewrite(url)
+    }
   }
 
   // Allow all public routes

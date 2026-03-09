@@ -21,11 +21,6 @@
       "source": "/",
       "destination": "/solutions",
       "has": [{ "type": "host", "value": "solutions.siz.land" }]
-    },
-    {
-      "source": "/:path*",
-      "destination": "/solutions",
-      "has": [{ "type": "host", "value": "solutions.siz.land" }]
     }
   ]
 }
