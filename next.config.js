@@ -5,6 +5,21 @@ const webpack = require('webpack');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcrypt'],
+  async rewrites() {
+    return [
+      // Subdomain solutions.siz.land → /solutions page
+      {
+        source: '/',
+        destination: '/solutions',
+        has: [{ type: 'host', value: 'solutions.siz.land' }],
+      },
+      {
+        source: '/:path*',
+        destination: '/solutions',
+        has: [{ type: 'host', value: 'solutions.siz.land' }],
+      },
+    ];
+  },
   webpack: (config) => {
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',

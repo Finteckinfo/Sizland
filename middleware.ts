@@ -14,7 +14,7 @@ const publicRoutes = [
   '/privacy',
   '/blog',
   '/whitepaper',
-  '/infrastructure',
+  '/solutions',
 ]
 
 // API routes that are public
