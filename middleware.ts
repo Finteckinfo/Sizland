@@ -33,6 +33,13 @@ const publicApiRoutes = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Subdomain solutions.siz.land → rewrite to /solutions
+  if (request.nextUrl.hostname === 'solutions.siz.land') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/solutions'
+    return NextResponse.rewrite(url)
+  }
+
   // Allow all public routes
   if (publicRoutes.includes(pathname)) {
     return NextResponse.next()
