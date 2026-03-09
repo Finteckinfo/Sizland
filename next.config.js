@@ -7,14 +7,9 @@ const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcrypt'],
   async rewrites() {
     return [
-      // Subdomain solutions.siz.land → /solutions page
+      // Subdomain solutions.siz.land root only → /solutions (api paths excluded - handled by middleware)
       {
         source: '/',
-        destination: '/solutions',
-        has: [{ type: 'host', value: 'solutions.siz.land' }],
-      },
-      {
-        source: '/:path*',
         destination: '/solutions',
         has: [{ type: 'host', value: 'solutions.siz.land' }],
       },
