@@ -35,8 +35,9 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || request.nextUrl.hostname
   const hostname = request.nextUrl.hostname
 
-  // siz.land/solutions → redirect to solutions.siz.land (only subdomain has the page)
-  if ((host === 'siz.land' || host.startsWith('siz.land:')) && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
+  // siz.land or www.siz.land /solutions → redirect to solutions.siz.land (only subdomain has the page)
+  const isMainDomain = host === 'siz.land' || host === 'www.siz.land' || host?.startsWith('siz.land:') || host?.startsWith('www.siz.land:');
+  if (isMainDomain && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
     const url = new URL(pathname, 'https://solutions.siz.land')
     return NextResponse.redirect(url.toString(), 308)
   }
