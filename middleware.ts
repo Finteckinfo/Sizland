@@ -32,8 +32,12 @@ const publicApiRoutes = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
   const host = request.headers.get('host') || request.nextUrl.hostname
+  const hostname = request.nextUrl.hostname
+
+  // DEBUG: log host info (remove after fixing subdomain)
+  console.log('[Middleware] host:', host, '| hostname:', hostname, '| pathname:', pathname)
+  console.log('[Middleware] isSolutionsSubdomain:', host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:'))
 
   // siz.land/solutions → redirect to solutions.siz.land (only subdomain has the page)
   if ((host === 'siz.land' || host.startsWith('siz.land:')) && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
@@ -42,7 +46,8 @@ export function middleware(request: NextRequest) {
   }
 
   // solutions.siz.land → rewrite to /solutions page
-  if (host === 'solutions.siz.land' || host.startsWith('solutions.siz.land:')) {
+  if (host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:')) {
+    console.log('[Middleware] REWRITE: solutions.siz.land -> /solutions')
     const url = request.nextUrl.clone()
     url.pathname = '/solutions'
     return NextResponse.rewrite(url)
