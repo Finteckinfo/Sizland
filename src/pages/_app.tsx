@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { AppProps } from "next/app";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Inter } from "next/font/google";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -34,6 +34,11 @@ export const monsterrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
   weight: "500",
+});
+
+export const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -84,7 +89,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`${monsterrat.variable} font-sans`}>
+    <div className={`${monsterrat.variable} ${inter.variable} font-sans`}>
       <GlowBackground />
       <AnimatedGrid />
       <Navbar />

@@ -73,7 +73,7 @@ const InfrastructurePage: NextPage = () => {
     >
       <div className="min-h-screen w-full">
         {/* Hero Section */}
-        <section className="relative pt-12 sm:pt-16 md:pt-24 pb-24 w-full">
+        <section className="relative pt-4 sm:pt-6 md:pt-8 pb-24 w-full">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Left: Copy */}
@@ -314,26 +314,33 @@ const InfrastructurePage: NextPage = () => {
 
         {/* CTA / Deployment Section */}
         <section
-          className={`relative py-24 w-full ${
+          className={`relative w-full py-[18px] md:py-7 ${
             isDark
               ? "bg-gradient-to-t from-green-950/40 via-green-900/25 to-transparent"
               : "bg-gradient-to-t from-green-100/90 via-green-50/70 to-white"
           }`}
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center text-center space-y-6">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-500 dark:text-emerald-300">
+            <div className="flex flex-col items-center text-center font-inter antialiased">
+              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-500 dark:text-emerald-300 mb-6">
                 READY FOR DEPLOYMENT
               </span>
-              <h2
-                className={`text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight max-w-4xl ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                SYSTEM READY.{" "}
-                <AuroraText>INITIALIZE DEPLOYMENT?</AuroraText>
-              </h2>
-              <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              {/* SYSTEM READY. INITIALIZE DEPLOYMENT? - Inter typography spec */}
+              <div className="flex flex-col gap-0 max-w-2xl">
+                <span
+                  className={`uppercase font-bold ${
+                    isDark ? "text-[#E6FFF2]" : "text-[#0B1F16]"
+                  } text-xl md:text-[28px] tracking-[0.10em] md:tracking-[0.12em] leading-[1.05]`}
+                >
+                  SYSTEM READY.
+                </span>
+                <span
+                  className="uppercase font-semibold text-[#00E07A] text-base md:text-[20px] tracking-[0.04em] md:tracking-[0.06em] leading-[1.2]"
+                >
+                  INITIALIZE DEPLOYMENT?
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <Link
                   href="/auth-choice"
                   className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl"

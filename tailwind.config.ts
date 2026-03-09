@@ -53,6 +53,7 @@ module.exports = {
       },
       fontFamily: {
         pj:['"PIXymbols Very Loose W01 Reg"', 'sans-serif'],
+        inter: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
 
     },
