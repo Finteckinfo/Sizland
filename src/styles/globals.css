@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: "Helvetica Neue LT Pro 97 Black Condensed Oblique";
+  src: url("https://db.onlinewebfonts.com/t/2b8731b2f012e4c90641886f0bb0db86.eot");
+  src: url("https://db.onlinewebfonts.com/t/2b8731b2f012e4c90641886f0bb0db86.eot?#iefix") format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/2b8731b2f012e4c90641886f0bb0db86.woff2") format("woff2"),
+    url("https://db.onlinewebfonts.com/t/2b8731b2f012e4c90641886f0bb0db86.woff") format("woff"),
+    url("https://db.onlinewebfonts.com/t/2b8731b2f012e4c90641886f0bb0db86.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
   font-family: "PIXymbols Very Loose W01 Reg";
   src: url("https://db.onlinewebfonts.com/t/6da23fec9663ee7743fe666a6ae8800e.eot");
   src: url("https://db.onlinewebfonts.com/t/6da23fec9663ee7743fe666a6ae8800e.eot?#iefix")format("embedded-opentype"),

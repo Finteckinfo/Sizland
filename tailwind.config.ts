@@ -54,6 +54,7 @@ module.exports = {
       fontFamily: {
         pj:['"PIXymbols Very Loose W01 Reg"', 'sans-serif'],
         inter: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        'helvetica-97-condensed-oblique': ['"Helvetica Neue LT Pro 97 Black Condensed Oblique"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
       },
 
     },

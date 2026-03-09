@@ -135,10 +135,6 @@ export const Navbar: React.FC = () => {
       href: "/whitepaper",
     },
     {
-      label: "Infrastructure",
-      href: "/infrastructure",
-    },
-    {
       label: "Blog",
       href: "/blog",
     },
