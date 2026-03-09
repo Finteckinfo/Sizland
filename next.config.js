@@ -6,14 +6,18 @@ const webpack = require('webpack');
 const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcrypt'],
   async rewrites() {
-    return [
-      // Subdomain solutions.siz.land root only → /solutions (api paths excluded - handled by middleware)
-      {
-        source: '/',
-        destination: '/solutions',
-        has: [{ type: 'host', value: 'solutions.siz.land' }],
-      },
-    ];
+    return {
+      // beforeFiles runs BEFORE filesystem - required so root / doesn't match index first
+      beforeFiles: [
+        {
+          source: '/',
+          destination: '/solutions',
+          has: [{ type: 'host', value: 'solutions.siz.land' }],
+        },
+      ],
+      // Subpaths on solutions.siz.land (exclude /api via middleware - no catch-all here to avoid breaking APIs)
+      afterFiles: [],
+    };
   },
   webpack: (config) => {
     config.externals.push({

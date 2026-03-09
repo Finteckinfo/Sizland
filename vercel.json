@@ -14,6 +14,18 @@
       "destination": "https://solutions.siz.land/:path*",
       "permanent": true,
       "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/solutions",
+      "destination": "https://solutions.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
+    },
+    {
+      "source": "/solutions/:path*",
+      "destination": "https://solutions.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
     }
   ],
   "rewrites": [
