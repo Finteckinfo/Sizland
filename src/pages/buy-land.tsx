@@ -49,7 +49,10 @@ export default function BuyLandPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/auth-choice?callbackUrl=/buy-land');
+      const callback = typeof window !== 'undefined' && window.location.hostname === 'buy.siz.land'
+        ? 'https://buy.siz.land'
+        : 'https://siz.land/buy-land';
+      router.replace(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
     if (status === 'authenticated') {

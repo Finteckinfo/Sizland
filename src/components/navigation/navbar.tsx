@@ -126,23 +126,17 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const isSolutionsPage = router.pathname === '/solutions';
+  const isBuyLandPage = router.pathname === '/buy-land';
+  const isSubdomainPage = isSolutionsPage || isBuyLandPage;
   const navItems = [
-    {
-      label: "Siz",
-      href: "#hero",
-    },
-    // Hide Whitepaper, Blog, Wallet on solutions subdomain page
-    ...(!isSolutionsPage ? [
-      { label: "Buy Land", href: "/buy-land" },
+    { label: "Siz", href: "#hero" },
+    // Hide Whitepaper, Blog, Wallet, New Wallet on subdomain pages (solutions, buy-land)
+    ...(!isSubdomainPage ? [
       { label: "Whitepaper", href: "/whitepaper" },
       { label: "Blog", href: "/blog" },
       { label: "Wallet", href: "/wallet" },
+      ...(hasGeneratedWallet ? [{ label: "New Wallet", href: "/new-wallet" }] : []),
     ] : []),
-    // Conditionally add New Wallet link
-    ...(hasGeneratedWallet ? [{
-      label: "New Wallet",
-      href: "/new-wallet",
-    }] : []),
   ];
 
   return (

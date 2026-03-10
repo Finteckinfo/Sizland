@@ -35,11 +35,31 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || request.nextUrl.hostname
   const hostname = request.nextUrl.hostname
 
-  // siz.land or www.siz.land /solutions → redirect to solutions.siz.land (only subdomain has the page)
+  // siz.land or www.siz.land /solutions → redirect to solutions.siz.land
   const isMainDomain = host === 'siz.land' || host === 'www.siz.land' || host?.startsWith('siz.land:') || host?.startsWith('www.siz.land:');
   if (isMainDomain && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
     const url = new URL(pathname, 'https://solutions.siz.land')
     return NextResponse.redirect(url.toString(), 308)
+  }
+
+  // siz.land or www.siz.land /buy-land → redirect to buy.siz.land
+  if (isMainDomain && (pathname === '/buy-land' || pathname.startsWith('/buy-land/'))) {
+    const url = new URL(pathname, 'https://buy.siz.land')
+    return NextResponse.redirect(url.toString(), 308)
+  }
+
+  // buy.siz.land: ONLY root / shows buy-land; all other paths redirect to main domain
+  if (host === 'buy.siz.land' || host?.startsWith('buy.siz.land:')) {
+    if (pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+      return NextResponse.next()
+    }
+    if (pathname === '/' || pathname === '/buy-land') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/buy-land'
+      return NextResponse.rewrite(url)
+    }
+    const mainUrl = new URL(pathname + request.nextUrl.search, 'https://siz.land')
+    return NextResponse.redirect(mainUrl.toString(), 302)
   }
 
   // solutions.siz.land: ONLY root / shows solutions; all other paths redirect to main domain

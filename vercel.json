@@ -26,6 +26,30 @@
       "destination": "https://solutions.siz.land/:path*",
       "permanent": true,
       "has": [{ "type": "host", "value": "www.siz.land" }]
+    },
+    {
+      "source": "/buy-land",
+      "destination": "https://buy.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/buy-land/:path*",
+      "destination": "https://buy.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/buy-land",
+      "destination": "https://buy.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
+    },
+    {
+      "source": "/buy-land/:path*",
+      "destination": "https://buy.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
     }
   ],
   "rewrites": [
@@ -33,6 +57,11 @@
       "source": "/",
       "destination": "/solutions",
       "has": [{ "type": "host", "value": "solutions.siz.land" }]
+    },
+    {
+      "source": "/",
+      "destination": "/buy-land",
+      "has": [{ "type": "host", "value": "buy.siz.land" }]
     }
   ]
 }
