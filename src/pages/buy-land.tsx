@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { useWallet } from '@txnlab/use-wallet-react';
 import Link from 'next/link';
 import { PageLayout } from '@/components/page-layout';
-import { Loader2, Check, X, MapPin } from 'lucide-react';
+import { Loader2, Check, X, MapPin, Shield, Search, FileCheck, Wallet, FileText } from 'lucide-react';
 import Image from 'next/image';
 import AuroraText from '@/components/ui/aurora-text';
 
@@ -21,6 +21,10 @@ const STEPS: { key: Step; label: string }[] = [
 ];
 
 const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
+
+const scrollToForm = () => {
+  document.getElementById('land-request-form')?.scrollIntoView({ behavior: 'smooth' });
+};
 
 export default function BuyLandPage() {
   const router = useRouter();
@@ -48,10 +52,6 @@ export default function BuyLandPage() {
   }, []);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.replace('/auth-choice?callbackUrl=/buy-land');
-      return;
-    }
     if (status === 'authenticated') {
       setCurrentStep('CONNECT_WALLET');
       fetchProgress();
@@ -144,42 +144,179 @@ export default function BuyLandPage() {
     fetchProgress();
   };
 
-  if (!mounted || status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-      </div>
-    );
-  }
-
-  if (status === 'unauthenticated') return null;
+  if (!mounted) return null;
 
   const cardClass = isDark
     ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
     : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]';
 
+  const handleStartLandRequest = () => {
+    if (status === 'unauthenticated') {
+      const callback = typeof window !== 'undefined' && window.location.hostname === 'buy.siz.land'
+        ? 'https://buy.siz.land'
+        : 'https://siz.land/buy-land';
+      router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
+      return;
+    }
+    scrollToForm();
+  };
+
   return (
     <PageLayout
-      title="Buy Land - Sizland"
-      description="Buy verified land in Kenya without being on the ground"
+      title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
+      description="Blockchain-secured land acquisition with full legal due diligence, notary mediated escrow protection, and seamless fiat conversion."
       requireAuth={false}
     >
-      <div className="min-h-screen w-full py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
+      <div className="w-full">
+        {/* Hero Section */}
+        <section className="relative min-h-[70vh] flex items-center overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/pictureinaddedherosection.jpg"
+              alt="Sizland Land Investment"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+              Invest in Kenyan Land From Anywhere in Europe
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+              Blockchain-secured land acquisition with full legal due diligence,{' '}
+              <span className="text-emerald-400 font-medium">notary mediated escrow</span>, and seamless fiat conversion
+              handled by our Kenya-based team.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={handleStartLandRequest}
+                className="px-8 py-4 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+              >
+                Start a Land Request
+              </button>
+              <button
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-4 rounded-lg font-bold text-white border-2 border-white/80 hover:bg-white/10 transition-colors"
+              >
+                How It Works
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Feature Cards */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="rounded-2xl p-8 bg-emerald-500 text-white">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                <Check className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Legal Due Diligence</h3>
+              <p className="text-emerald-50">
+                Local experts undertake legal search, site visits, and obtain comprehensive reports before you commit.
+              </p>
+            </div>
+            <div className={`rounded-2xl p-8 ${isDark ? 'bg-gray-800' : 'bg-gray-100'} ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+                <Shield className="w-7 h-7 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Notary Mediated Escrow Protected</h3>
+              <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
+                Sizland uses a notary mediated escrow system. Your funds remain secure—initial legal checks completed.
+                Only $200 deposit for initial due diligence.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-4 dark:text-white">How It Works</h2>
+            <p className="text-center max-w-2xl mx-auto mb-12 dark:text-gray-400">
+              From initial inquiry to complete ownership, each feature is designed to make decentralized land acquisition simple, fast, and powerful.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[
+                { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your budget, land size, and intended use. Our team sources verified plots that match your criteria.', highlight: false },
+                { icon: FileCheck, title: 'Review & Due Diligence', desc: 'Funded by us for legal checks. A licensed surveyor conducts industry searches and on-ground site visits.', highlight: true },
+                { icon: Wallet, title: 'Secure the Purchase', desc: 'Once approved, funds are released from our notary mediated escrow. Payment, statutory fees, and document custody handled.', highlight: false },
+                { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track documents at the Kenyan Land Registry. Once issued, the title is securely shipped to your address.', highlight: false },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className={`rounded-2xl p-6 ${item.highlight ? 'bg-emerald-500 text-white' : isDark ? 'bg-gray-800' : 'bg-gray-100'} ${!item.highlight && (isDark ? 'text-white' : 'text-gray-900')}`}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${item.highlight ? 'bg-white/20' : 'bg-emerald-500/20'}`}>
+                      <Icon className={`w-6 h-6 ${item.highlight ? 'text-white' : 'text-emerald-500'}`} />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                    <p className={item.highlight ? 'text-emerald-50' : isDark ? 'text-gray-300' : 'text-gray-600'}>{item.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* We Remove the Risk */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold mb-6 dark:text-white">
+                We Remove the Risk from Remote Land Buying
+              </h2>
+              <ul className="space-y-4">
+                {['Safe delivery of assets', 'Sizland acts as the single trusted counterparty', 'All documents held in notary mediated legal escrow', 'Every step visible in your dashboard', 'Entire acquisition done institutionally'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 dark:text-gray-200">
+                    <Check className="w-6 h-6 text-emerald-500 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="w-full max-w-md aspect-square rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center">
+                <span className="text-4xl font-bold text-emerald-500/50">Sizland ERP</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Form Section */}
+        <section id="land-request-form" className="py-16 px-4 sm:px-6 lg:px-8 scroll-mt-20">
+          <div className="max-w-4xl mx-auto">
+            {status === 'loading' ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+              </div>
+            ) : status === 'unauthenticated' ? (
+              <div className={`p-12 rounded-2xl text-center border ${cardClass}`}>
+                <h2 className="text-2xl font-bold mb-4 dark:text-white">Start Your Land Request</h2>
+                <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Sign in to create your land acquisition request and get started.
+                </p>
+                <button
+                  onClick={handleStartLandRequest}
+                  className="px-8 py-4 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600"
+                >
+                  Sign In to Start
+                </button>
+              </div>
+            ) : (
+              <>
+          {/* Form Header */}
           <div className="mb-10">
-            <Link
-              href="/lobby"
-              className={`inline-flex items-center text-sm mb-6 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              ← Back
-            </Link>
-            <h1
+            <h2
               className={`text-4xl sm:text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
             >
               Buy verified land in Kenya{' '}
               <AuroraText className="inline">without being on the ground.</AuroraText>
-            </h1>
+            </h2>
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Complete the steps below to start your land acquisition journey.
             </p>
@@ -506,7 +643,10 @@ export default function BuyLandPage() {
               </div>
             )}
           </div>
-        </div>
+              </>
+            )}
+          </div>
+        </section>
       </div>
     </PageLayout>
   );

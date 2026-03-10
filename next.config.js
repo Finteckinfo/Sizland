@@ -14,6 +14,11 @@ const nextConfig = {
           destination: '/solutions',
           has: [{ type: 'host', value: 'solutions.siz.land' }],
         },
+        {
+          source: '/',
+          destination: '/buy-land',
+          has: [{ type: 'host', value: 'buy.siz.land' }],
+        },
       ],
       // Subpaths on solutions.siz.land (exclude /api via middleware - no catch-all here to avoid breaking APIs)
       afterFiles: [],
