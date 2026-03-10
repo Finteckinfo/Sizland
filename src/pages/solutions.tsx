@@ -178,7 +178,7 @@ const SolutionsPage: NextPage = () => {
                     src="/firstimage.png"
                     alt="Sizland solutions - futuristic digital economy infrastructure"
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                   />
                 </div>
