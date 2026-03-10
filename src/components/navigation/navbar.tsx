@@ -133,6 +133,7 @@ export const Navbar: React.FC = () => {
     },
     // Hide Whitepaper, Blog, Wallet on solutions subdomain page
     ...(!isSolutionsPage ? [
+      { label: "Buy Land", href: "/buy-land" },
       { label: "Whitepaper", href: "/whitepaper" },
       { label: "Blog", href: "/blog" },
       { label: "Wallet", href: "/wallet" },
