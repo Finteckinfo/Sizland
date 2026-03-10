@@ -125,23 +125,18 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
+  const isSolutionsPage = router.pathname === '/solutions';
   const navItems = [
     {
       label: "Siz",
       href: "#hero",
     },
-    {
-      label: "Whitepaper",
-      href: "/whitepaper",
-    },
-    {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "Wallet",
-      href: "/wallet",
-    },
+    // Hide Whitepaper, Blog, Wallet on solutions subdomain page
+    ...(!isSolutionsPage ? [
+      { label: "Whitepaper", href: "/whitepaper" },
+      { label: "Blog", href: "/blog" },
+      { label: "Wallet", href: "/wallet" },
+    ] : []),
     // Conditionally add New Wallet link
     ...(hasGeneratedWallet ? [{
       label: "New Wallet",
@@ -171,9 +166,9 @@ export const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Center Section - Brand title (keep existing animation, just centered) */}
+        {/* Center Section - Brand title - always links to main domain */}
         <div className="flex-shrink-0 flex justify-center px-6 scale-[0.9] origin-center">
-          <Link href="/" className="flex items-center justify-center">
+          <Link href="https://siz.land" className="flex items-center justify-center">
             <button className="button1" data-text="Awesome">
               <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
               <span aria-hidden="true" className="hover-text1 font-pj">
@@ -220,7 +215,7 @@ export const Navbar: React.FC = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => router.push("/auth-choice")}>
+                <Button variant="outline" size="sm" onClick={() => window.location.href = "https://siz.land/auth-choice"}>
                   Sign In
                 </Button>
               )}
@@ -231,8 +226,8 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Layout */}
       <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-hidden min-w-0">
-        {/* Mobile Logo */}
-        <Link href="/" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
+        {/* Mobile Logo - always links to main domain */}
+        <Link href="https://siz.land" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
           <Image
             src="/logo1.png"
             alt="Sizland Logo"
@@ -288,7 +283,7 @@ export const Navbar: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="shrink-0 max-w-[110px] px-3 text-sm"
-                  onClick={() => router.push("/auth-choice")}
+                  onClick={() => window.location.href = "https://siz.land/auth-choice"}
                 >
                   Sign In
                 </Button>
