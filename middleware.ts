@@ -42,13 +42,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url.toString(), 308)
   }
 
-  // solutions.siz.land → rewrite to /solutions page (exclude /api, /_next, static files)
+  // solutions.siz.land: ONLY root / shows solutions; all other paths redirect to main domain
   if (host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:')) {
-    if (!pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+    if (pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+      return NextResponse.next()
+    }
+    if (pathname === '/' || pathname === '/solutions') {
       const url = request.nextUrl.clone()
       url.pathname = '/solutions'
       return NextResponse.rewrite(url)
     }
+    // Any other path on subdomain → redirect to main domain (e.g. /whitepaper → siz.land/whitepaper)
+    const mainUrl = new URL(pathname + request.nextUrl.search, 'https://siz.land')
+    return NextResponse.redirect(mainUrl.toString(), 302)
   }
 
   // Allow all public routes
