@@ -1,0 +1,513 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useTheme } from 'next-themes';
+import { useWallet } from '@txnlab/use-wallet-react';
+import Link from 'next/link';
+import { PageLayout } from '@/components/page-layout';
+import { Loader2, Check, X, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import AuroraText from '@/components/ui/aurora-text';
+
+type Step = 'LOGIN' | 'CONNECT_WALLET' | 'CREATE_REQUEST' | 'CONFIRMATION';
+
+const STEPS: { key: Step; label: string }[] = [
+  { key: 'LOGIN', label: 'Login' },
+  { key: 'CONNECT_WALLET', label: 'Connect Wallet' },
+  { key: 'CREATE_REQUEST', label: 'Create Request' },
+  { key: 'CONFIRMATION', label: 'Confirmation' },
+];
+
+const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
+
+export default function BuyLandPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { resolvedTheme: theme } = useTheme();
+  const { activeAccount } = useWallet();
+
+  const [mounted, setMounted] = useState(false);
+  const [currentStep, setCurrentStep] = useState<Step>('LOGIN');
+  const [request, setRequest] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [walletAddress, setWalletAddress] = useState('');
+  const [budget, setBudget] = useState('');
+  const [sizeCurve, setSizeCurve] = useState('');
+  const [purpose, setPurpose] = useState('');
+  const [plotReference, setPlotReference] = useState('N/A');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [selectedPlotId, setSelectedPlotId] = useState<string | null>(null);
+
+  const isDark = theme === 'dark';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/auth-choice?callbackUrl=/buy-land');
+      return;
+    }
+    if (status === 'authenticated') {
+      setCurrentStep('CONNECT_WALLET');
+      fetchProgress();
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (activeAccount?.address) {
+      setWalletAddress(activeAccount.address);
+    }
+  }, [activeAccount]);
+
+  const fetchProgress = async () => {
+    try {
+      const res = await fetch('/api/land/progress', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setRequest(data.request);
+        if (data.request?.currentStep) {
+          setCurrentStep(data.request.currentStep);
+        }
+        // If no request, currentStep stays CONNECT_WALLET (set when authenticated)
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const api = async (path: string, init?: RequestInit) => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/land/${path}`, {
+        ...init,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...init?.headers },
+        body: init?.body ?? (init?.method !== 'GET' ? undefined : undefined),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    } catch (e: any) {
+      setError(e.message || 'Something went wrong');
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConnectWallet = async () => {
+    const addr = walletAddress.trim() || activeAccount?.address;
+    if (!addr) {
+      setError('Please connect your wallet or enter an address');
+      return;
+    }
+    const data = await api('connect-wallet', {
+      method: 'PATCH',
+      body: JSON.stringify({ walletAddress: addr }),
+    });
+    setRequest(data.request);
+    setCurrentStep('CREATE_REQUEST');
+  };
+
+  const handleCreateRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!termsAccepted) {
+      setError('Please accept the Terms and Conditions');
+      return;
+    }
+    const data = await api('create-request', {
+      method: 'POST',
+      body: JSON.stringify({
+        walletAddress: request?.walletAddress || walletAddress.trim() || activeAccount?.address,
+        budget: parseFloat(budget) || 0,
+        sizeCurve: sizeCurve || '1 Acre',
+        purpose: purpose || 'Farming',
+        plotReference: plotReference || 'N/A',
+      }),
+    });
+    setRequest(data.request);
+    setCurrentStep('CONFIRMATION');
+  };
+
+  const handleSelectPlot = async () => {
+    if (!selectedPlotId || !request?.id) return;
+    await api('select-plot', {
+      method: 'POST',
+      body: JSON.stringify({ requestId: request.id, plotId: selectedPlotId }),
+    });
+    fetchProgress();
+  };
+
+  if (!mounted || status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') return null;
+
+  const cardClass = isDark
+    ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
+    : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]';
+
+  return (
+    <PageLayout
+      title="Buy Land - Sizland"
+      description="Buy verified land in Kenya without being on the ground"
+      requireAuth={false}
+    >
+      <div className="min-h-screen w-full py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-10">
+            <Link
+              href="/lobby"
+              className={`inline-flex items-center text-sm mb-6 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              ← Back
+            </Link>
+            <h1
+              className={`text-4xl sm:text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+            >
+              Buy verified land in Kenya{' '}
+              <AuroraText className="inline">without being on the ground.</AuroraText>
+            </h1>
+            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Complete the steps below to start your land acquisition journey.
+            </p>
+          </div>
+
+          {/* Stepper */}
+          <div className="flex items-center justify-between gap-2 mb-12">
+            {STEPS.map((s, i) => {
+              const idx = STEPS.findIndex((x) => x.key === currentStep);
+              const done = i < idx;
+              const active = i === idx;
+              return (
+                <div key={s.key} className="flex items-center flex-1">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                      done
+                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                        : active
+                          ? 'border-emerald-500 text-emerald-500'
+                          : 'border-gray-400 text-gray-400'
+                    }`}
+                  >
+                    {done ? <Check className="w-5 h-5" /> : i + 1}
+                  </div>
+                  <span
+                    className={`ml-2 text-sm font-medium hidden sm:inline ${
+                      active ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : isDark ? 'text-gray-500' : 'text-gray-400'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                  {i < STEPS.length - 1 && (
+                    <div
+                      className={`flex-1 h-0.5 mx-2 ${i < idx ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Step content */}
+          <div className={`p-8 rounded-2xl shadow-xl border ${cardClass}`}>
+            {error && (
+              <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
+
+            {/* Step 2: Connect Wallet */}
+            {currentStep === 'CONNECT_WALLET' && (
+              <div>
+                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Connect Wallet
+                </h2>
+                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Connect your wallet seamlessly.
+                </p>
+                <div className="space-y-4">
+                  <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                    Wallet Address
+                  </label>
+                  <input
+                    type="text"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    placeholder="0x..."
+                    className={`w-full px-4 py-3 rounded-xl border ${
+                      isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
+                    }`}
+                  />
+                  <button
+                    onClick={handleConnectWallet}
+                    disabled={loading || !walletAddress.trim()}
+                    className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Connect Wallet'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Create Request */}
+            {currentStep === 'CREATE_REQUEST' && (
+              <form onSubmit={handleCreateRequest}>
+                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Create Request
+                </h2>
+                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Tell us more about your land needs.
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Budget
+                    </label>
+                    <input
+                      type="text"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      placeholder="$100,000"
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Size
+                    </label>
+                    <input
+                      type="text"
+                      value={sizeCurve}
+                      onChange={(e) => setSizeCurve(e.target.value)}
+                      placeholder="1 Acre"
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Purpose
+                    </label>
+                    <select
+                      value={purpose}
+                      onChange={(e) => setPurpose(e.target.value)}
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
+                      }`}
+                    >
+                      <option value="">Select purpose</option>
+                      {PURPOSE_OPTIONS.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Plot Reference (optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={plotReference}
+                      onChange={(e) => setPlotReference(e.target.value)}
+                      placeholder="N/A"
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
+                      }`}
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="rounded border-gray-300 text-emerald-500"
+                    />
+                    <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>
+                      I agree to the Terms and Conditions.
+                    </span>
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={loading || !purpose}
+                    className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Submit'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Step 4: Confirmation */}
+            {currentStep === 'CONFIRMATION' && request && (
+              <div>
+                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Confirmation
+                </h2>
+                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Your request has been successfully created. We&apos;ll be in touch shortly.
+                </p>
+
+                <div className="space-y-6">
+                  <div>
+                    <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                      Request Summary
+                    </h3>
+                    <div className={`rounded-lg p-4 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Wallet</span>
+                          <span className={isDark ? 'text-white' : 'text-gray-900'}>
+                            {request.walletAddress
+                              ? `${request.walletAddress.slice(0, 6)}...${request.walletAddress.slice(-4)}`
+                              : '—'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Budget</span>
+                          <span className={isDark ? 'text-white' : 'text-gray-900'}>
+                            ${request.budget?.toLocaleString() ?? '—'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Size</span>
+                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.sizeCurve ?? '—'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Purpose</span>
+                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.purpose ?? '—'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Plot Ref</span>
+                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.plotReference ?? 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                      Your Confirmation
+                    </h3>
+                    <ul className="space-y-2 text-sm">
+                      {[
+                        { label: 'Request created', done: true },
+                        { label: 'Plot found', done: request.status === 'PLOT_FOUND' || request.plots?.length > 0 },
+                        { label: 'Escrow created', done: !!request.escrowId },
+                        { label: 'Due diligence', done: request.status === 'DUE_DILIGENCE' },
+                        { label: 'Ownership transfer', done: request.status === 'REGISTRY_TRANSFER' || request.status === 'COMPLETED' },
+                      ].map((item) => (
+                        <li key={item.label} className="flex items-center gap-2">
+                          {item.done ? (
+                            <Check className="w-5 h-5 text-emerald-500" />
+                          ) : (
+                            <X className="w-5 h-5 text-gray-400" />
+                          )}
+                          <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>{item.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Choose Your Plot - when plots exist */}
+                  {request.plots?.length > 0 && (
+                    <div>
+                      <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Choose Your Plot
+                      </h3>
+                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Verified plots sourced by Sizland. Select one to proceed.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {request.plots.map((plot: any) => (
+                          <button
+                            key={plot.id}
+                            type="button"
+                            onClick={() => setSelectedPlotId(plot.id)}
+                            className={`text-left rounded-xl border-2 p-4 transition-all ${
+                              selectedPlotId === plot.id
+                                ? 'border-emerald-500 ring-2 ring-emerald-500/30'
+                                : isDark
+                                  ? 'border-gray-600 hover:border-gray-500'
+                                  : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800">
+                              {plot.images?.[0]?.url ? (
+                                <Image
+                                  src={plot.images[0].url}
+                                  alt={plot.name}
+                                  width={200}
+                                  height={120}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-500">
+                                  <MapPin className="w-8 h-8" />
+                                </div>
+                              )}
+                            </div>
+                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {plot.name}
+                            </p>
+                            <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              <MapPin className="w-3 h-3" />
+                              {plot.fullAddress}
+                            </p>
+                            {plot.escrowAmount && (
+                              <p className="text-sm font-medium text-emerald-500 mt-2">
+                                ${plot.escrowAmount.toLocaleString()}
+                              </p>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={handleSelectPlot}
+                        disabled={!selectedPlotId || loading}
+                        className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                        ) : (
+                          `Fund Escrow for Selected Plot ${selectedPlotId
+                            ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})`
+                            : ''
+                          }`
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => router.push('/lobby')}
+                    className="w-full py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+}
