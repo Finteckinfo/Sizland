@@ -8,6 +8,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -51,18 +52,32 @@ const auditBlocks = [
   },
 ];
 
+// Subdomain page: canonical and assets use solutions.siz.land
+const MAIN_DOMAIN = "https://siz.land";
+const WHATSAPP_CONTACT = "https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL";
+
 const SEO = {
+  baseUrl: "https://solutions.siz.land",
   title: "Solutions - Sizland | Digital Economy Infrastructure & Blockchain ERP",
+  // Search-friendly alternate titles for discoverability
+  alternateNames: [
+    "Sizland Solutions | Digital Economy Infrastructure Kenya",
+    "Blockchain ERP Solutions | Sizland Enterprise Infrastructure",
+    "DeFi Infrastructure | Token-Based Access & Automation",
+  ],
   description: "Deploy scalable, secure infrastructure for the next generation of digital economies. Sizland Solutions offers economy infrastructure, growth architecture, treasury systems, and automation—audited, resilient, and ready for integration.",
-  keywords: "Sizland solutions, digital economy infrastructure, blockchain ERP, token-based access, multi-signature vaults, DeFi infrastructure, SME automation, enterprise blockchain, Algorand, decentralized finance",
-  canonical: "/solutions",
-  ogImage: "https://www.siz.land/firstimage.png",
+  keywords: "Sizland solutions, digital economy infrastructure, blockchain ERP, token-based access, multi-signature vaults, DeFi infrastructure, SME automation, enterprise blockchain, Algorand, decentralized finance, Kenya blockchain, digital economy Kenya",
+  ogImage: "https://solutions.siz.land/SEOimage.png",
+  ogImageAlt: "Sizland Solutions - Digital economy infrastructure and blockchain ERP platform",
+  subject: "Digital Economy Infrastructure, Blockchain ERP, DeFi Solutions, Enterprise Automation",
 };
 
 const SolutionsPage: NextPage = () => {
   const { resolvedTheme: theme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const isDark = theme === "dark";
+  const isLoggedIn = !!session?.user;
 
   useEffect(() => {
     setMounted(true);
@@ -79,31 +94,67 @@ const SolutionsPage: NextPage = () => {
     "@type": "WebPage",
     name: SEO.title,
     description: SEO.description,
-    url: `https://www.siz.land${SEO.canonical}`,
+    url: SEO.baseUrl,
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://siz.land" },
+        { "@type": "ListItem", position: 2, name: "Solutions", item: SEO.baseUrl },
+      ],
+    },
+    inLanguage: "en-KE",
     publisher: {
       "@type": "Organization",
       name: "Sizland Solutions",
-      url: "https://www.siz.land",
+      url: "https://siz.land",
+      areaServed: { "@type": "Country", name: "Kenya" },
+      logo: {
+        "@type": "ImageObject",
+        url: "https://siz.land/logo1.png",
+      },
     },
     mainEntity: {
       "@type": "SoftwareApplication",
       name: "Sizland Solutions",
+      alternateName: SEO.alternateNames,
       applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
       offers: {
         "@type": "Offer",
         price: "0",
         priceCurrency: "USD",
       },
+      featureList: [
+        "Economy Infrastructure",
+        "Growth Architecture",
+        "Treasury & Reputation",
+        "System Automation",
+      ],
     },
   };
 
   return (
     <>
-      {/* SEO: Keywords, canonical, robots, JSON-LD (PageLayout handles title/description/OG) */}
+      {/* SEO: Subdomain-specific - canonical, OG, Twitter, JSON-LD */}
       <Head>
         <meta name="keywords" content={SEO.keywords} />
-        <link rel="canonical" href={`https://www.siz.land${SEO.canonical}`} />
+        <link rel="canonical" href={SEO.baseUrl} />
         <meta name="robots" content="index, follow" />
+        <meta name="author" content="Sizland" />
+        <meta property="og:image:alt" content={SEO.ogImageAlt} />
+        <meta name="twitter:image:alt" content={SEO.ogImageAlt} />
+        <meta property="og:image:secure_url" content={SEO.ogImage} />
+        <meta property="og:image:type" content="image/png" />
+        <meta name="geo.region" content="KE" />
+        <meta name="geo.placename" content="Kenya" />
+        <meta name="ICBM" content="-1.2921, 36.8219" />
+        <meta name="DC.title" content={SEO.title} />
+        <meta name="subject" content={SEO.subject} />
+        <meta name="topic" content={SEO.subject} />
+        <meta name="classification" content="Business, Technology, Blockchain" />
+        <meta name="distribution" content="global" />
+        <meta name="target" content="all" />
+        <meta name="application-name" content="Sizland Solutions" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -113,7 +164,7 @@ const SolutionsPage: NextPage = () => {
       <PageLayout
         title={SEO.title}
         description={SEO.description}
-        url={`https://www.siz.land${SEO.canonical}`}
+        url={SEO.baseUrl}
         image={SEO.ogImage}
         requireAuth={false}
         setSocialMetadata={true}
@@ -154,18 +205,20 @@ const SolutionsPage: NextPage = () => {
 
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link
-                      href="/auth-choice"
+                      href={`${MAIN_DOMAIN}/auth-choice`}
                       className="inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
+                      aria-label="Initialize deployment - sign in or create account"
                     >
                       INITIALIZE DEPLOYMENT
                     </Link>
                     <Link
-                      href="/whitepaper"
+                      href={`${MAIN_DOMAIN}/whitepaper`}
                       className={`inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-bold rounded-full transition-all duration-200 ${
                         isDark
                           ? "text-gray-200 border border-emerald-500/40 hover:bg-emerald-500/10"
                           : "text-gray-800 border border-emerald-600/50 hover:bg-emerald-50"
                       }`}
+                      aria-label="Read Sizland whitepaper"
                     >
                       Read Whitepaper
                       <Icons.ArrowRight className="w-4 h-4" />
@@ -380,22 +433,25 @@ const SolutionsPage: NextPage = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Link
-                    href="/auth-choice"
+                    href={isLoggedIn ? WHATSAPP_CONTACT : `${MAIN_DOMAIN}/auth-choice`}
                     className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                       isDark
                         ? "bg-[#00E07A] text-[#E6FFF2] hover:bg-[#00c96a]"
                         : "bg-emerald-500 text-white hover:bg-emerald-600"
                     }`}
+                    aria-label={isLoggedIn ? "Contact architects via WhatsApp" : "Contact architects - sign in or create account"}
+                    {...(isLoggedIn && { target: "_blank", rel: "noopener noreferrer" })}
                   >
                     CONTACT ARCHITECTS
                   </Link>
                   <Link
-                    href="/whitepaper"
+                    href={`${MAIN_DOMAIN}/whitepaper`}
                     className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all border ${
                       isDark
                         ? "border-[#00E07A] text-[#E6FFF2] hover:bg-white/5"
                         : "border-emerald-600 text-[#0B1F16] hover:bg-emerald-50"
                     }`}
+                    aria-label="Request architecture documentation - view whitepaper"
                   >
                     REQUEST ARCHITECTURE DOCS
                   </Link>
