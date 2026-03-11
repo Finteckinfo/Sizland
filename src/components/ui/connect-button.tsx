@@ -292,7 +292,7 @@ export const ConnectWalletButton = () => {
 
   return (
     <>
-      <div className="wallet-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
+      <div className="wallet-dropdown-container" ref={dropdownRef} style={{ position: 'relative', overflow: 'visible' }}>
         {!activeAccount ? (
           <>
             <Button1 onClick={() => setIsOpen(!isOpen)}>Connect Wallet</Button1>
@@ -304,7 +304,7 @@ export const ConnectWalletButton = () => {
                   position: 'absolute',
                   top: '100%',
                   right: 0,
-                  zIndex: 1000,
+                  zIndex: 9999,
                   marginTop: '0.5rem',
                   background: 'white',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -498,7 +498,7 @@ export const ConnectWalletButton = () => {
             )}
           </>
         ) : (
-          <div className="wallet-dropdown-container" ref={walletDropdownRef} style={{ position: 'relative' }}>
+          <div className="wallet-dropdown-container" ref={walletDropdownRef} style={{ position: 'relative', overflow: 'visible' }}>
             <Button
               variant="outline"
               onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
@@ -545,7 +545,7 @@ export const ConnectWalletButton = () => {
                   position: 'absolute',
                   top: '100%',
                   right: 0,
-                  zIndex: 1000,
+                  zIndex: 9999,
                   marginTop: '0.5rem',
                   background: 'white',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',

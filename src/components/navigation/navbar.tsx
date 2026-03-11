@@ -142,7 +142,7 @@ export const Navbar: React.FC = () => {
   return (
     <div className="fixed z-50 top-0 left-0 w-screen max-w-screen overflow-x-hidden flex justify-center px-2 sm:px-4 pt-4 sm:pt-6 box-border">
       {/* Desktop Layout - Pill-style center bar */}
-      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3 overflow-hidden">
+      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3 overflow-visible">
         {/* Left Section - Navigation pills (keep existing PillNav design) */}
         <div className="flex-1 flex justify-start items-center scale-[0.9] origin-left">
           <PillNav
@@ -174,7 +174,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Right Section - Theme + auth actions */}
-        <div className="flex-1 flex items-center justify-end gap-3 scale-[0.9] origin-right">
+        <div className="flex-1 flex items-center justify-end gap-3 scale-[0.9] origin-right overflow-visible">
           <ThemeToggler />
           {isLoaded && (
             <>
@@ -220,7 +220,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-hidden min-w-0">
+      <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-visible min-w-0">
         {/* Mobile Logo - always links to main domain */}
         <Link href="https://siz.land" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
           <Image
