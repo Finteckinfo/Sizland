@@ -421,11 +421,11 @@ export default function BuyLandPage() {
       requireAuth={false}
     >
       <div className="w-full">
-        {/* Hero Section - plain dark background, no image */}
-        <section className="relative min-h-[70vh] flex items-center bg-black dark:bg-[#0a0a0a]">
+        {/* Hero Section - no bg (layout provides it) */}
+        <section className="relative min-h-[70vh] flex items-center">
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Invest in Kenyan Land From Anywhere in Europe
+              Invest in Kenyan Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>
             <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
               Blockchain-secured land acquisition with full legal due diligence, escrow protection, and seamless fiat conversion
@@ -448,8 +448,8 @@ export default function BuyLandPage() {
           </div>
         </section>
 
-        {/* Feature Cards - matches design */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
+        {/* Feature Cards */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="rounded-2xl p-8 bg-emerald-500 text-white">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-4">
@@ -472,8 +472,8 @@ export default function BuyLandPage() {
           </div>
         </section>
 
-        {/* How It Works - matches design */}
-        <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
+        {/* How It Works */}
+        <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-4 text-white">How It Works</h2>
             <p className="text-center max-w-2xl mx-auto mb-12 text-gray-400">
@@ -505,7 +505,7 @@ export default function BuyLandPage() {
         </section>
 
         {/* We Remove the Risk - image LEFT, text RIGHT */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 w-full order-2 lg:order-1 flex justify-center lg:justify-start">
               <div className="w-full max-w-md aspect-square relative rounded-2xl overflow-hidden">
@@ -519,7 +519,7 @@ export default function BuyLandPage() {
             </div>
             <div className="flex-1 order-1 lg:order-2">
               <h2 className="text-3xl font-bold mb-4 text-white">
-                We Remove the Risk from Remote Land Buying
+                We Remove the Risk from <AuroraText className="inline">Remote Land Buying</AuroraText>
               </h2>
               <p className="text-gray-400 mb-6">
                 Buying land remotely feels risky when initial verification is weak. Sizland replaces uncertainty with a controlled legal process.
