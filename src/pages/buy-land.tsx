@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { useWallet } from '@txnlab/use-wallet-react';
-import Link from 'next/link';
 import { PageLayout } from '@/components/page-layout';
 import { Loader2, Check, X, MapPin, Shield, Search, FileCheck, Wallet, FileText } from 'lucide-react';
 import Image from 'next/image';
@@ -22,9 +21,6 @@ const STEPS: { key: Step; label: string }[] = [
 
 const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
 
-const scrollToForm = () => {
-  document.getElementById('land-request-form')?.scrollIntoView({ behavior: 'smooth' });
-};
 
 export default function BuyLandPage() {
   const router = useRouter();
@@ -44,6 +40,7 @@ export default function BuyLandPage() {
   const [plotReference, setPlotReference] = useState('N/A');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [selectedPlotId, setSelectedPlotId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const isDark = theme === 'dark';
 
@@ -150,6 +147,239 @@ export default function BuyLandPage() {
     ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
     : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]';
 
+  const renderFormContent = () => (
+    <>
+      <div className="mb-10">
+        <h2 className={`text-4xl sm:text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Buy verified land in Kenya{' '}
+          <AuroraText className="inline">without being on the ground.</AuroraText>
+        </h2>
+        <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          Complete the steps below to start your land acquisition journey.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 mb-12">
+        {STEPS.map((s, i) => {
+          const idx = STEPS.findIndex((x) => x.key === currentStep);
+          const done = i < idx;
+          const active = i === idx;
+          return (
+            <div key={s.key} className="flex items-center flex-1">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                  done ? 'bg-emerald-500 border-emerald-500 text-white'
+                    : active ? 'border-emerald-500 text-emerald-500'
+                      : 'border-gray-400 text-gray-400'
+                }`}
+              >
+                {done ? <Check className="w-5 h-5" /> : i + 1}
+              </div>
+              <span
+                className={`ml-2 text-sm font-medium hidden sm:inline ${
+                  active ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : isDark ? 'text-gray-500' : 'text-gray-400'
+                }`}
+              >
+                {s.label}
+              </span>
+              {i < STEPS.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-2 ${i < idx ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className={`p-8 rounded-2xl shadow-xl border ${cardClass}`}>
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+            {error}
+          </div>
+        )}
+
+        {currentStep === 'CONNECT_WALLET' && (
+          <div>
+            <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Connect Wallet</h2>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Connect your wallet seamlessly.</p>
+            <div className="space-y-4">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Wallet Address</label>
+              <input
+                type="text"
+                value={walletAddress}
+                onChange={(e) => setWalletAddress(e.target.value)}
+                placeholder="0x..."
+                className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+              />
+              <button
+                onClick={handleConnectWallet}
+                disabled={loading || !walletAddress.trim()}
+                className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Connect Wallet'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 'CREATE_REQUEST' && (
+          <form onSubmit={handleCreateRequest}>
+            <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Create Request</h2>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tell us more about your land needs.</p>
+            <div className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Budget</label>
+                <input
+                  type="text"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  placeholder="$100,000"
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Size</label>
+                <input
+                  type="text"
+                  value={sizeCurve}
+                  onChange={(e) => setSizeCurve(e.target.value)}
+                  placeholder="1 Acre"
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Purpose</label>
+                <select
+                  value={purpose}
+                  onChange={(e) => setPurpose(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                >
+                  <option value="">Select purpose</option>
+                  {PURPOSE_OPTIONS.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Plot Reference (optional)</label>
+                <input
+                  type="text"
+                  value={plotReference}
+                  onChange={(e) => setPlotReference(e.target.value)}
+                  placeholder="N/A"
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="rounded border-gray-300 text-emerald-500" />
+                <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>I agree to the Terms and Conditions.</span>
+              </label>
+              <button
+                type="submit"
+                disabled={loading || !purpose}
+                className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Submit'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {currentStep === 'CONFIRMATION' && request && (
+          <div>
+            <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Confirmation</h2>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Your request has been successfully created. We&apos;ll be in touch shortly.</p>
+            <div className="space-y-6">
+              <div>
+                <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Request Summary</h3>
+                <div className={`rounded-lg p-4 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Wallet</span>
+                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.walletAddress ? `${request.walletAddress.slice(0, 6)}...${request.walletAddress.slice(-4)}` : '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Budget</span>
+                      <span className={isDark ? 'text-white' : 'text-gray-900'}>${request.budget?.toLocaleString() ?? '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Size</span>
+                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.sizeCurve ?? '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Purpose</span>
+                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.purpose ?? '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Plot Ref</span>
+                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.plotReference ?? 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Your Confirmation</h3>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    { label: 'Request created', done: true },
+                    { label: 'Plot found', done: request.status === 'PLOT_FOUND' || request.plots?.length > 0 },
+                    { label: 'Escrow created', done: !!request.escrowId },
+                    { label: 'Due diligence', done: request.status === 'DUE_DILIGENCE' },
+                    { label: 'Ownership transfer', done: request.status === 'REGISTRY_TRANSFER' || request.status === 'COMPLETED' },
+                  ].map((item) => (
+                    <li key={item.label} className="flex items-center gap-2">
+                      {item.done ? <Check className="w-5 h-5 text-emerald-500" /> : <X className="w-5 h-5 text-gray-400" />}
+                      <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>{item.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {request.plots?.length > 0 && (
+                <div>
+                  <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Choose Your Plot</h3>
+                  <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Verified plots sourced by Sizland. Select one to proceed.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    {request.plots.map((plot: any) => (
+                      <button
+                        key={plot.id}
+                        type="button"
+                        onClick={() => setSelectedPlotId(plot.id)}
+                        className={`text-left rounded-xl border-2 p-4 transition-all ${selectedPlotId === plot.id ? 'border-emerald-500 ring-2 ring-emerald-500/30' : isDark ? 'border-gray-600 hover:border-gray-500' : 'border-gray-200 hover:border-gray-300'}`}
+                      >
+                        <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800">
+                          {plot.images?.[0]?.url ? (
+                            <Image src={plot.images[0].url} alt={plot.name} width={200} height={120} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-500"><MapPin className="w-8 h-8" /></div>
+                          )}
+                        </div>
+                        <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{plot.name}</p>
+                        <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}><MapPin className="w-3 h-3" />{plot.fullAddress}</p>
+                        {plot.escrowAmount && <p className="text-sm font-medium text-emerald-500 mt-2">${plot.escrowAmount.toLocaleString()}</p>}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleSelectPlot}
+                    disabled={!selectedPlotId || loading}
+                    className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Fund Escrow for Selected Plot ${selectedPlotId ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})` : ''}`}
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={() => router.push('/lobby')}
+                className="w-full py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   const handleStartLandRequest = () => {
     if (status === 'unauthenticated') {
       const callback = typeof window !== 'undefined' && window.location.hostname === 'buy.siz.land'
@@ -158,8 +388,31 @@ export default function BuyLandPage() {
       router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
-    scrollToForm();
+    setShowForm(true);
   };
+
+  // Form view: show only the form when user clicks "Start a Land Request"
+  if (showForm && status === 'authenticated') {
+    return (
+      <PageLayout
+        title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
+        description="Blockchain-secured land acquisition with full legal due diligence, notary mediated escrow protection, and seamless fiat conversion."
+        requireAuth={false}
+      >
+        <div className="w-full py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <button
+              onClick={() => setShowForm(false)}
+              className={`inline-flex items-center text-sm mb-6 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              ← Back to landing
+            </button>
+            {renderFormContent()}
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout
@@ -168,25 +421,14 @@ export default function BuyLandPage() {
       requireAuth={false}
     >
       <div className="w-full">
-        {/* Hero Section */}
-        <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/pictureinaddedherosection.jpg"
-              alt="Sizland Land Investment"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
+        {/* Hero Section - plain dark background, no image */}
+        <section className="relative min-h-[70vh] flex items-center bg-black dark:bg-[#0a0a0a]">
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
               Invest in Kenyan Land From Anywhere in Europe
             </h1>
             <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              Blockchain-secured land acquisition with full legal due diligence,{' '}
-              <span className="text-emerald-400 font-medium">notary mediated escrow</span>, and seamless fiat conversion
+              Blockchain-secured land acquisition with full legal due diligence, escrow protection, and seamless fiat conversion
               handled by our Kenya-based team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -200,14 +442,14 @@ export default function BuyLandPage() {
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                 className="px-8 py-4 rounded-lg font-bold text-white border-2 border-white/80 hover:bg-white/10 transition-colors"
               >
-                How It Works
+                How it Works
               </button>
             </div>
           </div>
         </section>
 
-        {/* Feature Cards */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        {/* Feature Cards - matches design */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="rounded-2xl p-8 bg-emerald-500 text-white">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-4">
@@ -215,47 +457,46 @@ export default function BuyLandPage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Legal Due Diligence</h3>
               <p className="text-emerald-50">
-                Local experts undertake legal search, site visits, and obtain comprehensive reports before you commit.
+                Local experts conduct legal searches, site visits, and deliver comprehensive reports before you commit.
               </p>
             </div>
-            <div className={`rounded-2xl p-8 ${isDark ? 'bg-gray-800' : 'bg-gray-100'} ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <div className="rounded-2xl p-8 bg-gray-800/80 border border-gray-700 text-white">
               <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
                 <Shield className="w-7 h-7 text-emerald-500" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Notary Mediated Escrow Protected</h3>
-              <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-                Sizland uses a notary mediated escrow system. Your funds remain secure—initial legal checks completed.
-                Only $200 deposit for initial due diligence.
+              <h3 className="text-xl font-bold mb-2">Escrow Protected</h3>
+              <p className="text-gray-300">
+                Your funds remain in escrow with a trusted legal custodian. Only $2,000 reserved for initial due diligence.
               </p>
             </div>
           </div>
         </section>
 
-        {/* How It Works */}
-        <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8">
+        {/* How It Works - matches design */}
+        <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4 dark:text-white">How It Works</h2>
-            <p className="text-center max-w-2xl mx-auto mb-12 dark:text-gray-400">
-              From initial inquiry to complete ownership, each feature is designed to make decentralized land acquisition simple, fast, and powerful.
+            <h2 className="text-3xl font-bold text-center mb-4 text-white">How It Works</h2>
+            <p className="text-center max-w-2xl mx-auto mb-12 text-gray-400">
+              From initial inquiry to complete ownership, each feature is designed to ensure a smooth, simple, fast, and powerful process.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[
-                { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your budget, land size, and intended use. Our team sources verified plots that match your criteria.', highlight: false },
-                { icon: FileCheck, title: 'Review & Due Diligence', desc: 'Funded by us for legal checks. A licensed surveyor conducts industry searches and on-ground site visits.', highlight: true },
-                { icon: Wallet, title: 'Secure the Purchase', desc: 'Once approved, funds are released from our notary mediated escrow. Payment, statutory fees, and document custody handled.', highlight: false },
-                { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track documents at the Kenyan Land Registry. Once issued, the title is securely shipped to your address.', highlight: false },
+                { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your budget, land size and intended use. Our local sources will find properties that match your criteria.', highlight: false },
+                { icon: FileCheck, title: 'Review & Due Diligence', desc: 'Our experts review legal checks. A licensed surveyor conducts property searches and on-ground site visits.', highlight: true },
+                { icon: Wallet, title: 'Secure the Purchase', desc: 'Once approved, funds are released from secure Sizland managed escrow. Payment, statutory fees, and document custody handled.', highlight: false },
+                { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track the title transfer at the Kenyan Land Registry. Once issued, the title is securely shipped to your address.', highlight: false },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
                   <div
                     key={item.title}
-                    className={`rounded-2xl p-6 ${item.highlight ? 'bg-emerald-500 text-white' : isDark ? 'bg-gray-800' : 'bg-gray-100'} ${!item.highlight && (isDark ? 'text-white' : 'text-gray-900')}`}
+                    className={`rounded-2xl p-6 ${item.highlight ? 'bg-emerald-500 text-white' : 'bg-gray-800/80 border border-gray-700 text-white'}`}
                   >
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${item.highlight ? 'bg-white/20' : 'bg-emerald-500/20'}`}>
                       <Icon className={`w-6 h-6 ${item.highlight ? 'text-white' : 'text-emerald-500'}`} />
                     </div>
                     <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                    <p className={item.highlight ? 'text-emerald-50' : isDark ? 'text-gray-300' : 'text-gray-600'}>{item.desc}</p>
+                    <p className={item.highlight ? 'text-emerald-50' : 'text-gray-300'}>{item.desc}</p>
                   </div>
                 );
               })}
@@ -263,388 +504,35 @@ export default function BuyLandPage() {
           </div>
         </section>
 
-        {/* We Remove the Risk */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        {/* We Remove the Risk - image LEFT, text RIGHT */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black dark:bg-[#0a0a0a]">
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-6 dark:text-white">
+            <div className="flex-1 w-full order-2 lg:order-1 flex justify-center lg:justify-start">
+              <div className="w-full max-w-md aspect-square relative rounded-2xl overflow-hidden">
+                <Image
+                  src="/pictureinaddedherosection.jpg"
+                  alt="Sizland ERP - Land Investment"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+            <div className="flex-1 order-1 lg:order-2">
+              <h2 className="text-3xl font-bold mb-4 text-white">
                 We Remove the Risk from Remote Land Buying
               </h2>
+              <p className="text-gray-400 mb-6">
+                Buying land remotely feels risky when initial verification is weak. Sizland replaces uncertainty with a controlled legal process.
+              </p>
               <ul className="space-y-4">
-                {['Safe delivery of assets', 'Sizland acts as the single trusted counterparty', 'All documents held in notary mediated legal escrow', 'Every step visible in your dashboard', 'Entire acquisition done institutionally'].map((item) => (
-                  <li key={item} className="flex items-center gap-3 dark:text-gray-200">
+                {['Safe and easy off-site setup', 'Sizland acts as the single trusted counterparty', 'All documents are held in legal escrow', 'Every step is visible in your dashboard', 'The land acquisition done the institutional way.'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-200">
                     <Check className="w-6 h-6 text-emerald-500 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="flex-1 flex justify-center">
-              <div className="w-full max-w-md aspect-square rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center">
-                <span className="text-4xl font-bold text-emerald-500/50">Sizland ERP</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Form Section */}
-        <section id="land-request-form" className="py-16 px-4 sm:px-6 lg:px-8 scroll-mt-20">
-          <div className="max-w-4xl mx-auto">
-            {status === 'loading' ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-              </div>
-            ) : status === 'unauthenticated' ? (
-              <div className={`p-12 rounded-2xl text-center border ${cardClass}`}>
-                <h2 className="text-2xl font-bold mb-4 dark:text-white">Start Your Land Request</h2>
-                <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Sign in to create your land acquisition request and get started.
-                </p>
-                <button
-                  onClick={handleStartLandRequest}
-                  className="px-8 py-4 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600"
-                >
-                  Sign In to Start
-                </button>
-              </div>
-            ) : (
-              <>
-          {/* Form Header */}
-          <div className="mb-10">
-            <h2
-              className={`text-4xl sm:text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-            >
-              Buy verified land in Kenya{' '}
-              <AuroraText className="inline">without being on the ground.</AuroraText>
-            </h2>
-            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Complete the steps below to start your land acquisition journey.
-            </p>
-          </div>
-
-          {/* Stepper */}
-          <div className="flex items-center justify-between gap-2 mb-12">
-            {STEPS.map((s, i) => {
-              const idx = STEPS.findIndex((x) => x.key === currentStep);
-              const done = i < idx;
-              const active = i === idx;
-              return (
-                <div key={s.key} className="flex items-center flex-1">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                      done
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : active
-                          ? 'border-emerald-500 text-emerald-500'
-                          : 'border-gray-400 text-gray-400'
-                    }`}
-                  >
-                    {done ? <Check className="w-5 h-5" /> : i + 1}
-                  </div>
-                  <span
-                    className={`ml-2 text-sm font-medium hidden sm:inline ${
-                      active ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : isDark ? 'text-gray-500' : 'text-gray-400'
-                    }`}
-                  >
-                    {s.label}
-                  </span>
-                  {i < STEPS.length - 1 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-2 ${i < idx ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Step content */}
-          <div className={`p-8 rounded-2xl shadow-xl border ${cardClass}`}>
-            {error && (
-              <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
-                {error}
-              </div>
-            )}
-
-            {/* Step 2: Connect Wallet */}
-            {currentStep === 'CONNECT_WALLET' && (
-              <div>
-                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Connect Wallet
-                </h2>
-                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Connect your wallet seamlessly.
-                </p>
-                <div className="space-y-4">
-                  <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                    Wallet Address
-                  </label>
-                  <input
-                    type="text"
-                    value={walletAddress}
-                    onChange={(e) => setWalletAddress(e.target.value)}
-                    placeholder="0x..."
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
-                    }`}
-                  />
-                  <button
-                    onClick={handleConnectWallet}
-                    disabled={loading || !walletAddress.trim()}
-                    className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Connect Wallet'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Create Request */}
-            {currentStep === 'CREATE_REQUEST' && (
-              <form onSubmit={handleCreateRequest}>
-                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Create Request
-                </h2>
-                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Tell us more about your land needs.
-                </p>
-                <div className="space-y-4">
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                      Budget
-                    </label>
-                    <input
-                      type="text"
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      placeholder="$100,000"
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                      Size
-                    </label>
-                    <input
-                      type="text"
-                      value={sizeCurve}
-                      onChange={(e) => setSizeCurve(e.target.value)}
-                      placeholder="1 Acre"
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                      Purpose
-                    </label>
-                    <select
-                      value={purpose}
-                      onChange={(e) => setPurpose(e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
-                      }`}
-                    >
-                      <option value="">Select purpose</option>
-                      {PURPOSE_OPTIONS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                      Plot Reference (optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={plotReference}
-                      onChange={(e) => setPlotReference(e.target.value)}
-                      placeholder="N/A"
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'
-                      }`}
-                    />
-                  </div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                      className="rounded border-gray-300 text-emerald-500"
-                    />
-                    <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>
-                      I agree to the Terms and Conditions.
-                    </span>
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={loading || !purpose}
-                    className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Submit'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Step 4: Confirmation */}
-            {currentStep === 'CONFIRMATION' && request && (
-              <div>
-                <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Confirmation
-                </h2>
-                <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Your request has been successfully created. We&apos;ll be in touch shortly.
-                </p>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                      Request Summary
-                    </h3>
-                    <div className={`rounded-lg p-4 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
-                      <div className="grid gap-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Wallet</span>
-                          <span className={isDark ? 'text-white' : 'text-gray-900'}>
-                            {request.walletAddress
-                              ? `${request.walletAddress.slice(0, 6)}...${request.walletAddress.slice(-4)}`
-                              : '—'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Budget</span>
-                          <span className={isDark ? 'text-white' : 'text-gray-900'}>
-                            ${request.budget?.toLocaleString() ?? '—'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Size</span>
-                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.sizeCurve ?? '—'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Purpose</span>
-                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.purpose ?? '—'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Plot Ref</span>
-                          <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.plotReference ?? 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                      Your Confirmation
-                    </h3>
-                    <ul className="space-y-2 text-sm">
-                      {[
-                        { label: 'Request created', done: true },
-                        { label: 'Plot found', done: request.status === 'PLOT_FOUND' || request.plots?.length > 0 },
-                        { label: 'Escrow created', done: !!request.escrowId },
-                        { label: 'Due diligence', done: request.status === 'DUE_DILIGENCE' },
-                        { label: 'Ownership transfer', done: request.status === 'REGISTRY_TRANSFER' || request.status === 'COMPLETED' },
-                      ].map((item) => (
-                        <li key={item.label} className="flex items-center gap-2">
-                          {item.done ? (
-                            <Check className="w-5 h-5 text-emerald-500" />
-                          ) : (
-                            <X className="w-5 h-5 text-gray-400" />
-                          )}
-                          <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>{item.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Choose Your Plot - when plots exist */}
-                  {request.plots?.length > 0 && (
-                    <div>
-                      <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Choose Your Plot
-                      </h3>
-                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Verified plots sourced by Sizland. Select one to proceed.
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        {request.plots.map((plot: any) => (
-                          <button
-                            key={plot.id}
-                            type="button"
-                            onClick={() => setSelectedPlotId(plot.id)}
-                            className={`text-left rounded-xl border-2 p-4 transition-all ${
-                              selectedPlotId === plot.id
-                                ? 'border-emerald-500 ring-2 ring-emerald-500/30'
-                                : isDark
-                                  ? 'border-gray-600 hover:border-gray-500'
-                                  : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800">
-                              {plot.images?.[0]?.url ? (
-                                <Image
-                                  src={plot.images[0].url}
-                                  alt={plot.name}
-                                  width={200}
-                                  height={120}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                  <MapPin className="w-8 h-8" />
-                                </div>
-                              )}
-                            </div>
-                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                              {plot.name}
-                            </p>
-                            <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              <MapPin className="w-3 h-3" />
-                              {plot.fullAddress}
-                            </p>
-                            {plot.escrowAmount && (
-                              <p className="text-sm font-medium text-emerald-500 mt-2">
-                                ${plot.escrowAmount.toLocaleString()}
-                              </p>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={handleSelectPlot}
-                        disabled={!selectedPlotId || loading}
-                        className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
-                      >
-                        {loading ? (
-                          <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                        ) : (
-                          `Fund Escrow for Selected Plot ${selectedPlotId
-                            ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})`
-                            : ''
-                          }`
-                        )}
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => router.push('/lobby')}
-                    className="w-full py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-              </>
-            )}
           </div>
         </section>
       </div>
