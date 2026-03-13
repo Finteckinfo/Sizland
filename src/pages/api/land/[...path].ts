@@ -16,12 +16,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const path = (req.query.path as string[])?.join('/') || '';
   const url = `${BACKEND_URL.replace(/\/$/, '')}/api/land-acquisition/${path}`;
-  const sessionToken = req.cookies['next-auth.session-token'] || req.cookies['__Secure-next-auth.session-token'];
+  // Use accessToken (JWT) from session - backend verifies this with NEXTAUTH_SECRET.
+  // Do NOT use the raw session cookie; it's encoded differently and causes "jwt malformed".
+  const token =
+    (session as any)?.accessToken ||
+    req.cookies['next-auth.session-token'] ||
+    req.cookies['__Secure-next-auth.session-token'];
+
+  if (!token) {
+    return res.status(401).json({ error: 'No session token available' });
+  }
 
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${sessionToken || ''}`,
+      Authorization: `Bearer ${token}`,
     };
     const init: RequestInit = {
       method: req.method,
