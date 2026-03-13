@@ -15,7 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const path = (req.query.path as string[])?.join('/') || '';
-  const url = `${BACKEND_URL.replace(/\/$/, '')}/api/land-acquisition/${path}`;
+  const query = new URLSearchParams();
+  Object.entries(req.query).forEach(([k, v]) => {
+    if (k !== 'path' && v != null && v !== '') {
+      query.set(k, Array.isArray(v) ? v[0] : String(v));
+    }
+  });
+  const qs = query.toString();
+  const url = `${BACKEND_URL.replace(/\/$/, '')}/api/land-acquisition/${path}${qs ? `?${qs}` : ''}`;
   // Use accessToken (JWT) from session - backend verifies this with NEXTAUTH_SECRET.
   // Do NOT use the raw session cookie; it's encoded differently and causes "jwt malformed".
   const token =

@@ -5,17 +5,10 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { PageLayout } from '@/components/page-layout';
-import { Check, MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, SlidersHorizontal } from 'lucide-react';
 import Image from 'next/image';
 
-type Step = 'LOGIN' | 'CONNECT_WALLET' | 'CREATE_REQUEST' | 'CONFIRMATION';
-
-const STEPS: { key: Step; label: string }[] = [
-  { key: 'LOGIN', label: 'Login' },
-  { key: 'CONNECT_WALLET', label: 'Connect Wallet' },
-  { key: 'CREATE_REQUEST', label: 'Create Request' },
-  { key: 'CONFIRMATION', label: 'Confirmation' },
-];
+const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
 
 type Plot = {
   id: string;
@@ -28,16 +21,20 @@ type Plot = {
 
 export default function LandsPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const { resolvedTheme: theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [plots, setPlots] = useState<Plot[]>([]);
   const [request, setRequest] = useState<any>(null);
-  const [currentStep, setCurrentStep] = useState<Step>('CONFIRMATION');
   const [searchQuery, setSearchQuery] = useState('');
+  const [budget, setBudget] = useState('');
+  const [sizeCurve, setSizeCurve] = useState('');
+  const [purpose, setPurpose] = useState('');
   const [selectedPlotId, setSelectedPlotId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const isDark = theme === 'dark';
 
@@ -46,23 +43,28 @@ export default function LandsPage() {
   }, []);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchProgress();
-    } else if (status === 'unauthenticated') {
+    if (status === 'unauthenticated') {
       setLoading(false);
     }
   }, [status]);
 
-  const fetchProgress = async () => {
+  const fetchProgress = (search?: string, maxEscrow?: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (maxEscrow != null && !isNaN(maxEscrow)) params.set('maxEscrow', String(maxEscrow));
+    return fetch(`/api/land/progress${params.toString() ? `?${params}` : ''}`, { credentials: 'include' });
+  };
+
+  const loadProgress = async (search?: string, maxEscrow?: number) => {
     try {
-      const res = await fetch('/api/land/progress', { credentials: 'include' });
+      const res = await fetchProgress(search, maxEscrow);
       if (res.ok) {
         const data = await res.json();
         setRequest(data.request);
         setPlots(data.request?.plots ?? []);
-        if (data.request?.currentStep) {
-          setCurrentStep(data.request.currentStep);
-        }
+        if (!budget && data.request?.budget != null) setBudget(String(data.request.budget));
+        if (!sizeCurve && data.request?.sizeCurve) setSizeCurve(data.request.sizeCurve);
+        if (!purpose && data.request?.purpose) setPurpose(data.request.purpose);
       }
     } catch {
       // ignore
@@ -71,12 +73,40 @@ export default function LandsPage() {
     }
   };
 
-  const filteredPlots = plots.filter(
-    (p) =>
-      !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.fullAddress.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    if (status === 'authenticated') {
+      setLoading(true);
+      loadProgress();
+    }
+  }, [status]);
+
+  const handleApplyFilters = async () => {
+    const search = searchQuery.trim();
+    const maxEscrow = budget ? parseFloat(budget) : NaN;
+    setSaveLoading(true);
+    try {
+      if (request?.id && (budget || sizeCurve || purpose)) {
+        const res = await fetch('/api/land/update-criteria', {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            budget: budget ? parseFloat(budget) || undefined : undefined,
+            sizeCurve: sizeCurve || undefined,
+            purpose: purpose || undefined,
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to update');
+      }
+      setLoading(true);
+      await loadProgress(search, isNaN(maxEscrow) ? undefined : maxEscrow);
+      setShowFilters(false);
+    } catch {
+      setLoading(false);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
 
   const selectedPlot = plots.find((p) => p.id === selectedPlotId);
   const escrowAmount = selectedPlot?.escrowAmount ?? 5000;
@@ -91,9 +121,7 @@ export default function LandsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: request.id, plotId: selectedPlotId }),
       });
-      if (res.ok) {
-        await fetchProgress();
-      }
+      if (res.ok) await loadProgress(searchQuery, budget ? parseFloat(budget) : undefined);
     } finally {
       setActionLoading(false);
     }
@@ -101,7 +129,6 @@ export default function LandsPage() {
 
   if (!mounted) return null;
 
-  // Unauthenticated: redirect to auth
   if (status === 'unauthenticated') {
     const callback = typeof window !== 'undefined' && window.location.hostname === 'buy.siz.land'
       ? 'https://buy.siz.land/lands'
@@ -118,60 +145,80 @@ export default function LandsPage() {
     >
       <div className="w-full min-h-[80vh] py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {/* Progress Stepper */}
-          <div className="flex items-center justify-between gap-2 mb-12">
-            {STEPS.map((s, i) => {
-              const idx = STEPS.findIndex((x) => x.key === currentStep);
-              const done = i < idx;
-              const active = i === idx;
-              return (
-                <div key={s.key} className="flex items-center flex-1">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                      done
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : active
-                          ? 'border-emerald-500 text-emerald-500'
-                          : 'border-gray-400 text-gray-400'
-                    }`}
-                  >
-                    {done ? <Check className="w-5 h-5" /> : i + 1}
-                  </div>
-                  <span
-                    className={`ml-2 text-sm font-medium hidden sm:inline ${
-                      active ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : isDark ? 'text-gray-500' : 'text-gray-400'
-                    }`}
-                  >
-                    {s.label}
-                  </span>
-                  {i < STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-2 ${i < idx ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
           {/* Title & Subtitle */}
           <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Choose Your Plot
           </h1>
-          <p className={`text-lg mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-lg mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Verified plots sourced by Sizland. Select one to proceed.
           </p>
 
-          {/* Search */}
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Enter Location"
-            className={`w-full max-w-md px-4 py-3 rounded-xl border mb-10 ${
-              isDark
-                ? 'bg-[#1c2a3a] border-[#32465b] text-white placeholder-gray-500'
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
-            }`}
-          />
+          {/* Filters / Settings */}
+          <div className={`rounded-xl border p-4 mb-8 ${isDark ? 'bg-[#0f2d29]/50 border-[#1f2f3f]' : 'bg-gray-50 border-gray-200'}`}>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              {showFilters ? 'Hide filters' : 'Update your criteria & filters'}
+            </button>
+            {showFilters && (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Location search</label>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Enter location"
+                    className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Max budget ($)</label>
+                  <input
+                    type="text"
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                    placeholder="e.g. 100000"
+                    className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Size</label>
+                  <input
+                    type="text"
+                    value={sizeCurve}
+                    onChange={(e) => setSizeCurve(e.target.value)}
+                    placeholder="e.g. 1 Acre"
+                    className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Purpose</label>
+                  <select
+                    value={purpose}
+                    onChange={(e) => setPurpose(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                  >
+                    <option value="">Select purpose</option>
+                    {PURPOSE_OPTIONS.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="sm:col-span-2 lg:col-span-4">
+                  <button
+                    onClick={handleApplyFilters}
+                    disabled={saveLoading || loading}
+                    className="px-6 py-2.5 rounded-lg font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50"
+                  >
+                    {saveLoading || loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Apply filters'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Content */}
           {loading ? (
@@ -203,7 +250,7 @@ export default function LandsPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                {filteredPlots.map((plot) => (
+                {plots.map((plot) => (
                   <button
                     key={plot.id}
                     type="button"
@@ -232,14 +279,8 @@ export default function LandsPage() {
                       )}
                     </div>
                     <div className="p-4">
-                      <p className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {plot.name}
-                      </p>
-                      <p
-                        className={`text-sm flex items-center gap-1 mt-1 ${
-                          isDark ? 'text-gray-400' : 'text-gray-600'
-                        }`}
-                      >
+                      <p className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{plot.name}</p>
+                      <p className={`text-sm flex items-center gap-1 mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         <MapPin className="w-4 h-4 shrink-0 text-emerald-500" />
                         {plot.fullAddress}
                       </p>
