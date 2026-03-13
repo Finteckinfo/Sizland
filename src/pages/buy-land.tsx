@@ -333,7 +333,7 @@ export default function BuyLandPage() {
                   ))}
                 </ul>
               </div>
-              {request.plots?.length > 0 && (
+              {request.plots?.length > 0 ? (
                 <div>
                   <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Choose Your Plot</h3>
                   <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Verified plots sourced by Sizland. Select one to proceed.</p>
@@ -364,6 +364,17 @@ export default function BuyLandPage() {
                     className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Fund Escrow for Selected Plot ${selectedPlotId ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})` : ''}`}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Choose Your Plot</h3>
+                  <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Verified plots sourced by Sizland. Select one to proceed.</p>
+                  <button
+                    onClick={() => router.push('/lands')}
+                    className="w-full py-3 rounded-xl font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
+                  >
+                    View Available Lands →
                   </button>
                 </div>
               )}
