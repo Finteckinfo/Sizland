@@ -28,13 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (search) params.set('search', String(search));
     if (hasWallet) params.set('hasWallet', String(hasWallet));
 
-    // Get the session token from cookies
-    const sessionToken = req.cookies['next-auth.session-token'] || req.cookies['__Secure-next-auth.session-token'];
+    // Use accessToken (JWT) from session - backend verifies with NEXTAUTH_SECRET. Same as /api/land proxy.
+    const token = (session as any)?.accessToken || req.cookies['next-auth.session-token'] || req.cookies['__Secure-next-auth.session-token'];
 
     const response = await fetch(`${BACKEND_URL}/api/admin/users?${params.toString()}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${sessionToken || ''}`,
+        'Authorization': `Bearer ${token || ''}`,
         'Content-Type': 'application/json',
       },
     });
