@@ -351,8 +351,15 @@ export default function BuyLandPage() {
                               Satellite-Verified
                             </span>
                           )}
-                          {plot.images?.[0]?.url ? (
-                            <Image src={plot.images[0].url} alt={plot.name} width={200} height={120} className="w-full h-full object-cover" />
+                          {((plot as any).images?.[0]?.url || (plot as any).satelliteVerification?.imageryUrl) ? (
+                            <Image
+                              src={((plot as any).images?.[0]?.url || (plot as any).satelliteVerification?.imageryUrl) as string}
+                              alt={plot.name}
+                              width={200}
+                              height={120}
+                              className="w-full h-full object-cover"
+                              unoptimized={!!(plot as any).satelliteVerification?.imageryUrl}
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-500"><MapPin className="w-8 h-8" /></div>
                           )}
@@ -412,7 +419,7 @@ export default function BuyLandPage() {
     return (
       <PageLayout
         title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
-        description="Blockchain-secured land acquisition with full legal due diligence, notary mediated escrow protection, and seamless fiat conversion."
+        description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in Kenyan land from anywhere."
         requireAuth={false}
       >
         <div className="w-full py-12 px-4 sm:px-6 lg:px-8">
@@ -433,7 +440,7 @@ export default function BuyLandPage() {
   return (
     <PageLayout
       title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
-      description="Blockchain-secured land acquisition with full legal due diligence, notary mediated escrow protection, and seamless fiat conversion."
+      description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in Kenyan land from anywhere."
       requireAuth={false}
     >
       <div className="w-full">
@@ -444,8 +451,8 @@ export default function BuyLandPage() {
               Invest in Kenyan Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>
             <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              Blockchain-secured land acquisition with full legal due diligence, escrow protection, and seamless fiat conversion
-              handled by our Kenya-based team.
+              Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust.
+              Invest from anywhere with our Kenya-based team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -466,7 +473,7 @@ export default function BuyLandPage() {
 
         {/* Feature Cards */}
         <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-2xl p-8 bg-emerald-500 text-white">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-4">
                 <Check className="w-7 h-7" />
@@ -483,6 +490,15 @@ export default function BuyLandPage() {
               <h3 className="text-xl font-bold mb-2">Escrow Protected</h3>
               <p className="text-gray-300">
                 Your funds remain in escrow with a trusted legal custodian. Only $2,000 reserved for initial due diligence.
+              </p>
+            </div>
+            <div className="rounded-2xl p-8 bg-gray-800/80 border border-gray-700 text-white">
+              <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+                <MapPin className="w-7 h-7 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">EU Satellite-Verified</h3>
+              <p className="text-gray-300">
+                Copernicus and Galileo data verify land status. Trust-as-a-Service for remote investors.
               </p>
             </div>
           </div>
