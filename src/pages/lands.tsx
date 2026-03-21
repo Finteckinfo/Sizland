@@ -16,7 +16,13 @@ type Plot = {
   fullAddress: string;
   description?: string | null;
   escrowAmount?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
   images?: { url: string; order?: number }[];
+  satelliteVerification?: {
+    imageryUrl?: string | null;
+    hasVerified?: boolean;
+  } | null;
 };
 
 export default function LandsPage() {
@@ -264,6 +270,11 @@ export default function LandsPage() {
                     }`}
                   >
                     <div className="aspect-video relative bg-gray-800">
+                      {(plot.latitude != null && plot.longitude != null) && (
+                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/90 text-white z-10">
+                          Satellite-Verified
+                        </span>
+                      )}
                       {plot.images?.[0]?.url ? (
                         <Image
                           src={plot.images[0].url}
