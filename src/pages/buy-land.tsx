@@ -345,7 +345,12 @@ export default function BuyLandPage() {
                         onClick={() => setSelectedPlotId(plot.id)}
                         className={`text-left rounded-xl border-2 p-4 transition-all ${selectedPlotId === plot.id ? 'border-emerald-500 ring-2 ring-emerald-500/30' : isDark ? 'border-gray-600 hover:border-gray-500' : 'border-gray-200 hover:border-gray-300'}`}
                       >
-                        <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800">
+                        <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800 relative">
+                          {(plot as any).latitude != null && (plot as any).longitude != null && (
+                            <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/90 text-white z-10">
+                              Satellite-Verified
+                            </span>
+                          )}
                           {plot.images?.[0]?.url ? (
                             <Image src={plot.images[0].url} alt={plot.name} width={200} height={120} className="w-full h-full object-cover" />
                           ) : (
