@@ -41,6 +41,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         Authorization: `Bearer ${token}`,
       },
     });
+
+    // Stream binary for image endpoint
+    const isImageEndpoint = path.endsWith('/image');
+    if (isImageEndpoint) {
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', response.headers.get('cache-control') || 'public, max-age=86400');
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (!response.ok) {
+        return res.status(response.status).send(response.status === 404 ? 'Not found' : 'Error');
+      }
+      return res.status(200).send(buffer);
+    }
+
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       return res.status(response.status).json(data || { error: 'Request failed' });

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import Link from 'next/link';
 
 type User = {
   id: string;
@@ -8,6 +9,7 @@ type User = {
   lastName?: string | null;
   avatarUrl?: string | null;
   walletAddress?: string | null;
+  isLandAdmin?: boolean;
   createdAt?: string;
 };
 
@@ -20,6 +22,27 @@ const AdminUsersPage: React.FC = () => {
   const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const setLandAdmin = async (userId: string, isLandAdmin: boolean) => {
+    setTogglingId(userId);
+    try {
+      const resp = await fetch(`/api/admin/users/${userId}/land-admin`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isLandAdmin }),
+      });
+      if (!resp.ok) {
+        const d = await resp.json().catch(() => ({}));
+        throw new Error(d?.error || 'Failed to update');
+      }
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isLandAdmin } : u)));
+    } catch (e: any) {
+      setError(e.message || 'Failed to update land admin');
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const fetchUsers = async (p = page) => {
     setLoading(true);
@@ -60,7 +83,10 @@ const AdminUsersPage: React.FC = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Admin - Users</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h1 style={{ margin: 0 }}>Admin - Users</h1>
+        <Link href="/admin/land" style={{ color: '#2563eb', textDecoration: 'none' }}>Land Admin →</Link>
+      </div>
 
       {status === 'loading' && <p>Loading session...</p>}
 
@@ -102,6 +128,7 @@ const AdminUsersPage: React.FC = () => {
                   <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Email</th>
                   <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Name</th>
                   <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Wallet</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Land Admin</th>
                   <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Created</th>
                 </tr>
               </thead>
@@ -112,12 +139,29 @@ const AdminUsersPage: React.FC = () => {
                     <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.email}</td>
                     <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{`${u.firstName || ''} ${u.lastName || ''}`.trim() || '-'}</td>
                     <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.walletAddress || '-'}</td>
+                    <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
+                      <button
+                        onClick={() => setLandAdmin(u.id, !u.isLandAdmin)}
+                        disabled={togglingId === u.id}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: 12,
+                          background: u.isLandAdmin ? '#22c55e' : '#e5e7eb',
+                          color: u.isLandAdmin ? 'white' : '#374151',
+                          border: 'none',
+                          borderRadius: 4,
+                          cursor: togglingId === u.id ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {togglingId === u.id ? '...' : u.isLandAdmin ? 'Yes' : 'No'}
+                      </button>
+                    </td>
                     <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
                   </tr>
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ padding: 8 }}>
+                    <td colSpan={6} style={{ padding: 8 }}>
                       {loading ? 'Loading...' : 'No users to display. Click Fetch to load results.'}
                     </td>
                   </tr>

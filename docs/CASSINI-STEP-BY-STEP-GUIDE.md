@@ -404,17 +404,27 @@ SENTINEL_WMS_URL=
 
 ---
 
-## Phase 4: Sentinel Hub Integration (when credentials ready)
+## Phase 4: Sentinel Hub Integration — Implemented
 
-- Implement real Process API / WMS call in `satellite.ts`.
-- Upsert `SatelliteVerification` when imagery is fetched.
-- Store `imageryUrl` for reuse; progress will return it.
+- `SIZBackend2.0/src/services/sentinel-hub.ts` — OAuth + Process API
+- `GET /api/satellite/imagery/:plotId/image` — raw JPEG for img src
+- SatelliteVerification upserted when imagery fetched; imageryUrl stored
+
+**Env vars (Railway):** `SENTINEL_HUB_CLIENT_ID`, `SENTINEL_HUB_CLIENT_SECRET`  
+Register at https://dataspace.copernicus.eu/ and create OAuth client.
 
 ---
 
-## Phase 5: Admin UI (optional)
+## Phase 5: Admin UI (optional) — Implemented
 
-- Add lat/lng inputs; validate -90..90 and -180..180.
+- **User model:** `isLandAdmin Boolean @default(false)` — flag for land acquisition admin access.
+- **Auth:** Land admin = `user.isLandAdmin === true` OR email in `ADMIN_EMAILS` (bootstrap).
+- **APIs:**
+  - `GET /api/admin/users` — includes `isLandAdmin`
+  - `PATCH /api/admin/users/:userId/land-admin` — body `{ isLandAdmin: boolean }` (site admins only)
+- **Admin Users page** (`/admin/users`) — Land Admin toggle per user.
+- **Land Admin page** (`/admin/land`) — list requests, add plots with lat/lng (-90..90, -180..180), update status.
+- Lat/lng validated on both client and backend.
 
 ---
 
