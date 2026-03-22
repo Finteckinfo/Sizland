@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 type User = {
@@ -14,8 +15,10 @@ type User = {
 };
 
 const AdminUsersPage: React.FC = () => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [query, setQuery] = useState('');
+  const [adminChecked, setAdminChecked] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const [limit] = useState(50);
@@ -81,6 +84,20 @@ const AdminUsersPage: React.FC = () => {
     }
   }, [status]);
 
+  // Redirect non-admins - verify access when authenticated
+  useEffect(() => {
+    if (status !== 'authenticated' || adminChecked) return;
+    const check = async () => {
+      const resp = await fetch('/api/admin/users?page=1&limit=1', { credentials: 'include' });
+      if (resp.status === 403) {
+        router.replace('/lobby?error=admin_required');
+        return;
+      }
+      setAdminChecked(true);
+    };
+    check();
+  }, [status, adminChecked, router]);
+
   return (
     <div style={{ padding: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -90,6 +107,10 @@ const AdminUsersPage: React.FC = () => {
 
       {status === 'loading' && <p>Loading session...</p>}
 
+      {status === 'authenticated' && !adminChecked && (
+        <p>Verifying access...</p>
+      )}
+
       {status === 'unauthenticated' && (
         <div>
           <p>You must be logged in to view this page.</p>
@@ -97,7 +118,7 @@ const AdminUsersPage: React.FC = () => {
         </div>
       )}
 
-      {status === 'authenticated' && (
+      {status === 'authenticated' && adminChecked && (
         <>
           <p>
             Logged in as: {session?.user?.email}

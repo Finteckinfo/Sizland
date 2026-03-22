@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 type Plot = {
@@ -28,8 +29,10 @@ type LandRequest = {
 };
 
 const AdminLandPage: React.FC = () => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [requests, setRequests] = useState<LandRequest[]>([]);
+  const [adminChecked, setAdminChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -52,8 +55,9 @@ const AdminLandPage: React.FC = () => {
       const resp = await fetch('/api/land/admin/requests', { credentials: 'include' });
       if (!resp.ok) {
         if (resp.status === 403) {
-          setError('Land admin access required');
+          setAdminChecked(true);
           setRequests([]);
+          router.replace('/lobby?error=land_admin_required');
           return;
         }
         const body = await resp.json().catch(() => ({}));
@@ -62,7 +66,9 @@ const AdminLandPage: React.FC = () => {
       const data = await resp.json();
       const list = Array.isArray(data) ? data : [];
       setRequests(list);
+      setAdminChecked(true);
     } catch (e: any) {
+      setAdminChecked(true);
       setError(e.message || 'Failed to fetch requests');
       setRequests([]);
     } finally {
