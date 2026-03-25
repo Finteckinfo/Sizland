@@ -51,7 +51,6 @@ export function OsmMapLibre({
     let destroyed = false;
     (async () => {
       const maplibre = await import('maplibre-gl');
-      await import('maplibre-gl/dist/maplibre-gl.css');
       if (destroyed || !containerRef.current) return;
 
       const lat0 = latitude ?? null;
