@@ -145,7 +145,7 @@ export default function LandsPage() {
 
   return (
     <PageLayout
-      title="Choose Your Plot - Sizland | Verified Land in Kenya"
+      title="Choose Your Plot - Sizland | Verified Land in Africa"
       description="Browse verified land plots sourced by Sizland. Select a plot to proceed with escrow."
       requireAuth={false}
     >

@@ -17,7 +17,6 @@ import { Footer } from "@/components/footer";
 import GlowBackground from "@/components/ui/GlowBackground";
 import AnimatedGrid from "@/components/ui/AnimatedGrid";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { generateNonce, getCSP } from '@/utils/security';
 
 // Defensive theme check: Only allow valid theme values in localStorage
 if (typeof window !== "undefined") {
@@ -43,16 +42,12 @@ export const inter = Inter({
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const nonce = generateNonce();
-  const cspHeader = getCSP(nonce, process.env.NODE_ENV === 'development');
 
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta httpEquiv="Content-Security-Policy" content={cspHeader} />
         <link rel="icon" href="/favicon.ico" />
-        <meta property="csp-nonce" content={nonce} />
       </Head>
       <SessionProvider session={pageProps.session}>
         <WagmiProvider config={config}>

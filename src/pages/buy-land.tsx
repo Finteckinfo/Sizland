@@ -159,7 +159,7 @@ export default function BuyLandPage() {
     <>
       <div className="mb-10">
         <h2 className={`text-4xl sm:text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Buy verified land in Kenya{' '}
+          Buy verified land in Africa{' '}
           <AuroraText className="inline">without being on the ground.</AuroraText>
         </h2>
         <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -456,8 +456,8 @@ export default function BuyLandPage() {
   if (showForm && status === 'authenticated') {
     return (
       <PageLayout
-        title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
-        description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in Kenyan land from anywhere."
+        title="Buy Land - Sizland | Invest in African Land From Anywhere"
+        description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in African land from anywhere."
         requireAuth={false}
       >
         <div className="w-full py-12 px-4 sm:px-6 lg:px-8">
@@ -477,8 +477,8 @@ export default function BuyLandPage() {
 
   return (
     <PageLayout
-      title="Buy Land - Sizland | Invest in Kenyan Land From Anywhere"
-      description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in Kenyan land from anywhere."
+      title="Buy Land - Sizland | Invest in African Land From Anywhere"
+      description="Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust. Invest in African land from anywhere."
       requireAuth={false}
     >
       <div className="w-full">
@@ -486,11 +486,11 @@ export default function BuyLandPage() {
         <section className="relative min-h-[70vh] flex items-center">
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
             <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Invest in Kenyan Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
+              Invest in African Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>
             <p className={`text-lg sm:text-xl mb-8 max-w-2xl mx-auto ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>
               Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust.
-              Invest from anywhere with our Kenya-based team.
+              Invest from anywhere with our Africa-based team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -554,7 +554,7 @@ export default function BuyLandPage() {
                 { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your budget, land size and intended use. Our local sources will find properties that match your criteria.', highlight: false },
                 { icon: FileCheck, title: 'Review & Due Diligence', desc: 'Our experts review legal checks. A licensed surveyor conducts property searches and on-ground site visits.', highlight: true },
                 { icon: Wallet, title: 'Secure the Purchase', desc: 'Once approved, funds are released from secure Sizland managed escrow. Payment, statutory fees, and document custody handled.', highlight: false },
-                { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track the title transfer at the Kenyan Land Registry. Once issued, the title is securely shipped to your address.', highlight: false },
+                { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track the title transfer at the national land registry. Once issued, the title is securely shipped to your address.', highlight: false },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
