@@ -1,7 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { useLandPageMapHeights } from '@/hooks/useResponsiveMapHeight';
+
+const OsmMapLibre = dynamic(
+  () => import('@/components/maps/OsmMapLibre').then((m) => ({ default: m.OsmMapLibre })),
+  { ssr: false, loading: () => <div className="h-[140px] animate-pulse rounded-lg bg-muted" /> }
+);
+
+const inputClass =
+  'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 type Plot = {
   id: string;
@@ -28,27 +45,50 @@ type LandRequest = {
   createdAt: string;
 };
 
+type LandListing = {
+  id: string;
+  title: string;
+  description?: string | null;
+  fullAddress: string;
+  listPrice?: number | null;
+  currency?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const DOC_TYPES = ['REPORT', 'SURVEY', 'AGREEMENT', 'OTHER'] as const;
+type DocType = (typeof DOC_TYPES)[number];
+
+function formatDate(iso: string) {
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+
 const AdminLandPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [requests, setRequests] = useState<LandRequest[]>([]);
-  const [adminChecked, setAdminChecked] = useState(false);
+  const [listings, setListings] = useState<LandListing[]>([]);
   const [loading, setLoading] = useState(false);
+  const [listingsLoading, setListingsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Minimal P2N-style evidence submission (docs-only)
-  const DOC_TYPES = ['REPORT', 'SURVEY', 'AGREEMENT', 'OTHER'] as const;
-  type DocType = (typeof DOC_TYPES)[number];
+  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
+  const [listingModal, setListingModal] = useState<LandListing | null>(null);
+
   const [docType, setDocType] = useState<DocType>('REPORT');
-  const [docFileUrl, setDocFileUrl] = useState<string>('');
-  const [docFileHash, setDocFileHash] = useState<string>(''); // Optional SHA-256
+  const [docFileUrl, setDocFileUrl] = useState('');
+  const [docFileHash, setDocFileHash] = useState('');
   const [docSubmitting, setDocSubmitting] = useState(false);
   const [docError, setDocError] = useState<string | null>(null);
   const [docUploadedForRequestId, setDocUploadedForRequestId] = useState<string | null>(null);
 
-  // Add plot form
-  const [submitting, setSubmitting] = useState(false);
   const [formRequestId, setFormRequestId] = useState('');
   const [formName, setFormName] = useState('');
   const [formAddress, setFormAddress] = useState('');
@@ -57,6 +97,20 @@ const AdminLandPage: React.FC = () => {
   const [formLat, setFormLat] = useState('');
   const [formLng, setFormLng] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [invTitle, setInvTitle] = useState('');
+  const [invDesc, setInvDesc] = useState('');
+  const [invAddress, setInvAddress] = useState('');
+  const [invPrice, setInvPrice] = useState('');
+  const [invCurrency, setInvCurrency] = useState('USD');
+  const [invLat, setInvLat] = useState('');
+  const [invLng, setInvLng] = useState('');
+  const [invStatus, setInvStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
+  const [invSubmitting, setInvSubmitting] = useState(false);
+  const [invError, setInvError] = useState<string | null>(null);
+
+  const satisfyParam = typeof router.query.satisfy === 'string' ? router.query.satisfy : '';
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -65,7 +119,6 @@ const AdminLandPage: React.FC = () => {
       const resp = await fetch('/api/land/admin/requests', { credentials: 'include' });
       if (!resp.ok) {
         if (resp.status === 403) {
-          setAdminChecked(true);
           setRequests([]);
           router.replace('/lobby?error=land_admin_required');
           return;
@@ -75,40 +128,63 @@ const AdminLandPage: React.FC = () => {
           typeof body?.hint === 'string'
             ? ` ${body.hint}`
             : resp.status === 503 || resp.status === 500
-              ? ' Check Vercel NEXT_PUBLIC_BACKEND_URL (no trailing slash), Railway service health, and run `npx prisma migrate deploy` on the API so the DB matches the schema (User.isLandAdmin, SatelliteVerification, plot geo columns).'
+              ? ' Check Vercel NEXT_PUBLIC_BACKEND_URL, Railway, and `npx prisma migrate deploy` on the API.'
               : '';
         throw new Error((body?.error || `${resp.status} ${resp.statusText}`) + extra);
       }
       const data = await resp.json();
-      const list = Array.isArray(data) ? data : [];
-      setRequests(list);
-      setAdminChecked(true);
-    } catch (e: any) {
-      setAdminChecked(true);
-      setError(e.message || 'Failed to fetch requests');
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to fetch requests');
       setRequests([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (status === 'authenticated') fetchRequests();
-  }, [status]);
+  const fetchListings = useCallback(async () => {
+    setListingsLoading(true);
+    try {
+      const resp = await fetch('/api/land/admin/catalog/listings', { credentials: 'include' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      setListings(Array.isArray(data) ? data : []);
+    } catch {
+      /* ignore */
+    } finally {
+      setListingsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Reset evidence form when the admin expands a different request.
+    if (status === 'authenticated') {
+      fetchRequests();
+      fetchListings();
+    }
+  }, [status, fetchListings]);
+
+  useEffect(() => {
+    if (satisfyParam && requests.some((r) => r.id === satisfyParam)) {
+      setFormRequestId(satisfyParam);
+      const el = document.getElementById('plot-form');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [satisfyParam, requests]);
+
+  useEffect(() => {
     setDocError(null);
     setDocSubmitting(false);
     setDocType('REPORT');
     setDocFileUrl('');
     setDocFileHash('');
     setDocUploadedForRequestId(null);
-  }, [expandedId]);
+  }, [expandedRequestId]);
 
-  useEffect(() => {
-    if (requests.length > 0 && !formRequestId) setFormRequestId(requests[0].id);
-  }, [requests, formRequestId]);
+  const onSatisfyRequest = (id: string) => {
+    setFormRequestId(id);
+    router.replace({ pathname: '/admin/land', query: { satisfy: id } }, undefined, { shallow: true });
+    document.getElementById('plot-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const addPlot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,43 +228,37 @@ const AdminLandPage: React.FC = () => {
       setFormLat('');
       setFormLng('');
       fetchRequests();
-    } catch (e: any) {
-      setFormError(e.message || 'Failed to add plot');
+    } catch (e: unknown) {
+      setFormError(e instanceof Error ? e.message : 'Failed to add plot');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const updateStatus = async (requestId: string, status: string) => {
+  const updateStatus = async (requestId: string, next: string) => {
     try {
       const resp = await fetch(`/api/land/admin/request/${requestId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: next }),
       });
       if (!resp.ok) {
         const d = await resp.json().catch(() => ({}));
         throw new Error(d?.error || 'Failed to update');
       }
       fetchRequests();
-    } catch (e: any) {
-      setError(e.message || 'Failed to update status');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to update status');
     }
   };
 
   const uploadDueDiligenceDoc = async (requestId: string) => {
     setDocError(null);
-    if (!requestId) return;
-    if (!docType) {
-      setDocError('Document type is required');
-      return;
-    }
     if (!docFileUrl.trim()) {
       setDocError('Document file URL is required');
       return;
     }
-
     setDocSubmitting(true);
     try {
       const resp = await fetch('/api/land/admin/documents', {
@@ -204,306 +274,536 @@ const AdminLandPage: React.FC = () => {
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(data?.error || 'Failed to upload document');
-
       setDocUploadedForRequestId(requestId);
       fetchRequests();
-    } catch (e: any) {
-      setDocError(e.message || 'Failed to upload document');
+    } catch (e: unknown) {
+      setDocError(e instanceof Error ? e.message : 'Failed to upload document');
     } finally {
       setDocSubmitting(false);
     }
   };
 
+  const submitInventory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInvError(null);
+    if (!invTitle.trim() || !invAddress.trim()) {
+      setInvError('Title and address are required');
+      return;
+    }
+    const lat = invLat.trim() ? parseFloat(invLat) : undefined;
+    const lng = invLng.trim() ? parseFloat(invLng) : undefined;
+    setInvSubmitting(true);
+    try {
+      const resp = await fetch('/api/land/admin/catalog/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: invTitle.trim(),
+          description: invDesc.trim() || undefined,
+          fullAddress: invAddress.trim(),
+          listPrice: invPrice.trim() ? parseFloat(invPrice) : undefined,
+          currency: invCurrency.trim() || 'USD',
+          latitude: lat,
+          longitude: lng,
+          status: invStatus,
+        }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error || 'Failed to create listing');
+      setInvTitle('');
+      setInvDesc('');
+      setInvAddress('');
+      setInvPrice('');
+      setInvLat('');
+      setInvLng('');
+      setInvStatus('DRAFT');
+      fetchListings();
+    } catch (e: unknown) {
+      setInvError(e instanceof Error ? e.message : 'Failed to create listing');
+    } finally {
+      setInvSubmitting(false);
+    }
+  };
+
+  const deleteListing = async (id: string) => {
+    if (!confirm('Delete this catalog listing?')) return;
+    try {
+      const resp = await fetch(`/api/land/admin/catalog/listings/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!resp.ok) throw new Error('Delete failed');
+      setListingModal(null);
+      fetchListings();
+    } catch {
+      setError('Failed to delete listing');
+    }
+  };
+
+  const plotPickerLat = formLat.trim() ? parseFloat(formLat) : null;
+  const plotPickerLng = formLng.trim() ? parseFloat(formLng) : null;
+  const invPickerLat = invLat.trim() ? parseFloat(invLat) : null;
+  const invPickerLng = invLng.trim() ? parseFloat(invLng) : null;
+
+  const mapHeights = useLandPageMapHeights();
+
   return (
-    <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1>Admin – Land Acquisition</h1>
-        <Link href="/admin/users" style={{ color: '#2563eb', textDecoration: 'none' }}>← Users</Link>
+    <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4 sm:py-8 md:px-6">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Admin — Land</h1>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/browse-land" className="text-sm font-medium text-primary hover:underline">
+            View public catalog
+          </Link>
+          <Link href="/admin/users" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+            ← Users
+          </Link>
+        </div>
       </div>
 
-      {status === 'loading' && <p>Loading session...</p>}
+      {status === 'loading' && <p className="text-muted-foreground">Loading session…</p>}
 
       {status === 'unauthenticated' && (
-        <div>
-          <p>You must be logged in to view this page.</p>
-          <button onClick={() => signIn()}>Sign In</button>
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <p className="mb-4 text-card-foreground">You must be logged in.</p>
+          <button
+            type="button"
+            onClick={() => signIn()}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Sign in
+          </button>
         </div>
       )}
 
       {status === 'authenticated' && (
         <>
-          <p style={{ marginBottom: 16 }}>Logged in as: {session?.user?.email}</p>
+          <p className="mb-4 text-sm text-muted-foreground">Signed in as {session?.user?.email}</p>
+          {error && (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/20">
+              {error}
+            </div>
+          )}
 
-          {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
+          {/* —— Requests table —— */}
+          <section className="mb-8 sm:mb-10">
+            <h2 className="mb-3 text-base font-semibold text-foreground sm:text-lg">Land acquisition requests</h2>
+            {loading ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : requests.length === 0 ? (
+              <p className="text-muted-foreground">No requests yet. Buyers start from Buy land.</p>
+            ) : (
+              <div className="-mx-3 overflow-x-auto rounded-lg border border-border sm:mx-0">
+                <table className="min-w-[720px] w-full divide-y divide-border text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">ID</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">User</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Status</th>
+                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell sm:px-3">Step</th>
+                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Budget</th>
+                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Created</th>
+                      <th className="px-2 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border bg-card">
+                    {requests.map((r) => (
+                      <React.Fragment key={r.id}>
+                        <tr className="transition-colors hover:bg-muted/40">
+                          <td className="px-2 py-2.5 font-mono text-xs text-foreground sm:px-3">{r.id.slice(0, 10)}…</td>
+                          <td className="max-w-[140px] truncate px-2 py-2.5 text-foreground sm:max-w-[220px] sm:px-3">{r.user?.email || r.userId}</td>
+                          <td className="whitespace-nowrap px-2 py-2.5 text-xs text-foreground sm:px-3 sm:text-sm">{r.status}</td>
+                          <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground sm:table-cell sm:px-3">{r.currentStep}</td>
+                          <td className="hidden px-2 py-2.5 text-foreground lg:table-cell lg:px-3">{r.budget ?? '—'}</td>
+                          <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground lg:table-cell lg:px-3">{formatDate(r.createdAt)}</td>
+                          <td className="px-2 py-2.5 text-right sm:px-3">
+                            <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
+                              <button
+                                type="button"
+                                onClick={() => onSatisfyRequest(r.id)}
+                                className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                              >
+                                Satisfy request
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedRequestId(expandedRequestId === r.id ? null : r.id)}
+                                className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+                              >
+                                {expandedRequestId === r.id ? 'Hide' : 'Details'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        {expandedRequestId === r.id && (
+                          <tr>
+                            <td colSpan={7} className="bg-muted/30 px-3 py-4 sm:px-4">
+                              <p className="mb-2 text-sm text-foreground">
+                                Size: {r.sizeCurve ?? '—'} | Purpose: {r.purpose ?? '—'} | Wallet: {r.walletAddress ?? '—'}
+                              </p>
+                              <div className="mb-3 flex flex-wrap items-center gap-2">
+                                <label className="text-xs text-muted-foreground">Status</label>
+                                <select
+                                  value={r.status}
+                                  onChange={(e) => updateStatus(r.id, e.target.value)}
+                                  className={`${inputClass} w-auto min-w-[12rem]`}
+                                >
+                                  {[
+                                    'REQUEST_CREATED',
+                                    'PLOT_FOUND',
+                                    'PLOT_SELECTED',
+                                    'ESCROW_CREATED',
+                                    'ESCROW_FUNDED',
+                                    'DUE_DILIGENCE',
+                                    'EXECUTION',
+                                    'REGISTRY_TRANSFER',
+                                    'COMPLETED',
+                                    'CANCELLED',
+                                  ].map((s) => (
+                                    <option key={s} value={s}>
+                                      {s}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
 
-          {/* Add plot form */}
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 24, background: '#f9fafb' }}>
-            <h3 style={{ marginTop: 0 }}>Add plot</h3>
-            <form onSubmit={addPlot}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                              <div className="mb-4 border-t border-border pt-3">
+                                <h4 className="mb-2 text-sm font-semibold text-foreground">Due diligence documents</h4>
+                                {docError && <p className="mb-2 text-xs text-destructive">{docError}</p>}
+                                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                                  <select
+                                    value={docType}
+                                    onChange={(e) => setDocType(e.target.value as DocType)}
+                                    className={`${inputClass} w-full sm:w-auto sm:min-w-[8rem]`}
+                                  >
+                                    {DOC_TYPES.map((t) => (
+                                      <option key={t} value={t}>
+                                        {t}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <input
+                                    value={docFileUrl}
+                                    onChange={(e) => setDocFileUrl(e.target.value)}
+                                    placeholder="File URL"
+                                    className={`${inputClass} min-w-0 flex-1`}
+                                  />
+                                  <input
+                                    value={docFileHash}
+                                    onChange={(e) => setDocFileHash(e.target.value)}
+                                    placeholder="SHA-256 (optional)"
+                                    className={`${inputClass} w-full sm:w-52`}
+                                  />
+                                  <button
+                                    type="button"
+                                    disabled={docSubmitting}
+                                    onClick={() => uploadDueDiligenceDoc(r.id)}
+                                    className="rounded-md bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
+                                  >
+                                    {docSubmitting ? 'Uploading…' : 'Upload doc'}
+                                  </button>
+                                </div>
+                                {docUploadedForRequestId === r.id && (
+                                  <button
+                                    type="button"
+                                    onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
+                                    className="mt-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                                  >
+                                    Mark DUE_DILIGENCE
+                                  </button>
+                                )}
+                              </div>
+
+                              <h4 className="text-sm font-semibold text-foreground">Plots</h4>
+                              <ul className="list-inside list-disc text-sm text-muted-foreground">
+                                {r.plots?.length ? (
+                                  r.plots.map((p) => (
+                                    <li key={p.id}>
+                                      {p.name} — {p.fullAddress}
+                                    </li>
+                                  ))
+                                ) : (
+                                  <li>None yet — use Satisfy request above.</li>
+                                )}
+                              </ul>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {/* —— Add plot (request fulfillment) —— */}
+          <section
+            id="plot-form"
+            className="mb-8 scroll-mt-20 rounded-xl border border-border bg-card/60 p-4 shadow-sm backdrop-blur-sm sm:mb-10 sm:p-6 dark:bg-card/40"
+          >
+            <h2 className="mb-4 text-base font-semibold text-foreground sm:text-lg">Add plot for a request</h2>
+            <form onSubmit={addPlot} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Request</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Request (fallback)</label>
                   <select
                     value={formRequestId}
                     onChange={(e) => setFormRequestId(e.target.value)}
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    className={inputClass}
                   >
-                    <option value="">Select request</option>
+                    <option value="">Select…</option>
                     {requests.map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.id.slice(0, 8)}… {r.user?.email || r.userId}
                       </option>
                     ))}
                   </select>
+                  <p className="mt-1 text-xs text-muted-foreground">Use Satisfy request in the table to pre-fill this field.</p>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Name</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Plot name</label>
                   <input
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
+                    className={inputClass}
                     placeholder="Plot name"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
                   />
                 </div>
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Full address</label>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Full address</label>
                 <input
                   value={formAddress}
                   onChange={(e) => setFormAddress(e.target.value)}
+                  className={inputClass}
                   placeholder="Full address"
-                  style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
                 />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Description (optional)</label>
-                  <input
-                    value={formDesc}
-                    onChange={(e) => setFormDesc(e.target.value)}
-                    placeholder="Description"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
-                  />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
+                  <input value={formDesc} onChange={(e) => setFormDesc(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Escrow amount (optional)</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Escrow (optional)</label>
                   <input
                     type="number"
                     value={formEscrow}
                     onChange={(e) => setFormEscrow(e.target.value)}
-                    placeholder="e.g. 5000"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    className={inputClass}
                   />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Latitude (-90 to 90, optional)</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Latitude</label>
                   <input
-                    type="text"
                     value={formLat}
                     onChange={(e) => setFormLat(e.target.value)}
-                    placeholder="e.g. -1.29"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    className={`${inputClass} font-mono text-xs sm:text-sm`}
+                    placeholder="-1.29"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Longitude (-180 to 180, optional)</label>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Longitude</label>
                   <input
-                    type="text"
                     value={formLng}
                     onChange={(e) => setFormLng(e.target.value)}
-                    placeholder="e.g. 36.82"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    className={`${inputClass} font-mono text-xs sm:text-sm`}
+                    placeholder="36.82"
                   />
                 </div>
               </div>
-              <p style={{ margin: '0 0 12px', fontSize: 13, color: '#4b5563', lineHeight: 1.5 }}>
-                No map picker yet: open{' '}
-                <a
-                  href={
-                    formAddress.trim()
-                      ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(formAddress.trim())}`
-                      : 'https://www.openstreetmap.org/'
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#2563eb' }}
-                >
-                  OpenStreetMap
-                </a>{' '}
-                or{' '}
-                <a
-                  href={
-                    formAddress.trim()
-                      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formAddress.trim())}`
-                      : 'https://www.google.com/maps'
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#2563eb' }}
-                >
-                  Google Maps
-                </a>
-                , find the plot, then copy coordinates (Google: right-click the point → first number is lat, second is lng. OSM: click the map; coordinates appear in the URL or use the share panel).
-              </p>
-              {formError && <div style={{ color: 'red', marginBottom: 8, fontSize: 14 }}>{formError}</div>}
-              <button type="submit" disabled={submitting || loading} style={{ padding: '8px 16px', cursor: submitting ? 'wait' : 'pointer' }}>
+              <OsmMapLibre
+                latitude={plotPickerLat != null && !isNaN(plotPickerLat) ? plotPickerLat : null}
+                longitude={plotPickerLng != null && !isNaN(plotPickerLng) ? plotPickerLng : null}
+                height={mapHeights.form}
+                interactive
+                onLocationPick={(la, ln) => {
+                  setFormLat(String(la.toFixed(6)));
+                  setFormLng(String(ln.toFixed(6)));
+                }}
+              />
+              {formError && <p className="text-sm text-destructive">{formError}</p>}
+              <button
+                type="submit"
+                disabled={submitting || loading}
+                className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 sm:w-auto"
+              >
                 {submitting ? 'Adding…' : 'Add plot'}
               </button>
             </form>
-          </div>
+          </section>
 
-          {/* Requests list */}
-          <h3>Requests</h3>
-          {loading ? (
-            <p>Loading…</p>
-          ) : requests.length === 0 ? (
-            <p>No requests. Create one from the buy-land flow.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {requests.map((r) => (
-                <div key={r.id} style={{ border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      padding: 12,
-                      background: '#f3f4f6',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                    onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
-                  >
-                    <span>
-                      <strong>{r.id.slice(0, 12)}…</strong> {r.user?.email || r.userId} — {r.status}
-                    </span>
-                    <span style={{ fontSize: 14 }}>{expandedId === r.id ? '▼' : '▶'}</span>
-                  </div>
-                  {expandedId === r.id && (
-                    <div style={{ padding: 16 }}>
-                      <p>Budget: {r.budget ?? '—'} | Size: {r.sizeCurve ?? '—'} | Purpose: {r.purpose ?? '—'}</p>
-                      <p>Status: {r.status}</p>
-                      <select
-                        value={r.status}
-                        onChange={(e) => updateStatus(r.id, e.target.value)}
-                        style={{ marginBottom: 12, padding: 6 }}
-                      >
-                        <option value="REQUEST_CREATED">REQUEST_CREATED</option>
-                        <option value="PLOT_FOUND">PLOT_FOUND</option>
-                        <option value="PLOT_SELECTED">PLOT_SELECTED</option>
-                        <option value="ESCROW_CREATED">ESCROW_CREATED</option>
-                        <option value="ESCROW_FUNDED">ESCROW_FUNDED</option>
-                        <option value="DUE_DILIGENCE">DUE_DILIGENCE</option>
-                        <option value="EXECUTION">EXECUTION</option>
-                        <option value="REGISTRY_TRANSFER">REGISTRY_TRANSFER</option>
-                        <option value="COMPLETED">COMPLETED</option>
-                        <option value="CANCELLED">CANCELLED</option>
-                      </select>
-
-                      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16, marginTop: 16 }}>
-                        <h4 style={{ marginTop: 0 }}>Due diligence documents</h4>
-                        <p style={{ marginTop: 4, marginBottom: 12, fontSize: 13, color: '#6b7280' }}>
-                          Upload docs-only evidence (documents only). After upload, mark the request as <code>DUE_DILIGENCE</code>.
-                        </p>
-
-                        {docError && (
-                          <div style={{ color: 'red', marginBottom: 12, fontSize: 13 }}>
-                            {docError}
-                          </div>
-                        )}
-
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            uploadDueDiligenceDoc(r.id);
-                          }}
-                          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}
-                        >
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                            <div>
-                              <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Type</label>
-                              <select
-                                value={docType}
-                                onChange={(e) => setDocType(e.target.value as DocType)}
-                                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
-                              >
-                                {DOC_TYPES.map((t) => (
-                                  <option key={t} value={t}>
-                                    {t}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>File URL</label>
-                              <input
-                                value={docFileUrl}
-                                onChange={(e) => setDocFileUrl(e.target.value)}
-                                placeholder="https://... (stored document link)"
-                                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>
-                              SHA-256 hash (optional)
-                            </label>
-                            <input
-                              value={docFileHash}
-                              onChange={(e) => setDocFileHash(e.target.value)}
-                              placeholder="Optional integrity hash"
-                              style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
-                            />
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={docSubmitting || loading}
-                            style={{ padding: '8px 14px', cursor: docSubmitting ? 'wait' : 'pointer', width: 'fit-content' }}
-                          >
-                            {docSubmitting ? 'Uploading…' : 'Upload due diligence doc'}
-                          </button>
-                        </form>
-
-                        {docUploadedForRequestId === r.id && (
-                          <div style={{ marginTop: 12 }}>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
-                              style={{ padding: '8px 14px', cursor: 'pointer', width: 'fit-content' }}
-                            >
-                              Mark as DUE_DILIGENCE
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <h4 style={{ marginTop: 16 }}>Plots</h4>
-                      {r.plots?.length === 0 ? (
-                        <p>No plots yet.</p>
-                      ) : (
-                        <ul style={{ paddingLeft: 20 }}>
-                          {r.plots?.map((p) => (
-                            <li key={p.id} style={{ marginBottom: 8 }}>
-                              <strong>{p.name}</strong> — {p.fullAddress}
-                              {p.latitude != null && p.longitude != null && (
-                                <span style={{ color: '#059669', marginLeft: 8 }}>📍 {p.latitude}, {p.longitude}</span>
-                              )}
-                              {p.satelliteVerification?.imageryUrl && (
-                                <span style={{ color: '#2563eb', marginLeft: 8 }}>🛰️ Satellite</span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
+          {/* —— Inventory catalog —— */}
+          <section className="mb-10 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+            <h2 className="mb-4 text-base font-semibold text-foreground sm:text-lg">Inventory listing (not tied to a buyer yet)</h2>
+            <form onSubmit={submitInventory} className="mb-6 space-y-4 border-b border-border pb-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Title *</label>
+                  <input value={invTitle} onChange={(e) => setInvTitle(e.target.value)} className={inputClass} required />
                 </div>
-              ))}
-            </div>
-          )}
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">List price</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={invPrice}
+                      onChange={(e) => setInvPrice(e.target.value)}
+                      className={`${inputClass} min-w-0 flex-1`}
+                    />
+                    <input
+                      value={invCurrency}
+                      onChange={(e) => setInvCurrency(e.target.value)}
+                      className={`${inputClass} w-[4.5rem] shrink-0 px-2 text-center`}
+                      placeholder="USD"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Full address *</label>
+                <input value={invAddress} onChange={(e) => setInvAddress(e.target.value)} className={inputClass} required />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
+                <textarea
+                  value={invDesc}
+                  onChange={(e) => setInvDesc(e.target.value)}
+                  rows={3}
+                  className={`${inputClass} resize-y`}
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Latitude</label>
+                  <input value={invLat} onChange={(e) => setInvLat(e.target.value)} className={`${inputClass} font-mono text-xs sm:text-sm`} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Longitude</label>
+                  <input value={invLng} onChange={(e) => setInvLng(e.target.value)} className={`${inputClass} font-mono text-xs sm:text-sm`} />
+                </div>
+              </div>
+              <OsmMapLibre
+                latitude={invPickerLat != null && !isNaN(invPickerLat) ? invPickerLat : null}
+                longitude={invPickerLng != null && !isNaN(invPickerLng) ? invPickerLng : null}
+                height={mapHeights.form}
+                interactive
+                onLocationPick={(la, ln) => {
+                  setInvLat(String(la.toFixed(6)));
+                  setInvLng(String(ln.toFixed(6)));
+                }}
+              />
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <label className="flex flex-wrap items-center gap-2 text-sm text-foreground">
+                  <span className="text-muted-foreground">Visibility</span>
+                  <select
+                    value={invStatus}
+                    onChange={(e) => setInvStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
+                    className={`${inputClass} w-auto`}
+                  >
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                  </select>
+                </label>
+                {invError && <span className="text-sm text-destructive">{invError}</span>}
+                <button
+                  type="submit"
+                  disabled={invSubmitting}
+                  className="rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 sm:ml-auto"
+                >
+                  {invSubmitting ? 'Saving…' : 'Save listing'}
+                </button>
+              </div>
+            </form>
+
+            <h3 className="mb-3 text-base font-semibold text-foreground">Your catalog</h3>
+            {listingsLoading ? (
+              <p className="text-sm text-muted-foreground">Loading listings…</p>
+            ) : listings.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No listings yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {listings.map((L) => (
+                  <div
+                    key={L.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setListingModal(L)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setListingModal(L);
+                      }
+                    }}
+                    className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                  >
+                    <div className="w-full shrink-0 overflow-hidden bg-muted/30" style={{ height: mapHeights.cardPreview }}>
+                      <OsmMapLibre
+                        latitude={L.latitude}
+                        longitude={L.longitude}
+                        height={mapHeights.cardPreview}
+                        hideAttribution
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-3 sm:p-4">
+                      <span className="text-xs font-medium uppercase text-primary">{L.status}</span>
+                      <span className="font-semibold text-foreground">{L.title}</span>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{L.description || L.fullAddress}</p>
+                      <p className="mt-auto pt-2 text-sm font-medium text-foreground">
+                        {L.listPrice != null ? `${L.currency || 'USD'} ${L.listPrice.toLocaleString()}` : 'Price on request'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <Dialog open={!!listingModal} onOpenChange={(o) => !o && setListingModal(null)}>
+            <DialogContent className="max-h-[min(90dvh,900px)] w-[calc(100vw-1.25rem)] max-w-lg overflow-y-auto p-4 sm:max-w-xl sm:p-6">
+              <DialogHeader>
+                <DialogTitle className="text-left text-foreground">{listingModal?.title}</DialogTitle>
+                <DialogDescription className="text-left">{listingModal?.fullAddress}</DialogDescription>
+              </DialogHeader>
+              {listingModal && (
+                <>
+                  {listingModal.latitude != null && listingModal.longitude != null && (
+                    <OsmMapLibre
+                      latitude={listingModal.latitude}
+                      longitude={listingModal.longitude}
+                      height={mapHeights.modal}
+                    />
+                  )}
+                  <p className="text-sm text-muted-foreground">{listingModal.description || '—'}</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {listingModal.listPrice != null
+                      ? `${listingModal.currency || 'USD'} ${listingModal.listPrice.toLocaleString()}`
+                      : 'Price on request'}
+                  </p>
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => listingModal && deleteListing(listingModal.id)}
+                      className="rounded-lg border border-destructive/40 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10"
+                    >
+                      Delete listing
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setListingModal(null)}
+                      className="rounded-lg border border-border bg-muted px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>

@@ -1,6 +1,85 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const MAIN_ORIGIN = 'https://siz.land'
+const BUY_ORIGIN = 'https://buy.siz.land'
+const SOLUTIONS_ORIGIN = 'https://solutions.siz.land'
+
+function hostBase(host: string | null): string {
+  if (!host) return ''
+  return host.split(':')[0].toLowerCase()
+}
+
+function isMainDomainHost(h: string): boolean {
+  return h === 'siz.land' || h === 'www.siz.land'
+}
+
+function isBuyHost(h: string): boolean {
+  return h === 'buy.siz.land' || h === 'www.buy.siz.land' || h.endsWith('.buy.siz.land')
+}
+
+function isSolutionsHost(h: string): boolean {
+  return (
+    h === 'solutions.siz.land' ||
+    h === 'www.solutions.siz.land' ||
+    h.endsWith('.solutions.siz.land')
+  )
+}
+
+/** Only apply strict subdomain routing on real siz.land hosts (not localhost / preview apps). */
+function shouldApplySubdomainRouting(h: string): boolean {
+  if (!h) return false
+  if (h === 'localhost' || h === '127.0.0.1') return false
+  return h === 'siz.land' || h.endsWith('.siz.land')
+}
+
+function pathMatchesPrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+}
+
+/** Paths that belong to the buy app; allowed on buy.* and redirected from main www. */
+const BUY_APP_PREFIXES = [
+  '/buy-land',
+  '/lands',
+  '/browse-land',
+  '/admin/land',
+  '/admin/users',
+]
+
+/** Shared auth and post-auth entry used from buy (and main). */
+const SHARED_AUTH_PREFIXES = [
+  '/login',
+  '/signup',
+  '/wallet-auth',
+  '/auth-choice',
+  '/sso-callback',
+  '/lobby',
+]
+
+function isAllowedOnBuyHost(pathname: string): boolean {
+  if (pathname === '/') return true
+  for (const p of BUY_APP_PREFIXES) {
+    if (pathMatchesPrefix(pathname, p)) return true
+  }
+  for (const p of SHARED_AUTH_PREFIXES) {
+    if (pathMatchesPrefix(pathname, p)) return true
+  }
+  return false
+}
+
+function isBuyOnlyPath(pathname: string): boolean {
+  return BUY_APP_PREFIXES.some((p) => pathMatchesPrefix(pathname, p))
+}
+
+function isAllowedOnSolutionsHost(pathname: string): boolean {
+  if (pathname === '/') return true
+  if (pathMatchesPrefix(pathname, '/solutions')) return true
+  for (const p of SHARED_AUTH_PREFIXES) {
+    if (pathMatchesPrefix(pathname, p)) return true
+  }
+  return false
+}
+
 // Public routes that don't require authentication
 const publicRoutes = [
   '/',
@@ -33,47 +112,56 @@ const publicApiRoutes = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const host = request.headers.get('host') || request.nextUrl.hostname
-  const hostname = request.nextUrl.hostname
+  const h = hostBase(host)
+
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/trpc')
+  ) {
+    return NextResponse.next()
+  }
+
+  const isMainDomain = isMainDomainHost(h)
+  const applySplit = shouldApplySubdomainRouting(h)
 
   // siz.land or www.siz.land /solutions → redirect to solutions.siz.land
-  const isMainDomain = host === 'siz.land' || host === 'www.siz.land' || host?.startsWith('siz.land:') || host?.startsWith('www.siz.land:');
-  if (isMainDomain && (pathname === '/solutions' || pathname.startsWith('/solutions/'))) {
-    const url = new URL(pathname, 'https://solutions.siz.land')
+  if (applySplit && isMainDomain && pathMatchesPrefix(pathname, '/solutions')) {
+    const url = new URL(pathname + request.nextUrl.search, SOLUTIONS_ORIGIN)
     return NextResponse.redirect(url.toString(), 308)
   }
 
-  // siz.land or www.siz.land /buy-land → redirect to buy.siz.land
-  if (isMainDomain && (pathname === '/buy-land' || pathname.startsWith('/buy-land/'))) {
-    const url = new URL(pathname, 'https://buy.siz.land')
+  // Main domain: buy-only app routes → buy.siz.land
+  if (applySplit && isMainDomain && isBuyOnlyPath(pathname)) {
+    const url = new URL(pathname + request.nextUrl.search, BUY_ORIGIN)
     return NextResponse.redirect(url.toString(), 308)
   }
 
-  // buy.siz.land: ONLY root / shows buy-land; all other paths redirect to main domain
-  if (host === 'buy.siz.land' || host?.startsWith('buy.siz.land:')) {
-    if (pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+  // buy.siz.land: home + buy app + auth; anything else → same path on main (marketing site)
+  if (applySplit && isBuyHost(h)) {
+    if (isAllowedOnBuyHost(pathname)) {
+      if (pathname === '/' || pathname === '/buy-land') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/buy-land'
+        return NextResponse.rewrite(url)
+      }
       return NextResponse.next()
     }
-    if (pathname === '/' || pathname === '/buy-land') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/buy-land'
-      return NextResponse.rewrite(url)
-    }
-    const mainUrl = new URL(pathname + request.nextUrl.search, 'https://siz.land')
+    const mainUrl = new URL(pathname + request.nextUrl.search, MAIN_ORIGIN)
     return NextResponse.redirect(mainUrl.toString(), 302)
   }
 
-  // solutions.siz.land: ONLY root / shows solutions; all other paths redirect to main domain
-  if (host === 'solutions.siz.land' || host?.startsWith('solutions.siz.land:')) {
-    if (pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+  // solutions.siz.land: solutions + auth; anything else → main
+  if (applySplit && isSolutionsHost(h)) {
+    if (isAllowedOnSolutionsHost(pathname)) {
+      if (pathname === '/' || pathname === '/solutions') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/solutions'
+        return NextResponse.rewrite(url)
+      }
       return NextResponse.next()
     }
-    if (pathname === '/' || pathname === '/solutions') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/solutions'
-      return NextResponse.rewrite(url)
-    }
-    // Any other path on subdomain → redirect to main domain (e.g. /whitepaper → siz.land/whitepaper)
-    const mainUrl = new URL(pathname + request.nextUrl.search, 'https://siz.land')
+    const mainUrl = new URL(pathname + request.nextUrl.search, MAIN_ORIGIN)
     return NextResponse.redirect(mainUrl.toString(), 302)
   }
 

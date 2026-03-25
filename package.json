@@ -99,6 +99,7 @@
     "highcharts-react-official": "^3.2.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.441.0",
+    "maplibre-gl": "^4.7.1",
     "lute-connect": "^1.6.1",
     "next": "^15.5.7",
     "next-auth": "^4.24.13",

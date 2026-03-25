@@ -21,7 +21,10 @@ interface NavLink {
   href: string;
 }
 
-export const HeaderSheet: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
+export const HeaderSheet: React.FC<{
+  otherLinks: NavLink[];
+  showProductSections?: boolean;
+}> = ({ otherLinks, showProductSections = true }) => {
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
   return (
@@ -60,7 +63,7 @@ export const HeaderSheet: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks })
             
             {/* Navigation Links with PillNav-like styling */}
             <div className="w-full">
-              <MobileNavLinks otherLinks={otherLinks} />
+              <MobileNavLinks otherLinks={otherLinks} showProductSections={showProductSections} />
             </div>
           </div>
         </div>
