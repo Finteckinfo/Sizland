@@ -71,7 +71,11 @@ const AdminLandPage: React.FC = () => {
           return;
         }
         const body = await resp.json().catch(() => ({}));
-        throw new Error(body?.error || `${resp.status} ${resp.statusText}`);
+        const hint503 =
+          resp.status === 503
+            ? ' The land API backend returned 503 (often Render sleeping, overload, or wrong NEXT_PUBLIC_BACKEND_URL on Vercel).'
+            : '';
+        throw new Error((body?.error || `${resp.status} ${resp.statusText}`) + hint503);
       }
       const data = await resp.json();
       const list = Array.isArray(data) ? data : [];
@@ -297,7 +301,7 @@ const AdminLandPage: React.FC = () => {
                     type="text"
                     value={formLat}
                     onChange={(e) => setFormLat(e.target.value)}
-                    placeholder="e.g. 51.5"
+                    placeholder="e.g. -1.29"
                     style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
                   />
                 </div>
@@ -307,11 +311,40 @@ const AdminLandPage: React.FC = () => {
                     type="text"
                     value={formLng}
                     onChange={(e) => setFormLng(e.target.value)}
-                    placeholder="e.g. -0.12"
+                    placeholder="e.g. 36.82"
                     style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
                   />
                 </div>
               </div>
+              <p style={{ margin: '0 0 12px', fontSize: 13, color: '#4b5563', lineHeight: 1.5 }}>
+                No map picker yet: open{' '}
+                <a
+                  href={
+                    formAddress.trim()
+                      ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(formAddress.trim())}`
+                      : 'https://www.openstreetmap.org/'
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#2563eb' }}
+                >
+                  OpenStreetMap
+                </a>{' '}
+                or{' '}
+                <a
+                  href={
+                    formAddress.trim()
+                      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formAddress.trim())}`
+                      : 'https://www.google.com/maps'
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#2563eb' }}
+                >
+                  Google Maps
+                </a>
+                , find the plot, then copy coordinates (Google: right-click the point → first number is lat, second is lng. OSM: click the map; coordinates appear in the URL or use the share panel).
+              </p>
               {formError && <div style={{ color: 'red', marginBottom: 8, fontSize: 14 }}>{formError}</div>}
               <button type="submit" disabled={submitting || loading} style={{ padding: '8px 16px', cursor: submitting ? 'wait' : 'pointer' }}>
                 {submitting ? 'Adding…' : 'Add plot'}
