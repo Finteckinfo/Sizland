@@ -71,11 +71,13 @@ const AdminLandPage: React.FC = () => {
           return;
         }
         const body = await resp.json().catch(() => ({}));
-        const hint503 =
-          resp.status === 503
-            ? ' The land API backend returned 503 (often Render sleeping, overload, or wrong NEXT_PUBLIC_BACKEND_URL on Vercel).'
-            : '';
-        throw new Error((body?.error || `${resp.status} ${resp.statusText}`) + hint503);
+        const extra =
+          typeof body?.hint === 'string'
+            ? ` ${body.hint}`
+            : resp.status === 503 || resp.status === 500
+              ? ' Check Vercel NEXT_PUBLIC_BACKEND_URL (no trailing slash), Railway service health, and run `npx prisma migrate deploy` on the API so the DB matches the schema (User.isLandAdmin, SatelliteVerification, plot geo columns).'
+              : '';
+        throw new Error((body?.error || `${resp.status} ${resp.statusText}`) + extra);
       }
       const data = await resp.json();
       const list = Array.isArray(data) ? data : [];
