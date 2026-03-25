@@ -64,6 +64,34 @@ interface NavLink {
   href: string;
 }
 
+const buyAppPathPrefixes = [
+  "/buy-land",
+  "/lands",
+  "/browse-land",
+  "/admin/land",
+  "/admin/users",
+] as const;
+
+function isBuyAppPath(pathname: string): boolean {
+  return buyAppPathPrefixes.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
+
+function isMarketingRestrictedHost(): boolean {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname.toLowerCase();
+  const onBuy =
+    h === "buy.siz.land" ||
+    h === "www.buy.siz.land" ||
+    h.endsWith(".buy.siz.land");
+  const onSolutions =
+    h === "solutions.siz.land" ||
+    h === "www.solutions.siz.land" ||
+    h.endsWith(".solutions.siz.land");
+  return onBuy || onSolutions;
+}
+
 const productLinks: DropdownLinks[] = [
   {
     label: "Siz",
@@ -125,19 +153,32 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  const isSolutionsPage = router.pathname === '/solutions';
-  const isBuyLandPage = router.pathname === '/buy-land';
-  const isSubdomainPage = isSolutionsPage || isBuyLandPage;
+  const isSolutionsPage = router.pathname === "/solutions";
+  const [marketingRestrictedHost, setMarketingRestrictedHost] = useState(false);
+
+  useEffect(() => {
+    setMarketingRestrictedHost(isMarketingRestrictedHost());
+  }, []);
+
+  const hideMainMarketingLinks =
+    marketingRestrictedHost || isSolutionsPage || isBuyAppPath(router.pathname);
+
   const navItems = [
     { label: "Siz", href: "#hero" },
-    // Hide Whitepaper, Blog, Wallet, New Wallet on subdomain pages (solutions, buy-land)
-    ...(!isSubdomainPage ? [
-      { label: "Whitepaper", href: "/whitepaper" },
-      { label: "Blog", href: "/blog" },
-      { label: "Wallet", href: "/wallet" },
-      ...(hasGeneratedWallet ? [{ label: "New Wallet", href: "/new-wallet" }] : []),
-    ] : []),
+    ...(!hideMainMarketingLinks
+      ? [
+          { label: "Whitepaper", href: "/whitepaper" },
+          { label: "Blog", href: "/blog" },
+          { label: "Wallet", href: "/wallet" },
+          ...(hasGeneratedWallet ? [{ label: "New Wallet", href: "/new-wallet" }] : []),
+        ]
+      : []),
   ];
+
+  const mainSiteOrigin = "https://siz.land";
+  const logoHref = hideMainMarketingLinks ? "/" : mainSiteOrigin;
+  const signInHref = hideMainMarketingLinks ? "/auth-choice" : `${mainSiteOrigin}/auth-choice`;
+  const pillProductLinks = hideMainMarketingLinks ? [] : productLinks;
 
   return (
     <div className="fixed z-50 top-0 left-0 w-screen max-w-screen overflow-x-hidden flex justify-center px-2 sm:px-4 pt-4 sm:pt-6 box-border">
@@ -156,14 +197,14 @@ export const Navbar: React.FC = () => {
             pillColor={isDark ? "#000000" : "#ffffff"}
             hoveredPillTextColor="#ffffff"
             pillTextColor="#10b981"
-            productLinks={productLinks}
+            productLinks={pillProductLinks}
             onScrollToSection={scrollToSection}
           />
         </div>
 
         {/* Center Section - Brand title - always links to main domain */}
         <div className="flex-shrink-0 flex justify-center px-6 scale-[0.9] origin-center">
-          <Link href="https://siz.land" className="flex items-center justify-center">
+          <Link href={logoHref} className="flex items-center justify-center">
             <button className="button1" data-text="Awesome">
               <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
               <span aria-hidden="true" className="hover-text1 font-pj">
@@ -210,7 +251,7 @@ export const Navbar: React.FC = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => window.location.href = "https://siz.land/auth-choice"}>
+                <Button variant="outline" size="sm" onClick={() => { window.location.href = signInHref; }}>
                   Sign In
                 </Button>
               )}
@@ -222,7 +263,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile Layout */}
       <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-visible min-w-0">
         {/* Mobile Logo - always links to main domain */}
-        <Link href="https://siz.land" className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
+        <Link href={logoHref} className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
           <Image
             src="/logo1.png"
             alt="Sizland Logo"
@@ -278,7 +319,7 @@ export const Navbar: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="shrink-0 max-w-[110px] px-3 text-sm"
-                  onClick={() => window.location.href = "https://siz.land/auth-choice"}
+                  onClick={() => { window.location.href = signInHref; }}
                 >
                   Sign In
                 </Button>
@@ -286,7 +327,10 @@ export const Navbar: React.FC = () => {
             </>
           )}
           <div className="shrink-0">
-          <HeaderSheet otherLinks={navItems.filter(item => item.href !== "#hero")} />
+          <HeaderSheet
+            otherLinks={navItems.filter((item) => item.href !== "#hero")}
+            showProductSections={!hideMainMarketingLinks}
+          />
           </div>
         </div>
       </div>
@@ -342,7 +386,10 @@ export const NaviLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) =
   );
 };
 
-export const MobileNavLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
+export const MobileNavLinks: React.FC<{
+  otherLinks: NavLink[];
+  showProductSections?: boolean;
+}> = ({ otherLinks, showProductSections = true }) => {
   return (
     <div className="flex flex-col items-center space-y-4 w-full">
       {/* Main Navigation Links with PillNav-like styling */}
@@ -371,7 +418,8 @@ export const MobileNavLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks
       ))}
 
       {/* Product Links Section with enhanced styling */}
-      {productLinks.map((navLink, index) => (
+      {showProductSections &&
+        productLinks.map((navLink, index) => (
         <div key={index} className="w-full space-y-3">
           {/* Section Title with PillNav-like styling */}
           <div className="text-center mb-4">

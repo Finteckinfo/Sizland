@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { useWallet } from '@txnlab/use-wallet-react';
@@ -506,6 +507,11 @@ export default function BuyLandPage() {
                 How it Works
               </button>
             </div>
+            <p className={`mt-6 text-center text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <Link href="/browse-land" className="font-medium text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">
+                Browse published land listings (map previews)
+              </Link>
+            </p>
           </div>
         </section>
 
