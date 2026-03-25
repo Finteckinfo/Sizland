@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { AppProps } from "next/app";
 import { Montserrat, Inter } from "next/font/google";
 import Head from "next/head";
