@@ -22,7 +22,7 @@ export function getCSP(nonce: string, isDev: boolean = false): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' https://db.onlinewebfonts.com",
-    `connect-src 'self' https://*.vercel.live https://sizerpbackend.onrender.com https://pulse.walletconnect.org https://api.web3modal.org wss://*.walletconnect.org wss://*.walletconnect.com https://*.walletconnect.org https://*.walletconnect.com https://rpc.walletconnect.org`,
+    `connect-src 'self' https://*.vercel.live https://sizerpbackend.onrender.com https://*.up.railway.app https://cca-lite.coinbase.com https://*.coinbase.com https://pulse.walletconnect.org https://api.web3modal.org wss://*.walletconnect.org wss://*.walletconnect.com https://*.walletconnect.org https://*.walletconnect.com https://rpc.walletconnect.org`,
     "frame-src 'self' https://vercel.live https://verify.walletconnect.org https://verify.walletconnect.com",
     "object-src 'none'",
     "base-uri 'self'",
