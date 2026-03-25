@@ -66,11 +66,19 @@ export default function BuyLandPage() {
       const res = await fetch('/api/land/progress', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
-        setRequest(data.request);
-        if (data.request?.currentStep) {
-          setCurrentStep(data.request.currentStep);
+        const req = data.request;
+        setRequest(req);
+        if (req?.currentStep) {
+          setCurrentStep(req.currentStep);
         }
-        // If no request, currentStep stays CONNECT_WALLET (set when authenticated)
+        if (req) {
+          setShowForm(true);
+          if (req.walletAddress) setWalletAddress(req.walletAddress);
+          if (req.budget != null) setBudget(String(req.budget));
+          if (req.sizeCurve) setSizeCurve(req.sizeCurve);
+          if (req.purpose) setPurpose(req.purpose);
+          if (req.plotReference) setPlotReference(req.plotReference);
+        }
       }
     } catch {
       // ignore
@@ -333,6 +341,36 @@ export default function BuyLandPage() {
                   ))}
                 </ul>
               </div>
+
+              {request.status === 'DUE_DILIGENCE' && request.documents?.length > 0 && (
+                <div>
+                  <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                    Due diligence evidence
+                  </h3>
+                  <ul className="space-y-2 text-sm">
+                    {request.documents.map((doc: any) => (
+                      <li key={doc.id} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                        <div className="flex flex-col">
+                          <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>
+                            {doc.type || 'DOCUMENT'}
+                          </span>
+                          {doc.fileUrl && (
+                            <a
+                              href={doc.fileUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={`text-xs ${isDark ? 'text-emerald-300' : 'text-emerald-700'} hover:underline`}
+                            >
+                              Open file
+                            </a>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {request.plots?.length > 0 ? (
                 <div>
                   <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Choose Your Plot</h3>
@@ -447,10 +485,10 @@ export default function BuyLandPage() {
         {/* Hero Section - no bg (layout provides it) */}
         <section className="relative min-h-[70vh] flex items-center">
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Invest in Kenyan Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+            <p className={`text-lg sm:text-xl mb-8 max-w-2xl mx-auto ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>
               Satellite-verified land acquisition with blockchain escrow, legal due diligence, and EU Space data trust.
               Invest from anywhere with our Kenya-based team.
             </p>
@@ -459,11 +497,11 @@ export default function BuyLandPage() {
                 onClick={handleStartLandRequest}
                 className="px-8 py-4 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
               >
-                Start a Land Request
+                {request ? 'Continue your request' : 'Start a Land Request'}
               </button>
               <button
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-8 py-4 rounded-lg font-bold text-white border-2 border-white/80 hover:bg-white/10 transition-colors"
+                className={`px-8 py-4 rounded-lg font-bold border-2 transition-colors ${isDark ? 'text-white border-white/80 hover:bg-white/10' : 'text-gray-900 border-gray-800 hover:bg-gray-100'}`}
               >
                 How it Works
               </button>
@@ -483,21 +521,21 @@ export default function BuyLandPage() {
                 Local experts conduct legal searches, site visits, and deliver comprehensive reports before you commit.
               </p>
             </div>
-            <div className="rounded-2xl p-8 bg-gray-800/80 border border-gray-700 text-white">
+            <div className={`rounded-2xl p-8 border ${isDark ? 'bg-gray-800/80 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
               <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
                 <Shield className="w-7 h-7 text-emerald-500" />
               </div>
               <h3 className="text-xl font-bold mb-2">Escrow Protected</h3>
-              <p className="text-gray-300">
+              <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
                 Your funds remain in escrow with a trusted legal custodian. Only $2,000 reserved for initial due diligence.
               </p>
             </div>
-            <div className="rounded-2xl p-8 bg-gray-800/80 border border-gray-700 text-white">
+            <div className={`rounded-2xl p-8 border ${isDark ? 'bg-gray-800/80 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
               <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
                 <MapPin className="w-7 h-7 text-emerald-500" />
               </div>
               <h3 className="text-xl font-bold mb-2">EU Satellite-Verified</h3>
-              <p className="text-gray-300">
+              <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
                 Copernicus and Galileo data verify land status. Trust-as-a-Service for remote investors.
               </p>
             </div>
@@ -507,8 +545,8 @@ export default function BuyLandPage() {
         {/* How It Works */}
         <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4 text-white">How It Works</h2>
-            <p className="text-center max-w-2xl mx-auto mb-12 text-gray-400">
+            <h2 className={`text-3xl font-bold text-center mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>How It Works</h2>
+            <p className={`text-center max-w-2xl mx-auto mb-12 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               From initial inquiry to complete ownership, each feature is designed to ensure a smooth, simple, fast, and powerful process.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -522,13 +560,13 @@ export default function BuyLandPage() {
                 return (
                   <div
                     key={item.title}
-                    className={`rounded-2xl p-6 ${item.highlight ? 'bg-emerald-500 text-white' : 'bg-gray-800/80 border border-gray-700 text-white'}`}
+                    className={`rounded-2xl p-6 ${item.highlight ? 'bg-emerald-500 text-white' : isDark ? 'bg-gray-800/80 border border-gray-700 text-white' : 'bg-white border border-gray-200 text-gray-900'}`}
                   >
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${item.highlight ? 'bg-white/20' : 'bg-emerald-500/20'}`}>
                       <Icon className={`w-6 h-6 ${item.highlight ? 'text-white' : 'text-emerald-500'}`} />
                     </div>
                     <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                    <p className={item.highlight ? 'text-emerald-50' : 'text-gray-300'}>{item.desc}</p>
+                    <p className={item.highlight ? 'text-emerald-50' : isDark ? 'text-gray-300' : 'text-gray-600'}>{item.desc}</p>
                   </div>
                 );
               })}
@@ -550,15 +588,15 @@ export default function BuyLandPage() {
               </div>
             </div>
             <div className="flex-1 order-1 lg:order-2">
-              <h2 className="text-3xl font-bold mb-4 text-white">
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 We Remove the Risk from <AuroraText className="inline">Remote Land Buying</AuroraText>
               </h2>
-              <p className="text-gray-400 mb-6">
+              <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Buying land remotely feels risky when initial verification is weak. Sizland replaces uncertainty with a controlled legal process.
               </p>
               <ul className="space-y-4">
                 {['Safe and easy off-site setup', 'Sizland acts as the single trusted counterparty', 'All documents are held in legal escrow', 'Every step is visible in your dashboard', 'The land acquisition done the institutional way.'].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-200">
+                  <li key={item} className={`flex items-center gap-3 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                     <Check className="w-6 h-6 text-emerald-500 shrink-0" />
                     <span>{item}</span>
                   </li>

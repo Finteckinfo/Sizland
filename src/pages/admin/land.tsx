@@ -37,6 +37,16 @@ const AdminLandPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Minimal P2N-style evidence submission (docs-only)
+  const DOC_TYPES = ['REPORT', 'SURVEY', 'AGREEMENT', 'OTHER'] as const;
+  type DocType = (typeof DOC_TYPES)[number];
+  const [docType, setDocType] = useState<DocType>('REPORT');
+  const [docFileUrl, setDocFileUrl] = useState<string>('');
+  const [docFileHash, setDocFileHash] = useState<string>(''); // Optional SHA-256
+  const [docSubmitting, setDocSubmitting] = useState(false);
+  const [docError, setDocError] = useState<string | null>(null);
+  const [docUploadedForRequestId, setDocUploadedForRequestId] = useState<string | null>(null);
+
   // Add plot form
   const [submitting, setSubmitting] = useState(false);
   const [formRequestId, setFormRequestId] = useState('');
@@ -79,6 +89,16 @@ const AdminLandPage: React.FC = () => {
   useEffect(() => {
     if (status === 'authenticated') fetchRequests();
   }, [status]);
+
+  useEffect(() => {
+    // Reset evidence form when the admin expands a different request.
+    setDocError(null);
+    setDocSubmitting(false);
+    setDocType('REPORT');
+    setDocFileUrl('');
+    setDocFileHash('');
+    setDocUploadedForRequestId(null);
+  }, [expandedId]);
 
   useEffect(() => {
     if (requests.length > 0 && !formRequestId) setFormRequestId(requests[0].id);
@@ -148,6 +168,43 @@ const AdminLandPage: React.FC = () => {
       fetchRequests();
     } catch (e: any) {
       setError(e.message || 'Failed to update status');
+    }
+  };
+
+  const uploadDueDiligenceDoc = async (requestId: string) => {
+    setDocError(null);
+    if (!requestId) return;
+    if (!docType) {
+      setDocError('Document type is required');
+      return;
+    }
+    if (!docFileUrl.trim()) {
+      setDocError('Document file URL is required');
+      return;
+    }
+
+    setDocSubmitting(true);
+    try {
+      const resp = await fetch('/api/land/admin/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          requestId,
+          type: docType,
+          fileUrl: docFileUrl.trim(),
+          fileHash: docFileHash.trim() ? docFileHash.trim() : undefined,
+        }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error || 'Failed to upload document');
+
+      setDocUploadedForRequestId(requestId);
+      fetchRequests();
+    } catch (e: any) {
+      setDocError(e.message || 'Failed to upload document');
+    } finally {
+      setDocSubmitting(false);
     }
   };
 
@@ -308,6 +365,86 @@ const AdminLandPage: React.FC = () => {
                         <option value="COMPLETED">COMPLETED</option>
                         <option value="CANCELLED">CANCELLED</option>
                       </select>
+
+                      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16, marginTop: 16 }}>
+                        <h4 style={{ marginTop: 0 }}>Due diligence documents</h4>
+                        <p style={{ marginTop: 4, marginBottom: 12, fontSize: 13, color: '#6b7280' }}>
+                          Upload docs-only evidence (documents only). After upload, mark the request as <code>DUE_DILIGENCE</code>.
+                        </p>
+
+                        {docError && (
+                          <div style={{ color: 'red', marginBottom: 12, fontSize: 13 }}>
+                            {docError}
+                          </div>
+                        )}
+
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            uploadDueDiligenceDoc(r.id);
+                          }}
+                          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}
+                        >
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            <div>
+                              <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Type</label>
+                              <select
+                                value={docType}
+                                onChange={(e) => setDocType(e.target.value as DocType)}
+                                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                              >
+                                {DOC_TYPES.map((t) => (
+                                  <option key={t} value={t}>
+                                    {t}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>File URL</label>
+                              <input
+                                value={docFileUrl}
+                                onChange={(e) => setDocFileUrl(e.target.value)}
+                                placeholder="https://... (stored document link)"
+                                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>
+                              SHA-256 hash (optional)
+                            </label>
+                            <input
+                              value={docFileHash}
+                              onChange={(e) => setDocFileHash(e.target.value)}
+                              placeholder="Optional integrity hash"
+                              style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={docSubmitting || loading}
+                            style={{ padding: '8px 14px', cursor: docSubmitting ? 'wait' : 'pointer', width: 'fit-content' }}
+                          >
+                            {docSubmitting ? 'Uploading…' : 'Upload due diligence doc'}
+                          </button>
+                        </form>
+
+                        {docUploadedForRequestId === r.id && (
+                          <div style={{ marginTop: 12 }}>
+                            <button
+                              type="button"
+                              onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
+                              style={{ padding: '8px 14px', cursor: 'pointer', width: 'fit-content' }}
+                            >
+                              Mark as DUE_DILIGENCE
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
                       <h4 style={{ marginTop: 16 }}>Plots</h4>
                       {r.plots?.length === 0 ? (
                         <p>No plots yet.</p>
