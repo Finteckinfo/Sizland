@@ -92,6 +92,8 @@ export function OsmMapLibre({
       mapRef.current?.remove();
       mapRef.current = null;
     };
+    // Intentionally omit latitude/longitude: initial center is set once; updates are handled by the effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid remounting the map on every coord change
   }, [interactive]);
 
   useEffect(() => {

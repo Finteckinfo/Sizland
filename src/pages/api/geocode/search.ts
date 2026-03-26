@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 type NominatimResult = {
   lat: string;
@@ -7,13 +6,24 @@ type NominatimResult = {
   display_name: string;
 };
 
-export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get('q') || '';
-  const limitRaw = request.nextUrl.searchParams.get('limit') || '5';
-  const limit = Math.min(10, Math.max(1, parseInt(limitRaw, 10) || 5));
+/**
+ * Proxies geocoding to OpenStreetMap Nominatim (free; respect their usage policy).
+ * Pages Router API route — must use default export.
+ */
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const qRaw = req.query.q;
+  const q = typeof qRaw === 'string' ? qRaw : Array.isArray(qRaw) ? qRaw[0] ?? '' : '';
+  const limitRaw = req.query.limit;
+  const limitStr = typeof limitRaw === 'string' ? limitRaw : Array.isArray(limitRaw) ? limitRaw[0] : '5';
+  const limit = Math.min(10, Math.max(1, parseInt(limitStr, 10) || 5));
 
   if (q.trim().length < 2) {
-    return NextResponse.json({ results: [], error: 'Query too short' }, { status: 400 });
+    return res.status(400).json({ results: [], error: 'Query too short' });
   }
 
   try {
@@ -25,26 +35,19 @@ export async function GET(request: NextRequest) {
 
     const resp = await fetch(url.toString(), {
       headers: {
-        // Free service, but Nominatim requires a descriptive User-Agent.
-        // If you have an email/contact, add it here.
         'User-Agent': 'siz.land/1.0 (support@siz.land)',
       },
     });
 
     if (!resp.ok) {
-      return NextResponse.json(
-        { error: `Geocode provider error (${resp.status})` },
-        { status: 502 }
-      );
+      return res.status(502).json({ error: `Geocode provider error (${resp.status})` });
     }
 
     const data = (await resp.json()) as NominatimResult[];
-    return NextResponse.json({ results: Array.isArray(data) ? data : [] });
+    return res.status(200).json({ results: Array.isArray(data) ? data : [] });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : 'Geocode search failed' },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: e instanceof Error ? e.message : 'Geocode search failed',
+    });
   }
 }
-
