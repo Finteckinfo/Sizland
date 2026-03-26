@@ -11,6 +11,8 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useLandPageMapHeights } from '@/hooks/useResponsiveMapHeight';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { OsmMapLibreProps } from '@/components/maps/OsmMapLibre';
 
 const OsmMapLibre = dynamic(
   () => import('@/components/maps/OsmMapLibre').then((m) => ({ default: m.OsmMapLibre })),
@@ -70,6 +72,13 @@ function formatDate(iso: string) {
   }
 }
 
+type AdminLandViewMode = 'dashboard' | 'satisfy_request' | 'inventory_listing';
+
+function isRequestSatisfied(status: string) {
+  const s = String(status || '').toUpperCase();
+  return s === 'COMPLETED' || s === 'CANCELLED';
+}
+
 const AdminLandPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -111,6 +120,12 @@ const AdminLandPage: React.FC = () => {
   const [invError, setInvError] = useState<string | null>(null);
 
   const satisfyParam = typeof router.query.satisfy === 'string' ? router.query.satisfy : '';
+
+  const [viewMode, setViewMode] = useState<AdminLandViewMode>('dashboard');
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const REQUESTS_PER_PAGE = 10;
+  const INVENTORY_PER_PAGE = 9;
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -166,8 +181,7 @@ const AdminLandPage: React.FC = () => {
   useEffect(() => {
     if (satisfyParam && requests.some((r) => r.id === satisfyParam)) {
       setFormRequestId(satisfyParam);
-      const el = document.getElementById('plot-form');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setViewMode('satisfy_request');
     }
   }, [satisfyParam, requests]);
 
@@ -182,8 +196,24 @@ const AdminLandPage: React.FC = () => {
 
   const onSatisfyRequest = (id: string) => {
     setFormRequestId(id);
+    setViewMode('satisfy_request');
     router.replace({ pathname: '/admin/land', query: { satisfy: id } }, undefined, { shallow: true });
-    document.getElementById('plot-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const exitSatisfyMode = () => {
+    setViewMode('dashboard');
+    setFormError(null);
+    router.replace({ pathname: '/admin/land', query: {} }, undefined, { shallow: true });
+  };
+
+  const enterInventoryMode = () => {
+    setViewMode('inventory_listing');
+    setInvError(null);
+  };
+
+  const exitInventoryMode = () => {
+    setViewMode('dashboard');
+    setInvError(null);
   };
 
   const addPlot = async (e: React.FormEvent) => {
@@ -319,6 +349,7 @@ const AdminLandPage: React.FC = () => {
       setInvLng('');
       setInvStatus('DRAFT');
       fetchListings();
+      setViewMode('dashboard');
     } catch (e: unknown) {
       setInvError(e instanceof Error ? e.message : 'Failed to create listing');
     } finally {
@@ -347,6 +378,33 @@ const AdminLandPage: React.FC = () => {
   const invPickerLng = invLng.trim() ? parseFloat(invLng) : null;
 
   const mapHeights = useLandPageMapHeights();
+
+  const sortedRequests = [...requests].sort((a, b) => {
+    const aSat = isRequestSatisfied(a.status);
+    const bSat = isRequestSatisfied(b.status);
+    if (aSat !== bSat) return aSat ? 1 : -1; // unsatisfied first
+    const at = new Date(a.createdAt).getTime();
+    const bt = new Date(b.createdAt).getTime();
+    return at - bt; // oldest first
+  });
+  const requestsTotalPages = Math.max(1, Math.ceil(sortedRequests.length / REQUESTS_PER_PAGE));
+  const clampedRequestsPage = Math.min(Math.max(1, requestsPage), requestsTotalPages);
+  const requestsPageItems = sortedRequests.slice(
+    (clampedRequestsPage - 1) * REQUESTS_PER_PAGE,
+    clampedRequestsPage * REQUESTS_PER_PAGE
+  );
+
+  const sortedListings = [...listings].sort((a, b) => {
+    const at = new Date(a.createdAt).getTime();
+    const bt = new Date(b.createdAt).getTime();
+    return bt - at; // latest first
+  });
+  const inventoryTotalPages = Math.max(1, Math.ceil(sortedListings.length / INVENTORY_PER_PAGE));
+  const clampedInventoryPage = Math.min(Math.max(1, inventoryPage), inventoryTotalPages);
+  const inventoryPageItems = sortedListings.slice(
+    (clampedInventoryPage - 1) * INVENTORY_PER_PAGE,
+    clampedInventoryPage * INVENTORY_PER_PAGE
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4 sm:py-8 md:px-6">
@@ -386,165 +444,288 @@ const AdminLandPage: React.FC = () => {
             </div>
           )}
 
-          {/* —— Requests table —— */}
-          <section className="mb-8 sm:mb-10">
-            <h2 className="mb-3 text-base font-semibold text-foreground sm:text-lg">Land acquisition requests</h2>
-            {loading ? (
-              <p className="text-muted-foreground">Loading…</p>
-            ) : requests.length === 0 ? (
-              <p className="text-muted-foreground">No requests yet. Buyers start from Buy land.</p>
-            ) : (
-              <div className="-mx-3 overflow-x-auto rounded-lg border border-border sm:mx-0">
-                <table className="min-w-[720px] w-full divide-y divide-border text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">ID</th>
-                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">User</th>
-                      <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Status</th>
-                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell sm:px-3">Step</th>
-                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Budget</th>
-                      <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Created</th>
-                      <th className="px-2 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border bg-card">
-                    {requests.map((r) => (
-                      <React.Fragment key={r.id}>
-                        <tr className="transition-colors hover:bg-muted/40">
-                          <td className="px-2 py-2.5 font-mono text-xs text-foreground sm:px-3">{r.id.slice(0, 10)}…</td>
-                          <td className="max-w-[140px] truncate px-2 py-2.5 text-foreground sm:max-w-[220px] sm:px-3">{r.user?.email || r.userId}</td>
-                          <td className="whitespace-nowrap px-2 py-2.5 text-xs text-foreground sm:px-3 sm:text-sm">{r.status}</td>
-                          <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground sm:table-cell sm:px-3">{r.currentStep}</td>
-                          <td className="hidden px-2 py-2.5 text-foreground lg:table-cell lg:px-3">{r.budget ?? '—'}</td>
-                          <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground lg:table-cell lg:px-3">{formatDate(r.createdAt)}</td>
-                          <td className="px-2 py-2.5 text-right sm:px-3">
-                            <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
-                              <button
-                                type="button"
-                                onClick={() => onSatisfyRequest(r.id)}
-                                className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
-                              >
-                                Satisfy request
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setExpandedRequestId(expandedRequestId === r.id ? null : r.id)}
-                                className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
-                              >
-                                {expandedRequestId === r.id ? 'Hide' : 'Details'}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        {expandedRequestId === r.id && (
+          {viewMode === 'dashboard' && (
+            <>
+              {/* —— Requests table —— */}
+              <section className="mb-8 sm:mb-10">
+                <h2 className="mb-3 text-base font-semibold text-foreground sm:text-lg">Land acquisition requests</h2>
+                {loading ? (
+                  <p className="text-muted-foreground">Loading…</p>
+                ) : sortedRequests.length === 0 ? (
+                  <p className="text-muted-foreground">No requests yet. Buyers start from Buy land.</p>
+                ) : (
+                  <>
+                    <div className="-mx-3 overflow-x-auto rounded-lg border border-border sm:mx-0">
+                      <table className="min-w-[720px] w-full divide-y divide-border text-sm">
+                        <thead className="bg-muted/50">
                           <tr>
-                            <td colSpan={7} className="bg-muted/30 px-3 py-4 sm:px-4">
-                              <p className="mb-2 text-sm text-foreground">
-                                Size: {r.sizeCurve ?? '—'} | Purpose: {r.purpose ?? '—'} | Wallet: {r.walletAddress ?? '—'}
-                              </p>
-                              <div className="mb-3 flex flex-wrap items-center gap-2">
-                                <label className="text-xs text-muted-foreground">Status</label>
-                                <select
-                                  value={r.status}
-                                  onChange={(e) => updateStatus(r.id, e.target.value)}
-                                  className={`${inputClass} w-auto min-w-[12rem]`}
-                                >
-                                  {[
-                                    'REQUEST_CREATED',
-                                    'PLOT_FOUND',
-                                    'PLOT_SELECTED',
-                                    'ESCROW_CREATED',
-                                    'ESCROW_FUNDED',
-                                    'DUE_DILIGENCE',
-                                    'EXECUTION',
-                                    'REGISTRY_TRANSFER',
-                                    'COMPLETED',
-                                    'CANCELLED',
-                                  ].map((s) => (
-                                    <option key={s} value={s}>
-                                      {s}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="mb-4 border-t border-border pt-3">
-                                <h4 className="mb-2 text-sm font-semibold text-foreground">Due diligence documents</h4>
-                                {docError && <p className="mb-2 text-xs text-destructive">{docError}</p>}
-                                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                                  <select
-                                    value={docType}
-                                    onChange={(e) => setDocType(e.target.value as DocType)}
-                                    className={`${inputClass} w-full sm:w-auto sm:min-w-[8rem]`}
-                                  >
-                                    {DOC_TYPES.map((t) => (
-                                      <option key={t} value={t}>
-                                        {t}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <input
-                                    value={docFileUrl}
-                                    onChange={(e) => setDocFileUrl(e.target.value)}
-                                    placeholder="File URL"
-                                    className={`${inputClass} min-w-0 flex-1`}
-                                  />
-                                  <input
-                                    value={docFileHash}
-                                    onChange={(e) => setDocFileHash(e.target.value)}
-                                    placeholder="SHA-256 (optional)"
-                                    className={`${inputClass} w-full sm:w-52`}
-                                  />
-                                  <button
-                                    type="button"
-                                    disabled={docSubmitting}
-                                    onClick={() => uploadDueDiligenceDoc(r.id)}
-                                    className="rounded-md bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
-                                  >
-                                    {docSubmitting ? 'Uploading…' : 'Upload doc'}
-                                  </button>
-                                </div>
-                                {docUploadedForRequestId === r.id && (
-                                  <button
-                                    type="button"
-                                    onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
-                                    className="mt-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                                  >
-                                    Mark DUE_DILIGENCE
-                                  </button>
-                                )}
-                              </div>
-
-                              <h4 className="text-sm font-semibold text-foreground">Plots</h4>
-                              <ul className="list-inside list-disc text-sm text-muted-foreground">
-                                {r.plots?.length ? (
-                                  r.plots.map((p) => (
-                                    <li key={p.id}>
-                                      {p.name} — {p.fullAddress}
-                                    </li>
-                                  ))
-                                ) : (
-                                  <li>None yet — use Satisfy request above.</li>
-                                )}
-                              </ul>
-                            </td>
+                            <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">ID</th>
+                            <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">User</th>
+                            <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Status</th>
+                            <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell sm:px-3">Step</th>
+                            <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Budget</th>
+                            <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Created</th>
+                            <th className="px-2 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Actions</th>
                           </tr>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+                        </thead>
+                        <tbody className="divide-y divide-border bg-card">
+                          {requestsPageItems.map((r) => (
+                            <React.Fragment key={r.id}>
+                              <tr className="transition-colors hover:bg-muted/40">
+                                <td className="px-2 py-2.5 font-mono text-xs text-foreground sm:px-3">{r.id.slice(0, 10)}…</td>
+                                <td className="max-w-[140px] truncate px-2 py-2.5 text-foreground sm:max-w-[220px] sm:px-3">
+                                  {r.user?.email || r.userId}
+                                </td>
+                                <td className="whitespace-nowrap px-2 py-2.5 text-xs text-foreground sm:px-3 sm:text-sm">{r.status}</td>
+                                <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground sm:table-cell sm:px-3">{r.currentStep}</td>
+                                <td className="hidden px-2 py-2.5 text-foreground lg:table-cell lg:px-3">{r.budget ?? '—'}</td>
+                                <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground lg:table-cell lg:px-3">{formatDate(r.createdAt)}</td>
+                                <td className="px-2 py-2.5 text-right sm:px-3">
+                                  <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => onSatisfyRequest(r.id)}
+                                      className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                                    >
+                                      Satisfy request
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setExpandedRequestId(expandedRequestId === r.id ? null : r.id)}
+                                      className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+                                    >
+                                      {expandedRequestId === r.id ? 'Hide' : 'Details'}
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                              {expandedRequestId === r.id && (
+                                <tr>
+                                  <td colSpan={7} className="bg-muted/30 px-3 py-4 sm:px-4">
+                                    <p className="mb-2 text-sm text-foreground">
+                                      Size: {r.sizeCurve ?? '—'} | Purpose: {r.purpose ?? '—'} | Wallet: {r.walletAddress ?? '—'}
+                                    </p>
+                                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                                      <label className="text-xs text-muted-foreground">Status</label>
+                                      <select
+                                        value={r.status}
+                                        onChange={(e) => updateStatus(r.id, e.target.value)}
+                                        className={`${inputClass} w-auto min-w-[12rem]`}
+                                      >
+                                        {[
+                                          'REQUEST_CREATED',
+                                          'PLOT_FOUND',
+                                          'PLOT_SELECTED',
+                                          'ESCROW_CREATED',
+                                          'ESCROW_FUNDED',
+                                          'DUE_DILIGENCE',
+                                          'EXECUTION',
+                                          'REGISTRY_TRANSFER',
+                                          'COMPLETED',
+                                          'CANCELLED',
+                                        ].map((s) => (
+                                          <option key={s} value={s}>
+                                            {s}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
 
-          {/* —— Add plot (request fulfillment) —— */}
-          <section
-            id="plot-form"
-            className="mb-8 scroll-mt-20 rounded-xl border border-border bg-card/60 p-4 shadow-sm backdrop-blur-sm sm:mb-10 sm:p-6 dark:bg-card/40"
-          >
-            <h2 className="mb-4 text-base font-semibold text-foreground sm:text-lg">Add plot for a request</h2>
-            <form onSubmit={addPlot} className="space-y-4">
+                                    <div className="mb-4 border-t border-border pt-3">
+                                      <h4 className="mb-2 text-sm font-semibold text-foreground">Due diligence documents</h4>
+                                      {docError && <p className="mb-2 text-xs text-destructive">{docError}</p>}
+                                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                                        <select
+                                          value={docType}
+                                          onChange={(e) => setDocType(e.target.value as DocType)}
+                                          className={`${inputClass} w-full sm:w-auto sm:min-w-[8rem]`}
+                                        >
+                                          {DOC_TYPES.map((t) => (
+                                            <option key={t} value={t}>
+                                              {t}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        <input
+                                          value={docFileUrl}
+                                          onChange={(e) => setDocFileUrl(e.target.value)}
+                                          placeholder="File URL"
+                                          className={`${inputClass} min-w-0 flex-1`}
+                                        />
+                                        <input
+                                          value={docFileHash}
+                                          onChange={(e) => setDocFileHash(e.target.value)}
+                                          placeholder="SHA-256 (optional)"
+                                          className={`${inputClass} w-full sm:w-52`}
+                                        />
+                                        <button
+                                          type="button"
+                                          disabled={docSubmitting}
+                                          onClick={() => uploadDueDiligenceDoc(r.id)}
+                                          className="rounded-md bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
+                                        >
+                                          {docSubmitting ? 'Uploading…' : 'Upload doc'}
+                                        </button>
+                                      </div>
+                                      {docUploadedForRequestId === r.id && (
+                                        <button
+                                          type="button"
+                                          onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
+                                          className="mt-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                                        >
+                                          Mark DUE_DILIGENCE
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    <h4 className="text-sm font-semibold text-foreground">Plots</h4>
+                                    <ul className="list-inside list-disc text-sm text-muted-foreground">
+                                      {r.plots?.length ? (
+                                        r.plots.map((p) => (
+                                          <li key={p.id}>
+                                            {p.name} — {p.fullAddress}
+                                          </li>
+                                        ))
+                                      ) : (
+                                        <li>None yet — use Satisfy request above.</li>
+                                      )}
+                                    </ul>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {sortedRequests.length > REQUESTS_PER_PAGE && (
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          Page {clampedRequestsPage} of {requestsTotalPages} · {sortedRequests.length} total
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={clampedRequestsPage <= 1}
+                            onClick={() => setRequestsPage((p) => Math.max(1, p - 1))}
+                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-50"
+                          >
+                            Prev
+                          </button>
+                          <button
+                            type="button"
+                            disabled={clampedRequestsPage >= requestsTotalPages}
+                            onClick={() => setRequestsPage((p) => Math.min(requestsTotalPages, p + 1))}
+                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-50"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </section>
+
+              {/* —— Inventory catalog cards (like “Choose Your Plot”) —— */}
+              <section className="mb-10 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Inventory listing (not tied to a buyer yet)</h2>
+                  <button
+                    type="button"
+                    onClick={enterInventoryMode}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    Inventory listing
+                  </button>
+                </div>
+
+                {listingsLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading listings…</p>
+                ) : sortedListings.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center">
+                    <p className="text-lg font-semibold text-foreground">No lands at the moment</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Plots matching your criteria will appear here once our team sources them.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {inventoryPageItems.map((L) => (
+                        <div
+                          key={L.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setListingModal(L)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setListingModal(L);
+                            }
+                          }}
+                          className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                        >
+                          <div className="w-full shrink-0 overflow-hidden bg-muted/30" style={{ height: mapHeights.cardPreview }}>
+                            <OsmMapLibre latitude={L.latitude} longitude={L.longitude} height={mapHeights.cardPreview} hideAttribution />
+                          </div>
+                          <div className="flex flex-1 flex-col p-3 sm:p-4">
+                            <span className="text-xs font-medium uppercase text-primary">{L.status}</span>
+                            <span className="font-semibold text-foreground">{L.title}</span>
+                            <p className="line-clamp-2 text-sm text-muted-foreground">{L.description || L.fullAddress}</p>
+                            <p className="mt-auto pt-2 text-sm font-medium text-foreground">
+                              {L.listPrice != null ? `${L.currency || 'USD'} ${L.listPrice.toLocaleString()}` : 'Price on request'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {sortedListings.length > INVENTORY_PER_PAGE && (
+                      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          Page {clampedInventoryPage} of {inventoryTotalPages} · {sortedListings.length} total
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={clampedInventoryPage <= 1}
+                            onClick={() => setInventoryPage((p) => Math.max(1, p - 1))}
+                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-50"
+                          >
+                            Prev
+                          </button>
+                          <button
+                            type="button"
+                            disabled={clampedInventoryPage >= inventoryTotalPages}
+                            onClick={() => setInventoryPage((p) => Math.min(inventoryTotalPages, p + 1))}
+                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-50"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </section>
+            </>
+          )}
+
+          {viewMode === 'satisfy_request' && (
+            <section className="mb-10 rounded-xl border border-border bg-card/60 p-4 shadow-sm backdrop-blur-sm sm:p-6 dark:bg-card/40">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">Add plot for a request</h2>
+                <button
+                  type="button"
+                  onClick={exitSatisfyMode}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  ← Back to requests
+                </button>
+              </div>
+              <form onSubmit={addPlot} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Request (fallback)</label>
@@ -616,12 +797,12 @@ const AdminLandPage: React.FC = () => {
                   />
                 </div>
               </div>
-              <OsmMapLibre
+              <LocationPicker
+                MapComponent={OsmMapLibre as unknown as React.ComponentType<OsmMapLibreProps>}
                 latitude={plotPickerLat != null && !isNaN(plotPickerLat) ? plotPickerLat : null}
                 longitude={plotPickerLng != null && !isNaN(plotPickerLng) ? plotPickerLng : null}
                 height={mapHeights.form}
-                interactive
-                onLocationPick={(la, ln) => {
+                onPick={(la, ln) => {
                   setFormLat(String(la.toFixed(6)));
                   setFormLng(String(ln.toFixed(6)));
                 }}
@@ -634,13 +815,24 @@ const AdminLandPage: React.FC = () => {
               >
                 {submitting ? 'Adding…' : 'Add plot'}
               </button>
-            </form>
-          </section>
+              </form>
+            </section>
+          )}
 
-          {/* —— Inventory catalog —— */}
-          <section className="mb-10 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-            <h2 className="mb-4 text-base font-semibold text-foreground sm:text-lg">Inventory listing (not tied to a buyer yet)</h2>
-            <form onSubmit={submitInventory} className="mb-6 space-y-4 border-b border-border pb-6">
+          {viewMode === 'inventory_listing' && (
+            <section className="mb-10 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">Inventory listing</h2>
+                <button
+                  type="button"
+                  onClick={exitInventoryMode}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  ← Back to dashboard
+                </button>
+              </div>
+
+              <form onSubmit={submitInventory} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Title *</label>
@@ -687,12 +879,12 @@ const AdminLandPage: React.FC = () => {
                   <input value={invLng} onChange={(e) => setInvLng(e.target.value)} className={`${inputClass} font-mono text-xs sm:text-sm`} />
                 </div>
               </div>
-              <OsmMapLibre
+              <LocationPicker
+                MapComponent={OsmMapLibre as unknown as React.ComponentType<OsmMapLibreProps>}
                 latitude={invPickerLat != null && !isNaN(invPickerLat) ? invPickerLat : null}
                 longitude={invPickerLng != null && !isNaN(invPickerLng) ? invPickerLng : null}
                 height={mapHeights.form}
-                interactive
-                onLocationPick={(la, ln) => {
+                onPick={(la, ln) => {
                   setInvLat(String(la.toFixed(6)));
                   setInvLng(String(ln.toFixed(6)));
                 }}
@@ -718,50 +910,9 @@ const AdminLandPage: React.FC = () => {
                   {invSubmitting ? 'Saving…' : 'Save listing'}
                 </button>
               </div>
-            </form>
-
-            <h3 className="mb-3 text-base font-semibold text-foreground">Your catalog</h3>
-            {listingsLoading ? (
-              <p className="text-sm text-muted-foreground">Loading listings…</p>
-            ) : listings.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No listings yet.</p>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {listings.map((L) => (
-                  <div
-                    key={L.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setListingModal(L)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setListingModal(L);
-                      }
-                    }}
-                    className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
-                  >
-                    <div className="w-full shrink-0 overflow-hidden bg-muted/30" style={{ height: mapHeights.cardPreview }}>
-                      <OsmMapLibre
-                        latitude={L.latitude}
-                        longitude={L.longitude}
-                        height={mapHeights.cardPreview}
-                        hideAttribution
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-3 sm:p-4">
-                      <span className="text-xs font-medium uppercase text-primary">{L.status}</span>
-                      <span className="font-semibold text-foreground">{L.title}</span>
-                      <p className="line-clamp-2 text-sm text-muted-foreground">{L.description || L.fullAddress}</p>
-                      <p className="mt-auto pt-2 text-sm font-medium text-foreground">
-                        {L.listPrice != null ? `${L.currency || 'USD'} ${L.listPrice.toLocaleString()}` : 'Price on request'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+              </form>
+            </section>
+          )}
 
           <Dialog open={!!listingModal} onOpenChange={(o) => !o && setListingModal(null)}>
             <DialogContent className="max-h-[min(90dvh,900px)] w-[calc(100vw-1.25rem)] max-w-lg overflow-y-auto p-4 sm:max-w-xl sm:p-6">
