@@ -124,12 +124,27 @@ const AdminLandPage: React.FC = () => {
   const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
   const [listingModal, setListingModal] = useState<LandListing | null>(null);
 
-  const [docType, setDocType] = useState<DocType>('REPORT');
-  const [docFileUrl, setDocFileUrl] = useState('');
-  const [docFileHash, setDocFileHash] = useState('');
-  const [docSubmitting, setDocSubmitting] = useState(false);
-  const [docError, setDocError] = useState<string | null>(null);
-  const [docUploadedForRequestId, setDocUploadedForRequestId] = useState<string | null>(null);
+  type DocDraft = {
+    id: string;
+    type: DocType;
+    fileUrl: string;
+    fileHash: string;
+    submitting: boolean;
+    error: string | null;
+    uploaded: boolean;
+  };
+  const [docDrafts, setDocDrafts] = useState<DocDraft[]>(() => [
+    {
+      id: 'doc-0',
+      type: 'REPORT',
+      fileUrl: '',
+      fileHash: '',
+      submitting: false,
+      error: null,
+      uploaded: false,
+    },
+  ]);
+  const [uploadedDocTypes, setUploadedDocTypes] = useState<Set<DocType>>(() => new Set());
 
   const [formRequestId, setFormRequestId] = useState('');
   const [formName, setFormName] = useState('');
@@ -219,12 +234,19 @@ const AdminLandPage: React.FC = () => {
   }, [satisfyParam, requests]);
 
   useEffect(() => {
-    setDocError(null);
-    setDocSubmitting(false);
-    setDocType('REPORT');
-    setDocFileUrl('');
-    setDocFileHash('');
-    setDocUploadedForRequestId(null);
+    // Reset drafts when switching expanded request.
+    setDocDrafts([
+      {
+        id: 'doc-0',
+        type: 'REPORT',
+        fileUrl: '',
+        fileHash: '',
+        submitting: false,
+        error: null,
+        uploaded: false,
+      },
+    ]);
+    setUploadedDocTypes(new Set());
   }, [expandedRequestId]);
 
   const onSatisfyRequest = (id: string) => {
@@ -316,13 +338,55 @@ const AdminLandPage: React.FC = () => {
     }
   };
 
-  const uploadDueDiligenceDoc = async (requestId: string) => {
-    setDocError(null);
-    if (!docFileUrl.trim()) {
-      setDocError('Document file URL is required');
+  const availableDocTypesForRow = (rowId: string): DocType[] => {
+    const used = new Set<DocType>();
+    for (const d of docDrafts) {
+      if (d.id !== rowId) used.add(d.type);
+    }
+    for (const t of uploadedDocTypes) used.add(t);
+    const current = docDrafts.find((d) => d.id === rowId)?.type;
+    return DOC_TYPES.filter((t) => !used.has(t) || t === current);
+  };
+
+  const addDocRow = () => {
+    const used = new Set<DocType>();
+    for (const d of docDrafts) used.add(d.type);
+    for (const t of uploadedDocTypes) used.add(t);
+    const nextType = DOC_TYPES.find((t) => !used.has(t));
+    if (!nextType) return;
+    setDocDrafts((prev) => [
+      ...prev,
+      {
+        id: `doc-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        type: nextType,
+        fileUrl: '',
+        fileHash: '',
+        submitting: false,
+        error: null,
+        uploaded: false,
+      },
+    ]);
+  };
+
+  const removeDocRow = (rowId: string) => {
+    setDocDrafts((prev) => (prev.length <= 1 ? prev : prev.filter((d) => d.id !== rowId)));
+  };
+
+  const setDocRow = (rowId: string, patch: Partial<DocDraft>) => {
+    setDocDrafts((prev) => prev.map((d) => (d.id === rowId ? { ...d, ...patch } : d)));
+  };
+
+  const uploadDocRow = async (requestId: string, rowId: string) => {
+    const row = docDrafts.find((d) => d.id === rowId);
+    if (!row) return;
+
+    setDocRow(rowId, { error: null });
+    if (!row.fileUrl.trim()) {
+      setDocRow(rowId, { error: 'Document file URL is required' });
       return;
     }
-    setDocSubmitting(true);
+
+    setDocRow(rowId, { submitting: true });
     try {
       const resp = await fetch('/api/land/admin/documents', {
         method: 'POST',
@@ -330,19 +394,19 @@ const AdminLandPage: React.FC = () => {
         credentials: 'include',
         body: JSON.stringify({
           requestId,
-          type: docType,
-          fileUrl: docFileUrl.trim(),
-          fileHash: docFileHash.trim() ? docFileHash.trim() : undefined,
+          type: row.type,
+          fileUrl: row.fileUrl.trim(),
+          fileHash: row.fileHash.trim() ? row.fileHash.trim() : undefined,
         }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(data?.error || 'Failed to upload document');
-      setDocUploadedForRequestId(requestId);
+
+      setUploadedDocTypes((prev) => new Set(prev).add(row.type));
+      setDocRow(rowId, { uploaded: true, submitting: false });
       fetchRequests();
     } catch (e: unknown) {
-      setDocError(e instanceof Error ? e.message : 'Failed to upload document');
-    } finally {
-      setDocSubmitting(false);
+      setDocRow(rowId, { error: e instanceof Error ? e.message : 'Failed to upload document', submitting: false });
     }
   };
 
@@ -567,49 +631,98 @@ const AdminLandPage: React.FC = () => {
 
                                     <div className="mb-4 border-t border-border pt-3">
                                       <h4 className="mb-2 text-sm font-semibold text-foreground">Due diligence documents</h4>
-                                      {docError && <p className="mb-2 text-xs text-destructive">{docError}</p>}
-                                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                                        <select
-                                          value={docType}
-                                          onChange={(e) => setDocType(e.target.value as DocType)}
-                                          className={`${inputClass} w-full sm:w-auto sm:min-w-[8rem]`}
-                                        >
-                                          {DOC_TYPES.map((t) => (
-                                            <option key={t} value={t}>
-                                              {t}
-                                            </option>
-                                          ))}
-                                        </select>
-                                        <input
-                                          value={docFileUrl}
-                                          onChange={(e) => setDocFileUrl(e.target.value)}
-                                          placeholder="File URL"
-                                          className={`${inputClass} min-w-0 flex-1`}
-                                        />
-                                        <input
-                                          value={docFileHash}
-                                          onChange={(e) => setDocFileHash(e.target.value)}
-                                          placeholder="SHA-256 (optional)"
-                                          className={`${inputClass} w-full sm:w-52`}
-                                        />
-                                        <button
-                                          type="button"
-                                          disabled={docSubmitting}
-                                          onClick={() => uploadDueDiligenceDoc(r.id)}
-                                          className="rounded-md bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
-                                        >
-                                          {docSubmitting ? 'Uploading…' : 'Upload doc'}
-                                        </button>
+                                      <div className="space-y-3">
+                                        {docDrafts.map((d, idx) => {
+                                          const options = availableDocTypesForRow(d.id);
+                                          return (
+                                            <div key={d.id} className="rounded-lg border border-border bg-background/40 p-3">
+                                              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex items-center gap-2">
+                                                  <span className="text-xs font-medium text-muted-foreground">Doc {idx + 1}</span>
+                                                  {d.uploaded && (
+                                                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                                                      Uploaded
+                                                    </span>
+                                                  )}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => removeDocRow(d.id)}
+                                                    disabled={docDrafts.length <= 1 || d.submitting}
+                                                    className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground disabled:opacity-50"
+                                                  >
+                                                    Remove
+                                                  </button>
+                                                  <button
+                                                    type="button"
+                                                    disabled={d.submitting || d.uploaded}
+                                                    onClick={() => uploadDocRow(r.id, d.id)}
+                                                    className="rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
+                                                  >
+                                                    {d.submitting ? 'Uploading…' : d.uploaded ? 'Uploaded' : 'Upload'}
+                                                  </button>
+                                                </div>
+                                              </div>
+
+                                              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                                                <select
+                                                  value={d.type}
+                                                  disabled={d.submitting || d.uploaded}
+                                                  onChange={(e) => setDocRow(d.id, { type: e.target.value as DocType })}
+                                                  className={`${inputClass} w-full sm:w-auto sm:min-w-[8rem]`}
+                                                >
+                                                  {options.map((t) => (
+                                                    <option key={t} value={t}>
+                                                      {t}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                                <input
+                                                  value={d.fileUrl}
+                                                  disabled={d.submitting || d.uploaded}
+                                                  onChange={(e) => setDocRow(d.id, { fileUrl: e.target.value })}
+                                                  placeholder="File URL"
+                                                  className={`${inputClass} min-w-0 flex-1`}
+                                                />
+                                                <input
+                                                  value={d.fileHash}
+                                                  disabled={d.submitting || d.uploaded}
+                                                  onChange={(e) => setDocRow(d.id, { fileHash: e.target.value })}
+                                                  placeholder="SHA-256 (optional)"
+                                                  className={`${inputClass} w-full sm:w-52`}
+                                                />
+                                              </div>
+
+                                              {d.error && <p className="mt-2 text-xs text-destructive">{d.error}</p>}
+                                            </div>
+                                          );
+                                        })}
+
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                          <p className="text-xs text-muted-foreground">
+                                            Add documents progressively (Report, Survey, Agreement, etc.). Types already selected/uploaded won’t appear again.
+                                          </p>
+                                          <button
+                                            type="button"
+                                            onClick={addDocRow}
+                                            disabled={uploadedDocTypes.size + docDrafts.length >= DOC_TYPES.length}
+                                            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                                          >
+                                            Add document
+                                          </button>
+                                        </div>
+
+                                        {uploadedDocTypes.size > 0 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
+                                            className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                                          >
+                                            Mark DUE_DILIGENCE
+                                          </button>
+                                        )}
                                       </div>
-                                      {docUploadedForRequestId === r.id && (
-                                        <button
-                                          type="button"
-                                          onClick={() => updateStatus(r.id, 'DUE_DILIGENCE')}
-                                          className="mt-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                                        >
-                                          Mark DUE_DILIGENCE
-                                        </button>
-                                      )}
                                     </div>
 
                                     <h4 className="text-sm font-semibold text-foreground">Plots</h4>
