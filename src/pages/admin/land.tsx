@@ -477,6 +477,9 @@ const AdminLandPage: React.FC = () => {
 
   const mapHeights = useLandPageMapHeights();
 
+  const activeSatisfyRequestId = (formRequestId || satisfyParam).toString();
+  const activeSatisfyRequest = requests.find((r) => r.id === activeSatisfyRequestId);
+
   const sortedRequests = [...requests].sort((a, b) => {
     const aSat = isRequestSatisfied(a.status);
     const bSat = isRequestSatisfied(b.status);
@@ -963,6 +966,21 @@ const AdminLandPage: React.FC = () => {
                 {submitting ? 'Adding…' : 'Add plot'}
               </button>
               </form>
+
+              <div className="mt-6 rounded-xl border border-border bg-background/40 p-4">
+                <h3 className="mb-2 text-sm font-semibold text-foreground">Plots added for this request</h3>
+                {activeSatisfyRequest?.plots?.length ? (
+                  <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                    {activeSatisfyRequest.plots.map((p) => (
+                      <li key={p.id}>
+                        <span className="font-medium text-foreground">{p.name}</span> — {p.fullAddress}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No plots added yet. Add one or more plots using the form above.</p>
+                )}
+              </div>
             </section>
           )}
 
