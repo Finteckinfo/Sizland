@@ -127,7 +127,7 @@ const AdminLandPage: React.FC = () => {
   const REQUESTS_PER_PAGE = 10;
   const INVENTORY_PER_PAGE = 9;
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -155,7 +155,7 @@ const AdminLandPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   const fetchListings = useCallback(async () => {
     setListingsLoading(true);
@@ -176,7 +176,7 @@ const AdminLandPage: React.FC = () => {
       fetchRequests();
       fetchListings();
     }
-  }, [status, fetchListings]);
+  }, [status, fetchListings, fetchRequests]);
 
   useEffect(() => {
     if (satisfyParam && requests.some((r) => r.id === satisfyParam)) {

@@ -84,6 +84,7 @@ export default function LandsPage() {
       setLoading(true);
       loadProgress();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once when auth becomes ready; filters call loadProgress explicitly
   }, [status]);
 
   const handleApplyFilters = async () => {
