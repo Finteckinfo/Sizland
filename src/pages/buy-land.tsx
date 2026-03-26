@@ -28,6 +28,7 @@ export default function BuyLandPage() {
   const { data: session, status } = useSession();
   const { resolvedTheme: theme } = useTheme();
   const { activeAccount } = useWallet();
+  const isPilotEscrow = process.env.NEXT_PUBLIC_PILOT_ESCROW === 'true';
 
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>('LOGIN');
@@ -42,6 +43,7 @@ export default function BuyLandPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [selectedPlotId, setSelectedPlotId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [pilotEscrowSimulated, setPilotEscrowSimulated] = useState(false);
 
   const isDark = theme === 'dark';
 
@@ -69,6 +71,9 @@ export default function BuyLandPage() {
         const data = await res.json();
         const req = data.request;
         setRequest(req);
+        if (isPilotEscrow && req?.escrowId) {
+          setPilotEscrowSimulated(true);
+        }
         if (req?.currentStep) {
           setCurrentStep(req.currentStep);
         }
@@ -143,6 +148,17 @@ export default function BuyLandPage() {
 
   const handleSelectPlot = async () => {
     if (!selectedPlotId || !request?.id) return;
+
+    // Pilot mode: simulate successful escrow funding without requiring wallet funds.
+    if (isPilotEscrow) {
+      setPilotEscrowSimulated(true);
+      setRequest((prev: any) => ({
+        ...prev,
+        escrowId: prev?.escrowId || `PILOT_ESCROW_${Date.now()}`,
+      }));
+      return;
+    }
+
     await api('select-plot', {
       method: 'POST',
       body: JSON.stringify({ requestId: request.id, plotId: selectedPlotId }),
@@ -298,6 +314,11 @@ export default function BuyLandPage() {
             <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Confirmation</h2>
             <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Your request has been successfully created. We&apos;ll be in touch shortly.</p>
             <div className="space-y-6">
+              {pilotEscrowSimulated && (
+                <div className="mx-auto w-fit rounded-full bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                  Funded (Pilot)
+                </div>
+              )}
               <div>
                 <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Request Summary</h3>
                 <div className={`rounded-lg p-4 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
@@ -332,7 +353,15 @@ export default function BuyLandPage() {
                     { label: 'Request created', done: true },
                     { label: 'Plot found', done: request.status === 'PLOT_FOUND' || request.plots?.length > 0 },
                     { label: 'Escrow created', done: !!request.escrowId },
-                    { label: 'Due diligence', done: request.status === 'DUE_DILIGENCE' },
+                    {
+                      label: 'Due diligence',
+                      done:
+                        request.status === 'DUE_DILIGENCE' ||
+                        request.status === 'EXECUTION' ||
+                        request.status === 'REGISTRY_TRANSFER' ||
+                        request.status === 'COMPLETED' ||
+                        (Array.isArray(request.documents) && request.documents.length > 0),
+                    },
                     { label: 'Ownership transfer', done: request.status === 'REGISTRY_TRANSFER' || request.status === 'COMPLETED' },
                   ].map((item) => (
                     <li key={item.label} className="flex items-center gap-2">
@@ -343,7 +372,7 @@ export default function BuyLandPage() {
                 </ul>
               </div>
 
-              {request.status === 'DUE_DILIGENCE' && request.documents?.length > 0 && (
+              {Array.isArray(request.documents) && request.documents.length > 0 && (
                 <div>
                   <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
                     Due diligence evidence
@@ -411,10 +440,20 @@ export default function BuyLandPage() {
                   </div>
                   <button
                     onClick={handleSelectPlot}
-                    disabled={!selectedPlotId || loading}
+                    disabled={!selectedPlotId || loading || pilotEscrowSimulated || !!request?.escrowId}
                     className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Fund Escrow for Selected Plot ${selectedPlotId ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})` : ''}`}
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                    ) : pilotEscrowSimulated || !!request?.escrowId ? (
+                      'Funded (Pilot)'
+                    ) : (
+                      `Fund Escrow for Selected Plot ${
+                        selectedPlotId
+                          ? `($${request.plots.find((p: any) => p.id === selectedPlotId)?.escrowAmount?.toLocaleString() || '5,000'})`
+                          : ''
+                      }`
+                    )}
                   </button>
                 </div>
               ) : (
