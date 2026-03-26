@@ -28,7 +28,9 @@ export default function BuyLandPage() {
   const { data: session, status } = useSession();
   const { resolvedTheme: theme } = useTheme();
   const { activeAccount } = useWallet();
-  const isPilotEscrow = process.env.NEXT_PUBLIC_PILOT_ESCROW === 'true';
+  // Pilot mode should be enabled by default for showcases.
+  // Only disable if explicitly set to "false".
+  const isPilotEscrow = (process.env.NEXT_PUBLIC_PILOT_ESCROW ?? 'true') !== 'false';
 
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>('LOGIN');
@@ -71,9 +73,8 @@ export default function BuyLandPage() {
         const data = await res.json();
         const req = data.request;
         setRequest(req);
-        if (isPilotEscrow && req?.escrowId) {
-          setPilotEscrowSimulated(true);
-        }
+        const pilotIds = Array.isArray(req?.pilotEscrowPlotIds) ? req.pilotEscrowPlotIds : [];
+        if (isPilotEscrow && (req?.escrowId || pilotIds.length > 0)) setPilotEscrowSimulated(true);
         if (req?.currentStep) {
           setCurrentStep(req.currentStep);
         }
@@ -152,10 +153,16 @@ export default function BuyLandPage() {
     // Pilot mode: simulate successful escrow funding without requiring wallet funds.
     if (isPilotEscrow) {
       setPilotEscrowSimulated(true);
-      setRequest((prev: any) => ({
-        ...prev,
-        escrowId: prev?.escrowId || `PILOT_ESCROW_${Date.now()}`,
-      }));
+      setRequest((prev: any) => {
+        const prevIds = Array.isArray(prev?.pilotEscrowPlotIds) ? prev.pilotEscrowPlotIds : [];
+        const nextIds = Array.from(new Set([...prevIds, selectedPlotId]));
+        return {
+          ...prev,
+          pilotEscrowPlotIds: nextIds,
+          // Keep old flag for compatibility with UI expecting a single escrowId.
+          escrowId: prev?.escrowId || `PILOT_ESCROW_${nextIds.length}`,
+        };
+      });
       return;
     }
 
@@ -167,6 +174,18 @@ export default function BuyLandPage() {
   };
 
   if (!mounted) return null;
+
+  const pilotEscrowPlotIds: string[] = Array.isArray((request as any)?.pilotEscrowPlotIds)
+    ? (request as any).pilotEscrowPlotIds
+    : [];
+  const escrowCreatedCount =
+    pilotEscrowPlotIds.length > 0 ? pilotEscrowPlotIds.length : request?.escrowId ? 1 : 0;
+  const isSelectedPlotFunded =
+    !!selectedPlotId && pilotEscrowPlotIds.includes(selectedPlotId);
+  const disableFundButton =
+    !selectedPlotId ||
+    loading ||
+    (isPilotEscrow ? isSelectedPlotFunded : !!request?.escrowId);
 
   const cardClass = isDark
     ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
@@ -316,7 +335,7 @@ export default function BuyLandPage() {
             <div className="space-y-6">
               {pilotEscrowSimulated && (
                 <div className="mx-auto w-fit rounded-full bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                  Funded (Pilot)
+                  Funded (Pilot) · Escrow created ({escrowCreatedCount})
                 </div>
               )}
               <div>
@@ -352,7 +371,10 @@ export default function BuyLandPage() {
                   {[
                     { label: 'Request created', done: true },
                     { label: 'Plot found', done: request.status === 'PLOT_FOUND' || request.plots?.length > 0 },
-                    { label: 'Escrow created', done: !!request.escrowId },
+                    {
+                      label: escrowCreatedCount > 0 ? `Escrow created (${escrowCreatedCount})` : 'Escrow created',
+                      done: escrowCreatedCount > 0,
+                    },
                     {
                       label: 'Due diligence',
                       done:
@@ -419,6 +441,11 @@ export default function BuyLandPage() {
                               Satellite-Verified
                             </span>
                           )}
+                          {isPilotEscrow && pilotEscrowPlotIds.includes(plot.id) && (
+                            <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/90 text-white z-10">
+                              Funded
+                            </span>
+                          )}
                           {((plot as any).images?.[0]?.url || (plot as any).satelliteVerification?.imageryUrl) ? (
                             <Image
                               src={((plot as any).images?.[0]?.url || (plot as any).satelliteVerification?.imageryUrl) as string}
@@ -440,13 +467,13 @@ export default function BuyLandPage() {
                   </div>
                   <button
                     onClick={handleSelectPlot}
-                    disabled={!selectedPlotId || loading || pilotEscrowSimulated || !!request?.escrowId}
+                    disabled={disableFundButton}
                     className="w-full py-4 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30"
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                    ) : pilotEscrowSimulated || !!request?.escrowId ? (
-                      'Funded (Pilot)'
+                    ) : isPilotEscrow && isSelectedPlotFunded ? (
+                      'Escrow created (Pilot)'
                     ) : (
                       `Fund Escrow for Selected Plot ${
                         selectedPlotId
