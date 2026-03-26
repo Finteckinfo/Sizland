@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -64,6 +64,38 @@ type LandListing = {
 const DOC_TYPES = ['REPORT', 'SURVEY', 'AGREEMENT', 'OTHER'] as const;
 type DocType = (typeof DOC_TYPES)[number];
 
+/** European ISO 4217 codes commonly used in listings, plus KES. */
+const INVENTORY_CURRENCIES = [
+  { code: 'EUR', label: 'EUR' },
+  { code: 'GBP', label: 'GBP' },
+  { code: 'CHF', label: 'CHF' },
+  { code: 'SEK', label: 'SEK' },
+  { code: 'NOK', label: 'NOK' },
+  { code: 'DKK', label: 'DKK' },
+  { code: 'PLN', label: 'PLN' },
+  { code: 'CZK', label: 'CZK' },
+  { code: 'HUF', label: 'HUF' },
+  { code: 'RON', label: 'RON' },
+  { code: 'BGN', label: 'BGN' },
+  { code: 'ISK', label: 'ISK' },
+  { code: 'TRY', label: 'TRY' },
+  { code: 'ALL', label: 'ALL' },
+  { code: 'MKD', label: 'MKD' },
+  { code: 'RSD', label: 'RSD' },
+  { code: 'UAH', label: 'UAH' },
+  { code: 'KES', label: 'KES' },
+] as const;
+
+function resolveInventoryCurrency(raw: string): string {
+  const upper = raw.trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+  if (!upper) return 'KES';
+  const exact = INVENTORY_CURRENCIES.find((c) => c.code === upper);
+  if (exact) return exact.code;
+  const prefix = INVENTORY_CURRENCIES.find((c) => c.code.startsWith(upper));
+  if (prefix) return prefix.code;
+  return 'KES';
+}
+
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleString();
@@ -80,6 +112,7 @@ function isRequestSatisfied(status: string) {
 }
 
 const AdminLandPage: React.FC = () => {
+  const inventoryCurrencyListId = useId();
   const router = useRouter();
   const { data: session, status } = useSession();
   const [requests, setRequests] = useState<LandRequest[]>([]);
@@ -112,7 +145,7 @@ const AdminLandPage: React.FC = () => {
   const [invDesc, setInvDesc] = useState('');
   const [invAddress, setInvAddress] = useState('');
   const [invPrice, setInvPrice] = useState('');
-  const [invCurrency, setInvCurrency] = useState('USD');
+  const [invCurrency, setInvCurrency] = useState<string>('KES');
   const [invLat, setInvLat] = useState('');
   const [invLng, setInvLng] = useState('');
   const [invStatus, setInvStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
@@ -333,7 +366,7 @@ const AdminLandPage: React.FC = () => {
           description: invDesc.trim() || undefined,
           fullAddress: invAddress.trim(),
           listPrice: invPrice.trim() ? parseFloat(invPrice) : undefined,
-          currency: invCurrency.trim() || 'USD',
+          currency: resolveInventoryCurrency(invCurrency),
           latitude: lat,
           longitude: lng,
           status: invStatus,
@@ -345,6 +378,7 @@ const AdminLandPage: React.FC = () => {
       setInvDesc('');
       setInvAddress('');
       setInvPrice('');
+      setInvCurrency('KES');
       setInvLat('');
       setInvLng('');
       setInvStatus('DRAFT');
@@ -675,7 +709,7 @@ const AdminLandPage: React.FC = () => {
                             <span className="font-semibold text-foreground">{L.title}</span>
                             <p className="line-clamp-2 text-sm text-muted-foreground">{L.description || L.fullAddress}</p>
                             <p className="mt-auto pt-2 text-sm font-medium text-foreground">
-                              {L.listPrice != null ? `${L.currency || 'USD'} ${L.listPrice.toLocaleString()}` : 'Price on request'}
+                              {L.listPrice != null ? `${L.currency || 'KES'} ${L.listPrice.toLocaleString()}` : 'Price on request'}
                             </p>
                           </div>
                         </div>
@@ -838,21 +872,38 @@ const AdminLandPage: React.FC = () => {
                   <label className="mb-1 block text-sm font-medium text-foreground">Title *</label>
                   <input value={invTitle} onChange={(e) => setInvTitle(e.target.value)} className={inputClass} required />
                 </div>
-                <div>
+                <div className="min-w-0 sm:col-span-1">
                   <label className="mb-1 block text-sm font-medium text-foreground">List price</label>
-                  <div className="flex gap-2">
+                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
                     <input
                       type="number"
+                      min={0}
+                      step="any"
                       value={invPrice}
                       onChange={(e) => setInvPrice(e.target.value)}
-                      className={`${inputClass} min-w-0 flex-1`}
+                      className={`${inputClass} min-h-11 min-w-0 flex-1 py-2.5 text-base sm:min-w-0`}
+                      placeholder="Amount"
                     />
-                    <input
-                      value={invCurrency}
-                      onChange={(e) => setInvCurrency(e.target.value)}
-                      className={`${inputClass} w-[4.5rem] shrink-0 px-2 text-center`}
-                      placeholder="USD"
-                    />
+                    <>
+                      <input
+                        type="text"
+                        list={inventoryCurrencyListId}
+                        value={invCurrency}
+                        onChange={(e) => setInvCurrency(e.target.value.toUpperCase())}
+                        onBlur={() => setInvCurrency(resolveInventoryCurrency(invCurrency))}
+                        maxLength={3}
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-label="Currency"
+                        placeholder="e.g. KES"
+                        className={`${inputClass} h-11 w-full shrink-0 px-2 py-2 font-mono text-xs uppercase sm:w-[6.5rem] sm:max-w-[7rem] sm:px-1.5 sm:text-[11px]`}
+                      />
+                      <datalist id={inventoryCurrencyListId}>
+                        {INVENTORY_CURRENCIES.map((c) => (
+                          <option key={c.code} value={c.code} label={c.label} />
+                        ))}
+                      </datalist>
+                    </>
                   </div>
                 </div>
               </div>
@@ -932,7 +983,7 @@ const AdminLandPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">{listingModal.description || '—'}</p>
                   <p className="text-lg font-semibold text-foreground">
                     {listingModal.listPrice != null
-                      ? `${listingModal.currency || 'USD'} ${listingModal.listPrice.toLocaleString()}`
+                      ? `${listingModal.currency || 'KES'} ${listingModal.listPrice.toLocaleString()}`
                       : 'Price on request'}
                   </p>
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:flex-wrap">
