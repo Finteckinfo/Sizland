@@ -74,6 +74,7 @@ function isBuyOnlyPath(pathname: string): boolean {
 function isAllowedOnSolutionsHost(pathname: string): boolean {
   if (pathname === '/') return true
   if (pathMatchesPrefix(pathname, '/solutions')) return true
+  if (pathMatchesPrefix(pathname, '/ratecard')) return true
   for (const p of SHARED_AUTH_PREFIXES) {
     if (pathMatchesPrefix(pathname, p)) return true
   }
@@ -94,6 +95,7 @@ const publicRoutes = [
   '/blog',
   '/whitepaper',
   '/solutions',
+  '/ratecard',
 ]
 
 // API routes that are public

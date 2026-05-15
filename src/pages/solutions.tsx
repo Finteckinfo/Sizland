@@ -203,25 +203,37 @@ const SolutionsPage: NextPage = () => {
                     Select a specialized module to deploy. Our architecture provides the technical bedrock for modern infrastructure.
                   </p>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                     <Link
                       href={`${MAIN_DOMAIN}/auth-choice`}
-                      className="inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
+                      className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
                       aria-label="Initialize deployment - sign in or create account"
                     >
                       INITIALIZE DEPLOYMENT
                     </Link>
                     <Link
-                      href={`${MAIN_DOMAIN}/whitepaper`}
-                      className={`inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-bold rounded-full transition-all duration-200 ${
+                      href="/ratecard"
+                      className={`inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base font-bold rounded-full transition-all duration-200 border ${
                         isDark
-                          ? "text-gray-200 border border-emerald-500/40 hover:bg-emerald-500/10"
-                          : "text-gray-800 border border-emerald-600/50 hover:bg-emerald-50"
+                          ? "text-gray-200 border-emerald-500/40 hover:bg-emerald-500/10"
+                          : "text-gray-800 border-emerald-600/50 hover:bg-emerald-50"
+                      }`}
+                      aria-label="View Sizland web development rate card"
+                    >
+                      Our Ratecard
+                      <Icons.ArrowRight className="w-4 h-4 shrink-0" />
+                    </Link>
+                    <Link
+                      href={`${MAIN_DOMAIN}/whitepaper`}
+                      className={`inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base font-bold rounded-full transition-all duration-200 border ${
+                        isDark
+                          ? "text-gray-200 border-emerald-500/40 hover:bg-emerald-500/10"
+                          : "text-gray-800 border-emerald-600/50 hover:bg-emerald-50"
                       }`}
                       aria-label="Read Sizland whitepaper"
                     >
                       Read Whitepaper
-                      <Icons.ArrowRight className="w-4 h-4" />
+                      <Icons.ArrowRight className="w-4 h-4 shrink-0" />
                     </Link>
                   </div>
                 </div>
