@@ -15,6 +15,11 @@ const nextConfig = {
           has: [{ type: 'host', value: 'solutions.siz.land' }],
         },
         {
+          source: '/ratecard',
+          destination: '/ratecard',
+          has: [{ type: 'host', value: 'solutions.siz.land' }],
+        },
+        {
           source: '/',
           destination: '/buy-land',
           has: [{ type: 'host', value: 'buy.siz.land' }],
