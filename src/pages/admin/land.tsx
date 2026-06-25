@@ -965,7 +965,7 @@ const AdminLandPage: React.FC = () => {
               >
                 {submitting ? 'Adding…' : 'Add plot'}
               </button>
-              </form>
+            </form>
 
               <div className="mt-6 rounded-xl border border-border bg-background/40 p-4">
                 <h3 className="mb-2 text-sm font-semibold text-foreground">Plots added for this request</h3>
@@ -995,7 +995,7 @@ const AdminLandPage: React.FC = () => {
                 >
                   ← Back to dashboard
                 </button>
-              </div>
+          </div>
 
               <form onSubmit={submitInventory} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -1037,26 +1037,26 @@ const AdminLandPage: React.FC = () => {
                     </>
                   </div>
                 </div>
-              </div>
-              <div>
+                          </div>
+                            <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Full address *</label>
                 <input value={invAddress} onChange={(e) => setInvAddress(e.target.value)} className={inputClass} required />
-              </div>
-              <div>
+                            </div>
+                            <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
                 <textarea
                   value={invDesc}
                   onChange={(e) => setInvDesc(e.target.value)}
                   rows={3}
                   className={`${inputClass} resize-y`}
-                />
-              </div>
+                              />
+                            </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Latitude</label>
                   <input value={invLat} onChange={(e) => setInvLat(e.target.value)} className={`${inputClass} font-mono text-xs sm:text-sm`} />
-                </div>
-                <div>
+                          </div>
+                          <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Longitude</label>
                   <input value={invLng} onChange={(e) => setInvLng(e.target.value)} className={`${inputClass} font-mono text-xs sm:text-sm`} />
                 </div>
@@ -1082,16 +1082,16 @@ const AdminLandPage: React.FC = () => {
                     <option value="DRAFT">Draft</option>
                     <option value="PUBLISHED">Published</option>
                   </select>
-                </label>
+                            </label>
                 {invError && <span className="text-sm text-destructive">{invError}</span>}
-                <button
-                  type="submit"
+                          <button
+                            type="submit"
                   disabled={invSubmitting}
                   className="rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 sm:ml-auto"
                 >
                   {invSubmitting ? 'Saving…' : 'Save listing'}
-                </button>
-              </div>
+                            </button>
+                          </div>
               </form>
             </section>
           )}
@@ -1132,9 +1132,9 @@ const AdminLandPage: React.FC = () => {
                     >
                       Close
                     </button>
-                  </div>
+                </div>
                 </>
-              )}
+          )}
             </DialogContent>
           </Dialog>
         </>
