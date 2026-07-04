@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Sizland',
     short_name: 'SIZ',
-    description: 'Sizland Native',
+    description: 'The decentralized operating system for sovereign remote workers.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

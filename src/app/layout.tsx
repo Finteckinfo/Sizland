@@ -14,9 +14,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Sizland - Decentralized Platform for Remote Teams',
-  description: 'Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain. Experience blockchain-powered ERP and investment opportunities.',
-  keywords: ['blockchain', 'remote teams', 'decentralized', 'ERP', 'DeFi', 'crypto', 'web3', 'freelancers', 'blockchain payments'],
+  title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
+  description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
+  keywords: ['blockchain', 'remote workers', 'decentralized', 'digital identity', 'DiD', 'web3', 'freelancers', 'sovereign reputation', 'multi-chain'],
   authors: [{ name: 'Sizland Dev Argwings' }],
   creator: 'Sizland',
   publisher: 'Sizland',
@@ -29,21 +29,21 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://www.siz.land',
     siteName: 'Sizland',
-    title: 'Sizland - Decentralized Platform for Remote Teams',
-    description: 'Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain.',
+    title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
+    description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
     images: [
       {
         url: '/metaimage.png',
         width: 1200,
         height: 630,
-        alt: 'Sizland - Decentralized Platform for Remote Teams',
+        alt: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sizland - Decentralized Platform for Remote Teams',
-    description: 'Sizland unites remote teams, founders, and freelancers on a decentralized platform where tasks, payments, and growth live transparently on the blockchain.',
+    title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
+    description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
     images: ['/metaimage.png'],
     creator: '@sizlandofficial',
     site: '@sizlandofficial',

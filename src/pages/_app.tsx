@@ -2,7 +2,7 @@ import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AppProps } from "next/app";
-import { Montserrat, Inter } from "next/font/google";
+import { Montserrat, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -36,9 +36,15 @@ export const monsterrat = Montserrat({
   weight: "500",
 });
 
-export const inter = Inter({
+export const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-hanken-grotesk",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+export const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -56,7 +62,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <Providers>
               <ThemeProvider
                 attribute="class"
-                defaultTheme="system"
+                defaultTheme="dark"
                 enableSystem
                 disableTransitionOnChange
               >
@@ -85,7 +91,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`${monsterrat.variable} ${inter.variable} font-sans`}>
+    <div
+      className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body text-on-surface`}
+    >
       <GlowBackground />
       <AnimatedGrid />
       <Navbar />
