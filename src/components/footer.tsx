@@ -25,7 +25,7 @@ const socialLinks = [
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-surface-container-lowest border-t border-border-subtle">
+    <footer className="bg-[#0A0A0A] border-t border-white/10 text-[#bbcabf]">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter px-4 sm:px-6 md:px-margin-desktop py-10 md:py-12 max-w-container-max mx-auto">
         <div className="flex flex-col space-y-4">
           <div className="flex items-center gap-3">
@@ -38,10 +38,10 @@ export const Footer: React.FC = () => {
             />
             <span className="font-headline text-lg text-terminal-green tracking-headline">Sizland</span>
           </div>
-          <p className="font-body text-on-surface-variant text-sm">
+          <p className="font-body text-sm text-[#9ca8a2]">
             Confidential — Sizland 2026 — Proprietary Technology
           </p>
-          <p className="font-label text-on-surface-variant text-xs">
+          <p className="font-label text-xs text-[#9ca8a2]">
             Engineering Total Sovereignty.
           </p>
           <div className="flex gap-4 pt-2">
@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.label}
-                className="font-body text-on-surface-variant hover:text-terminal-green transition-colors"
+                className="font-body text-[#9ca8a2] hover:text-terminal-green transition-colors"
               >
                 <social.icon />
               </Link>
@@ -65,7 +65,7 @@ export const Footer: React.FC = () => {
             <Link
               key={link.label}
               href={link.href}
-              className="font-body text-on-surface-variant hover:text-terminal-green transition-colors"
+              className="font-body text-[#9ca8a2] hover:text-terminal-green transition-colors"
             >
               {link.label}
             </Link>

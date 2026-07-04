@@ -61,6 +61,15 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Stitch marketing tokens — light mode defaults */
+    --stitch-surface-base: #f7faf8;
+    --stitch-surface-elevated: #eef4f0;
+    --stitch-surface-container-lowest: #ffffff;
+    --stitch-surface-variant: #9ca8a2;
+    --stitch-border-subtle: #c8d6ce;
+    --stitch-on-surface: #0f1412;
+    --stitch-on-surface-variant: #3d4f46;
   }
 
   .dark {
@@ -100,6 +109,14 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --stitch-surface-base: #0a0a0a;
+    --stitch-surface-elevated: #1a1a1a;
+    --stitch-surface-container-lowest: #0e0e0e;
+    --stitch-surface-variant: #353534;
+    --stitch-border-subtle: #262626;
+    --stitch-on-surface: #e5e2e1;
+    --stitch-on-surface-variant: #bbcabf;
   }
 }
 
@@ -126,9 +143,14 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(26, 26, 26, 0.4);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--stitch-border-subtle);
+  }
+
+  .dark .glass-panel {
+    background: rgba(26, 26, 26, 0.4);
     border: 1px solid #262626;
   }
 
@@ -220,6 +242,10 @@
   .stitch-card:hover {
     transform: translateY(-2px);
   }
+
+  .animate-planned-pulse {
+    animation: plannedDotPulse 2.5s ease-in-out infinite;
+  }
 }
 
 @keyframes glowPulse {
@@ -243,6 +269,20 @@
   }
 }
 
+@keyframes plannedDotPulse {
+  0%,
+  100% {
+    background-color: var(--stitch-surface-variant);
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.55);
+    transform: scale(1.15);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scanline::before {
     display: none;
@@ -251,6 +291,7 @@
   .animate-glow-pulse,
   .animate-gradient-shift,
   .animate-pulse,
+  .animate-planned-pulse,
   .animate-\[spin_60s_linear_infinite\],
   .animate-\[spin_40s_linear_infinite_reverse\],
   .animate-\[spin_70s_linear_infinite_reverse\],

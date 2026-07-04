@@ -92,7 +92,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body text-on-surface`}
+      className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body bg-surface-base text-on-surface`}
     >
       <GlowBackground />
       <AnimatedGrid />

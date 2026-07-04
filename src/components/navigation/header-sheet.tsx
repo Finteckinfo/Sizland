@@ -29,7 +29,7 @@ export const HeaderSheet: React.FC<{
       <SheetTrigger asChild className="z-[500]">
         <MenuIcon className="text-terminal-green h-6 w-6" />
       </SheetTrigger>
-      <SheetContent className="border-border-subtle bg-surface-base/95 backdrop-blur-xl flex flex-col">
+      <SheetContent className="border-white/10 bg-[#0A0A0A]/95 backdrop-blur-xl flex flex-col text-[#e5e2e1]">
         <VisuallyHidden>
           <SheetTitle>Mobile Menu</SheetTitle>
           <SheetDescription>Navigation menu</SheetDescription>
