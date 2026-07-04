@@ -70,6 +70,14 @@
     --stitch-border-subtle: #c8d6ce;
     --stitch-on-surface: #0f1412;
     --stitch-on-surface-variant: #3d4f46;
+
+    --stitch-chrome-nav-solid: #ffffff;
+    --stitch-chrome-footer-solid: #ffffff;
+    --stitch-chrome-nav-edge: rgba(16, 185, 129, 0.45);
+    --stitch-chrome-nav-edge-glow: rgba(16, 185, 129, 0.22);
+    --stitch-chrome-footer-tint: rgba(16, 185, 129, 0.1);
+    --stitch-chrome-footer-tint-mid: rgba(16, 185, 129, 0.04);
+    --stitch-chrome-footer-separator: rgba(200, 214, 206, 0.85);
   }
 
   .dark {
@@ -117,6 +125,14 @@
     --stitch-border-subtle: #262626;
     --stitch-on-surface: #e5e2e1;
     --stitch-on-surface-variant: #bbcabf;
+
+    --stitch-chrome-nav-solid: #000000;
+    --stitch-chrome-footer-solid: #000000;
+    --stitch-chrome-nav-edge: rgba(167, 139, 250, 0.6);
+    --stitch-chrome-nav-edge-glow: rgba(139, 92, 246, 0.32);
+    --stitch-chrome-footer-tint: rgba(20, 184, 166, 0.14);
+    --stitch-chrome-footer-tint-mid: rgba(20, 184, 166, 0.05);
+    --stitch-chrome-footer-separator: rgba(38, 38, 38, 0.95);
   }
 }
 
@@ -193,6 +209,47 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+  }
+
+  .chrome-tint-nav {
+    position: relative;
+    isolation: isolate;
+    border-bottom: none;
+    background-color: transparent;
+    background-image: linear-gradient(
+      to bottom,
+      var(--stitch-chrome-nav-solid) 0%,
+      var(--stitch-chrome-nav-solid) 58%,
+      color-mix(in srgb, var(--stitch-chrome-nav-solid) 72%, transparent) 78%,
+      color-mix(in srgb, var(--stitch-chrome-nav-solid) 28%, transparent) 92%,
+      transparent 100%
+    );
+  }
+
+  .chrome-tint-footer {
+    position: relative;
+    isolation: isolate;
+    border-top: none;
+    background-color: transparent;
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--stitch-chrome-footer-solid) 35%, transparent) 0.75rem,
+      color-mix(in srgb, var(--stitch-chrome-footer-solid) 70%, transparent) 1.25rem,
+      var(--stitch-chrome-footer-solid) 2rem,
+      var(--stitch-chrome-footer-solid) 100%
+    );
+  }
+
+  .chrome-tint-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--stitch-chrome-footer-separator);
+    pointer-events: none;
   }
 
   .scanline {
