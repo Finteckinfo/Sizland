@@ -65,36 +65,36 @@
 
   .dark {
     /* CSS: .bg-gradient { background: var(--gradient) } */
-    --gradient: linear-gradient(to top left, #020617, #000000);
+    --gradient: linear-gradient(to top left, #0A0A0A, #000000);
 
-    --background: #000000; /* Dark mode: true black */
-    --foreground: hsl(217, 4.7%, 96.6%);
+    --background: #0A0A0A;
+    --foreground: #e5e2e1;
 
-    --muted: 217 23.5% 9.6%;
-    --muted-foreground: 217 4.7% 53.2%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 150 8% 74%;
 
-    --popover: 217 55.6% 4.16%;
-    --popover-foreground: 217 4.7% 96.6%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 90%;
 
-    --card: 217 55.6% 4.16%;
-    --card-foreground: 217 4.7% 96.6%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 90%;
 
-    --border: 217 23.5% 9.6%;
-    --input: 217 23.5% 9.6%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
 
-    --primary: 217 47% 32%;
-    --primary-foreground: 217 4.7% 96.6%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 217 23.5% 9.6%;
-    --secondary-foreground: 217 4.7% 96.6%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --accent: 217 23.5% 9.6%;
-    --accent-foreground: 217 4.7% 96.6%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 90%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 217 4.7% 96.6%;
+    --destructive-foreground: 0 0% 90%;
 
-    --ring: 217 47% 32%;
+    --ring: 160 84% 39%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -111,8 +111,8 @@
   }
 
   .dark {
-    --background: #000000; /* Dark mode: true black */
-    --foreground: hsl(217, 4.7%, 96.6%);
+    --background: #0A0A0A;
+    --foreground: #e5e2e1;
   }
 
   /* Apply custom background and foreground */
@@ -120,6 +120,146 @@
     background-color: var(--background);
     color: var(--foreground);
     overflow-x: hidden;
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(26, 26, 26, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid #262626;
+  }
+
+  .grid-bg {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, rgba(38, 38, 38, 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(38, 38, 38, 0.5) 1px, transparent 1px);
+  }
+
+  .terminal-glow {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  }
+
+  .terminal-glow-active {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    border-color: #10b981;
+  }
+
+  .font-body {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+  }
+
+  .font-label {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .font-mono-custom {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .font-headline {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .scanline {
+    position: relative;
+  }
+
+  .scanline::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background:
+      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+      linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 6s ease-in-out infinite;
+  }
+
+  .animate-gradient-shift {
+    background-size: 200% auto;
+    animation: gradientShift 4s ease-in-out infinite alternate;
+  }
+
+  .stitch-btn {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .stitch-btn:hover,
+  .stitch-btn:focus-visible {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .stitch-card {
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stitch-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline::before {
+    display: none;
+  }
+
+  .animate-glow-pulse,
+  .animate-gradient-shift,
+  .animate-pulse,
+  .animate-\[spin_60s_linear_infinite\],
+  .animate-\[spin_40s_linear_infinite_reverse\],
+  .animate-\[spin_70s_linear_infinite_reverse\],
+  .animate-\[spin_90s_linear_infinite\] {
+    animation: none !important;
+  }
+
+  .stitch-card:hover {
+    transform: none;
   }
 }
 
