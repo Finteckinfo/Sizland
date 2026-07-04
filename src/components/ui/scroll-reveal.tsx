@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { motion, type Variants, type Transition } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const easeOut: Transition["ease"] = [0.22, 1, 0.36, 1];
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 interface ScrollRevealProps {
   children: React.ReactNode;
