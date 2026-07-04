@@ -3,9 +3,9 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { motion, type Variants, type Transition } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const easeOut: Transition["ease"] = [0.22, 1, 0.36, 1];
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const scrollToSection = (id: string) => {
   const section = document.querySelector(id) as HTMLElement;
