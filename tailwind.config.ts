@@ -10,6 +10,7 @@ module.exports = {
     "md:row-span-2",
     "animate-[spin_70s_linear_infinite_reverse]",
     "animate-[spin_90s_linear_infinite]",
+    "animate-planned-pulse",
   ],
   theme: {
     extend: {
@@ -24,13 +25,13 @@ module.exports = {
         "terminal-green": "#10B981",
         "neon-accent": "#00FF00",
         "encryption-purple": "#4F46E5",
-        "surface-base": "#0A0A0A",
-        "surface-elevated": "#1A1A1A",
-        "surface-container-lowest": "#0e0e0e",
-        "surface-variant": "#353534",
-        "border-subtle": "#262626",
-        "on-surface": "#e5e2e1",
-        "on-surface-variant": "#bbcabf",
+        "surface-base": "var(--stitch-surface-base)",
+        "surface-elevated": "var(--stitch-surface-elevated)",
+        "surface-container-lowest": "var(--stitch-surface-container-lowest)",
+        "surface-variant": "var(--stitch-surface-variant)",
+        "border-subtle": "var(--stitch-border-subtle)",
+        "on-surface": "var(--stitch-on-surface)",
+        "on-surface-variant": "var(--stitch-on-surface-variant)",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

@@ -40,7 +40,7 @@ const phases: Phase[] = [
     label: 'Planned',
     labelColor: 'text-on-surface-variant',
     dotClass:
-      'bg-surface-variant border border-border-subtle group-hover:border-terminal-green/40 group-hover:bg-terminal-green/20 transition-colors duration-200',
+      'bg-surface-variant border border-border-subtle animate-planned-pulse',
     cardHoverClass: 'group-hover:border-terminal-green/50',
     title: 'Scale & Sovereignty',
     description:

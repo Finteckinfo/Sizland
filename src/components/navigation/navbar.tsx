@@ -144,7 +144,7 @@ export const Navbar: React.FC = () => {
     "font-body text-on-surface-variant text-xs lg:text-sm hover:text-terminal-green transition-colors duration-200 whitespace-nowrap";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border-subtle bg-surface-base/95 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 chrome-tint-nav backdrop-blur-md">
       <div className="flex justify-between items-center w-full px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-16 md:h-20 gap-3">
         <Link href={logoHref} className="flex items-center gap-3 shrink-0">
           <Image
