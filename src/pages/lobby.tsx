@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PageLayout } from "@/components/page-layout";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
@@ -86,6 +86,10 @@ const LobbyPage = () => {
   const [mounted, setMounted] = useState(false);
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  // Tracks whether we have seen both auth systems settle at least once.
+  // Prevents a race condition on reload where status briefly flickers
+  // to "unauthenticated" before the JWT cookie is validated.
+  const sessionChecked = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -208,13 +212,18 @@ const LobbyPage = () => {
   ];
 
   useEffect(() => {
-    if (mounted && !isAuthed && status !== "loading" && isReady) {
-      // Redirect to login if neither NextAuth session nor wallet is available
+    if (!mounted) return;
+    // Mark session as checked only once both auth systems have settled
+    if (status !== "loading" && isReady) {
+      sessionChecked.current = true;
+    }
+    // Only redirect if we have confirmed both systems are ready and user is not authed
+    if (sessionChecked.current && !isAuthed) {
       router.push("/login");
     }
   }, [mounted, isAuthed, status, isReady, router]);
 
-  if (!mounted || (!isAuthed && (status === "loading" || !isReady))) {
+  if (!mounted || (!isAuthed && (status === "loading" || !isReady || !sessionChecked.current))) {
     return (
       <PageLayout title="Loading - Sizland" description="Loading your dashboard" requireAuth={true}>
         <div className="flex items-center justify-center min-h-[60vh]">
