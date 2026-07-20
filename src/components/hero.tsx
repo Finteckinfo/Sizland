@@ -37,7 +37,7 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative flex flex-col items-center justify-center px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24"
+      className="relative flex flex-col items-center justify-center px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto overflow-hidden pt-8 pb-10 md:pt-20 md:pb-24"
     >
       <motion.div
         className="relative z-10 text-center w-full max-w-4xl mx-auto flex flex-col items-center gap-6 md:gap-8"
@@ -85,7 +85,7 @@ const Hero = () => {
       </motion.div>
 
       <motion.div
-        className="w-full max-w-5xl mt-10 md:mt-16 relative z-10 glass-panel rounded overflow-hidden aspect-[4/3] sm:aspect-video border border-border-subtle stitch-card"
+        className="w-full max-w-5xl mt-6 md:mt-16 relative z-10 glass-panel rounded overflow-hidden aspect-[4/3] sm:aspect-video border border-border-subtle stitch-card"
         initial={{ opacity: 0, y: 32, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, delay: 0.45, ease: easeOut }}

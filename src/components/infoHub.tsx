@@ -9,7 +9,7 @@ const InfoHub = () => {
   return (
     <section
       id="community"
-      className="py-16 md:py-24 lg:py-32 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto text-center border-t border-border-subtle"
+      className="py-8 md:py-24 lg:py-32 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto text-center border-t border-border-subtle"
     >
       <ScrollReveal>
         <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-on-surface mb-4 md:mb-6 tracking-headline leading-snug">
