@@ -3,8 +3,25 @@ const path = require('path');
 const webpack = require('webpack');
 
 /** @type {import('next').NextConfig} */
+const SIZLAND_WALLET_URL =
+  process.env.NEXT_PUBLIC_SIZLAND_WALLET_URL || 'https://wallet.siz.land';
+
 const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcrypt'],
+  async redirects() {
+    const walletDest = SIZLAND_WALLET_URL;
+    const legacyWalletPaths = [
+      '/wallet',
+      '/new-wallet',
+      '/unlock-wallet',
+      '/wallet-auth',
+    ];
+    return legacyWalletPaths.map((source) => ({
+      source,
+      destination: walletDest,
+      permanent: false,
+    }));
+  },
   async rewrites() {
     return {
       // beforeFiles runs BEFORE filesystem - required so root / doesn't match index first
