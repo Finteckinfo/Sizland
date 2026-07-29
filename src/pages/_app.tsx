@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { Providers } from '@/providers/index'
 import { SessionProvider } from "next-auth/react";
 import { config } from "../wagmi";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -59,18 +58,16 @@ function MyApp({ Component, pageProps }: AppProps) {
       <SessionProvider session={pageProps.session}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={client}>
-            <Providers>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </ThemeProvider>
-            </Providers>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </ThemeProvider>
           </QueryClientProvider>
         </WagmiProvider>
         <SpeedInsights />

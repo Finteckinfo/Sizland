@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { Code, Users } from "lucide-react";
 import ScrollReveal from "./ui/scroll-reveal";
+import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
 const InfoHub = () => {
   return (
@@ -31,13 +31,15 @@ const InfoHub = () => {
           <Code className="h-4 w-4 shrink-0" />
           Build in Public
         </a>
-        <Link
-          href="/wallet"
+        <a
+          href={SIZLAND_WALLET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="stitch-btn bg-transparent border border-terminal-green text-terminal-green font-label text-sm px-5 sm:px-8 py-3.5 sm:py-4 rounded hover:bg-terminal-green/10 transition-colors flex items-center justify-center gap-2"
         >
           <Users className="h-4 w-4 shrink-0" />
           Join Our Developer Community
-        </Link>
+        </a>
       </ScrollReveal>
     </section>
   );

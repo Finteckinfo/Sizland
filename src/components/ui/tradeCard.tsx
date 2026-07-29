@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
 import { TokenPurchaseForm } from './token-purchase-form';
-import { useWallet } from '@txnlab/use-wallet-react';
 import { calculateTokenPrice } from '@/lib/stripe/config';
 import { useTheme } from 'next-themes';
 
@@ -12,7 +11,6 @@ export const TradeCard: React.FC = () => {
   const isDark = theme === 'dark';
   const [amount, setAmount] = useState<number>(0);
   const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
-  const { activeAccount } = useWallet();
 
   // Use centralized pricing calculation
   const pricing = amount > 0 ? calculateTokenPrice(amount) : { pricePerToken: 0.25, subtotal: 0, processingFee: 0, total: 0 };
@@ -22,10 +20,6 @@ export const TradeCard: React.FC = () => {
   const total = pricing.total;
 
   const handleBuyClick = () => {
-    if (!activeAccount?.address) {
-      alert('Please connect your wallet first to purchase SIZ tokens');
-      return;
-    }
     setShowPurchaseForm(true);
   };
 

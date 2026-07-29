@@ -3,9 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Button1 } from '@/components/ui/button1';
-// Call the API route instead of importing server actions directly to avoid bundling server-only deps in the browser
 import { calculateTokenPrice, validateTokenAmount, formatCurrency, convertUSDToCurrency, getCurrencySymbol, PAYSTACK_PRODUCT_CONFIG } from '@/lib/paystack/config';
-import { useWallet } from '@txnlab/use-wallet-react';
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 
 
@@ -14,8 +12,8 @@ interface TokenPurchaseFormProps {
 }
 
 export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className = '' }) => {
-  const { activeAccount } = useWallet();
   const [tokenAmount, setTokenAmount] = useState<number>(100);
+  const [walletAddress, setWalletAddress] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,12 +61,10 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
 
   // Handle Paystack payment
   const handlePaystackPayment = async () => {
-    if (!activeAccount?.address) {
-      setError('Please connect your wallet first');
+    if (!walletAddress.trim()) {
+      setError('Please enter your wallet address');
       return;
     }
-
-
 
     if (!userEmail.trim()) {
       setError('Please enter your email address');
@@ -93,9 +89,9 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
         body: JSON.stringify({
           tokenAmount,
           userEmail: userEmail.trim(),
-          userWalletAddress: activeAccount.address,
-          successUrl: `${window.location.origin}/wallet?success=true&tokens=${tokenAmount}`,
-          cancelUrl: `${window.location.origin}/wallet?canceled=true`,
+          userWalletAddress: walletAddress.trim(),
+          successUrl: `${window.location.origin}/buy-land?success=true&tokens=${tokenAmount}`,
+          cancelUrl: `${window.location.origin}/buy-land?canceled=true`,
           currency: selectedCurrency,
         }),
       });
@@ -189,6 +185,25 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
         </p>
       </div>
 
+      {/* Wallet Address */}
+      <div>
+        <label htmlFor="walletAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Wallet Address
+        </label>
+        <input
+          id="walletAddress"
+          type="text"
+          value={walletAddress}
+          onChange={(e) => setWalletAddress(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          placeholder="Your Algorand or EVM address"
+          required
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Tokens will be delivered to this address
+        </p>
+      </div>
+
       {/* Email Input */}
       <div>
         <label htmlFor="userEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -266,7 +281,7 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
       <div className="space-y-3">
         <Button
           onClick={handlePaystackPayment}
-          disabled={isLoading || !activeAccount?.address || !userEmail.trim() || !pricing}
+          disabled={isLoading || !walletAddress.trim() || !userEmail.trim() || !pricing}
           className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isLoading ? (
@@ -282,9 +297,9 @@ export const TokenPurchaseForm: React.FC<TokenPurchaseFormProps> = ({ className 
           )}
         </Button>
 
-        {!activeAccount?.address && (
+        {!walletAddress.trim() && (
           <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-            Please connect your wallet to continue
+            Please enter your wallet address to continue
           </p>
         )}
       </div>

@@ -15,13 +15,12 @@ const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
   const { resolvedTheme: theme } = useTheme();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/signup', '/wallet-auth', '/auth-choice', '/sso-callback', '/404', '/terms', '/privacy', '/blog', '/whitepaper', '/solutions', '/buy-land'];
+  const publicRoutes = ['/', '/login', '/signup', '/auth-choice', '/sso-callback', '/404', '/terms', '/privacy', '/blog', '/whitepaper', '/solutions', '/buy-land'];
   const isPublicRoute = publicRoutes.includes(router.pathname);
 
   useEffect(() => {
-    // Only redirect if we're loaded, not authenticated, and not on a public route
     if (status === 'unauthenticated' && !isPublicRoute) {
-      router.replace('/wallet-auth');
+      router.replace('/auth-choice');
     }
   }, [status, isPublicRoute, router]);
 

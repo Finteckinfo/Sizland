@@ -17,8 +17,8 @@ const GRID_CLASSES = [
   "md:col-span-8 md:row-span-2",
   "md:col-span-4 md:row-span-1",
   "md:col-span-4 md:row-span-1",
-  "md:col-span-4 md:row-span-1 md:col-start-9",
-  "md:col-span-12 md:row-span-1",
+  "md:col-span-4 md:row-span-1",
+  "md:col-span-8 md:row-span-1",
 ] as const;
 
 const Features = () => {
@@ -76,8 +76,7 @@ const Features = () => {
           key={feature.title}
           href={feature.href}
           {...(feature.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          className={`${cardClass} no-underline block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-green`}
-          aria-label={`Open ${feature.title}`}
+          className={`${cardClass} no-underline block`}
         >
           {inner}
         </a>

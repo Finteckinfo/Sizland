@@ -6,8 +6,6 @@ import React, { useEffect, useState } from "react";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
-import { ConnectWalletButton } from "../ui/connect-button";
-import { loadWallet } from "@/lib/algorand/walletGenerator";
 import { useRouter } from "next/router";
 import { useSession, signOut } from "next-auth/react";
 import {
@@ -20,6 +18,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
+import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
 const scrollToSection = (
   e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>,
@@ -78,7 +77,6 @@ function isMarketingRestrictedHost(): boolean {
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
-  const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { data: session, status } = useSession();
   const isLoaded = status !== "loading";
@@ -86,19 +84,7 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     setMounted(true);
-    const wallet = loadWallet();
-    setHasGeneratedWallet(!!wallet);
     setMarketingRestrictedHost(isMarketingRestrictedHost());
-
-    const handleWalletGenerated = () => setHasGeneratedWallet(true);
-    const handleWalletCleared = () => setHasGeneratedWallet(false);
-
-    window.addEventListener("walletGenerated", handleWalletGenerated);
-    window.addEventListener("walletCleared", handleWalletCleared);
-    return () => {
-      window.removeEventListener("walletGenerated", handleWalletGenerated);
-      window.removeEventListener("walletCleared", handleWalletCleared);
-    };
   }, []);
 
   if (!mounted) return null;
@@ -111,7 +97,6 @@ export const Navbar: React.FC = () => {
     ? [
         { label: "Whitepaper", href: "/whitepaper" },
         { label: "Blog", href: "/blog" },
-        ...(hasGeneratedWallet ? [{ label: "New Wallet", href: "/new-wallet" }] : []),
       ]
     : [];
 
@@ -144,17 +129,18 @@ export const Navbar: React.FC = () => {
     "font-body text-on-surface-variant text-xs lg:text-sm hover:text-terminal-green transition-colors duration-200 whitespace-nowrap";
 
   return (
-    <nav className="sticky top-0 z-50 chrome-tint-nav backdrop-blur-md">
-      <div className="flex justify-between items-center w-full px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-16 md:h-20 gap-3">
-        <Link href={logoHref} className="flex items-center gap-3 shrink-0">
+    <nav className="sticky top-0 z-[100] chrome-tint-nav backdrop-blur-md supports-[backdrop-filter]:bg-surface-base/80">
+      <div className="flex justify-between items-center w-full px-3 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-14 sm:h-16 md:h-20 gap-2 sm:gap-3">
+        <Link href={logoHref} className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
           <Image
             src="/logo1.png"
             alt="Sizland Logo"
             width={40}
             height={40}
-            className="h-10 w-10 object-contain"
+            className="h-8 w-8 sm:h-10 sm:w-10 object-contain shrink-0"
+            priority
           />
-          <span className="font-headline text-lg tracking-headline text-terminal-green hidden sm:inline">
+          <span className="font-headline text-base sm:text-lg tracking-headline text-terminal-green truncate">
             Sizland
           </span>
         </Link>
@@ -165,10 +151,9 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggler />
-            {isLoaded && session?.user && <ConnectWalletButton />}
             {isLoaded && session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -214,17 +199,18 @@ export const Navbar: React.FC = () => {
                 </Button>
               )
             )}
-            <Link href="/wallet">
+            <a href={SIZLAND_WALLET_URL} target="_blank" rel="noopener noreferrer">
               <button className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap">
                 Launch Wallet
               </button>
-            </Link>
+            </a>
           </div>
 
           <div className="md:hidden">
             <HeaderSheet
               marketingLinks={hideMainMarketingLinks ? [] : marketingNavLinks}
               otherLinks={secondaryLinks}
+              signInHref={signInHref}
             />
           </div>
         </div>
@@ -236,9 +222,19 @@ export const Navbar: React.FC = () => {
 export const MobileNavLinks: React.FC<{
   marketingLinks: NavLink[];
   otherLinks: NavLink[];
-}> = ({ marketingLinks, otherLinks }) => {
+  onNavigate?: () => void;
+  signInHref?: string;
+}> = ({ marketingLinks, otherLinks, onNavigate, signInHref = "/auth-choice" }) => {
   const linkClass =
     "block w-full text-center py-3 px-4 border border-border-subtle rounded font-label text-sm text-on-surface hover:border-terminal-green hover:text-terminal-green transition-colors duration-200";
+
+  const handleAnchorClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string
+  ) => {
+    scrollToSection(e, href);
+    onNavigate?.();
+  };
 
   const renderLink = (link: NavLink) => {
     if (link.href.startsWith("#")) {
@@ -246,7 +242,7 @@ export const MobileNavLinks: React.FC<{
         <a
           key={link.href}
           href={link.href}
-          onClick={(e) => scrollToSection(e, link.href)}
+          onClick={(e) => handleAnchorClick(e, link.href)}
           className={linkClass}
         >
           {link.label}
@@ -254,7 +250,12 @@ export const MobileNavLinks: React.FC<{
       );
     }
     return (
-      <Link key={link.href} href={link.href} className={linkClass}>
+      <Link
+        key={link.href}
+        href={link.href}
+        className={linkClass}
+        onClick={() => onNavigate?.()}
+      >
         {link.label}
       </Link>
     );
@@ -264,9 +265,13 @@ export const MobileNavLinks: React.FC<{
     <div className="flex flex-col gap-3 w-full">
       {marketingLinks.map(renderLink)}
       {otherLinks.map(renderLink)}
-      <Link href="/wallet" className={`stitch-btn ${linkClass} bg-terminal-green text-surface-base border-terminal-green terminal-glow`}>
-        Launch Wallet
-      </Link>
+      <a
+        href={signInHref}
+        className={linkClass}
+        onClick={() => onNavigate?.()}
+      >
+        Sign In
+      </a>
     </div>
   );
 };
