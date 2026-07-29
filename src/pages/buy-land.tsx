@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
-import { useWallet } from '@txnlab/use-wallet-react';
 import { PageLayout } from '@/components/page-layout';
 import { Loader2, Check, X, MapPin, Shield, Search, FileCheck, Wallet, FileText } from 'lucide-react';
 import Image from 'next/image';
@@ -27,7 +26,6 @@ export default function BuyLandPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { resolvedTheme: theme } = useTheme();
-  const { activeAccount } = useWallet();
   // Pilot mode should be enabled by default for showcases.
   // Only disable if explicitly set to "false".
   const isPilotEscrow = (process.env.NEXT_PUBLIC_PILOT_ESCROW ?? 'true') !== 'false';
@@ -59,12 +57,6 @@ export default function BuyLandPage() {
       fetchProgress();
     }
   }, [status, router]);
-
-  useEffect(() => {
-    if (activeAccount?.address) {
-      setWalletAddress(activeAccount.address);
-    }
-  }, [activeAccount]);
 
   const fetchProgress = async () => {
     try {
@@ -114,7 +106,7 @@ export default function BuyLandPage() {
   };
 
   const handleConnectWallet = async () => {
-    const addr = walletAddress.trim() || activeAccount?.address;
+    const addr = walletAddress.trim();
     if (!addr) {
       setError('Please connect your wallet or enter an address');
       return;
@@ -136,7 +128,7 @@ export default function BuyLandPage() {
     const data = await api('create-request', {
       method: 'POST',
       body: JSON.stringify({
-        walletAddress: request?.walletAddress || walletAddress.trim() || activeAccount?.address,
+        walletAddress: request?.walletAddress || walletAddress.trim(),
         budget: parseFloat(budget) || 0,
         sizeCurve: sizeCurve || '1 Acre',
         purpose: purpose || 'Farming',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { AuthChoiceCard } from '@/components/auth/auth-choice-card';
 import Image from 'next/image';
+import { SIZLAND_WALLET_URL } from '@/lib/external-apps';
 
 export default function AuthChoice() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function AuthChoice() {
 
   const handleWeb3Choice = () => {
     localStorage.setItem('auth_mode', 'web3');
-    router.push('/wallet-auth');
+    window.location.href = SIZLAND_WALLET_URL;
   };
 
   const handleWeb2Choice = () => {

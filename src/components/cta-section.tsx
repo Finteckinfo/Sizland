@@ -2,13 +2,12 @@
 
 import React from 'react';
 import { useTheme } from 'next-themes';
-import { useRouter } from 'next/router';
 import { AuroraText } from './ui/aurora-text';
+import { SIZLAND_WALLET_URL } from '@/lib/external-apps';
 
 const CTASection = () => {
   const { resolvedTheme: theme } = useTheme();
   const isDark = theme === 'dark';
-  const router = useRouter();
 
   return (
     <section className={`relative py-24 ${
@@ -39,16 +38,18 @@ const CTASection = () => {
             Sizland isn&apos;t just technology; it is a movement toward true digital autonomy for the remote worker. Generate your sovereign DiD and take control of your work history today.
           </p>
 
-          <button
-            className={`mt-8 px-8 py-4 text-lg font-bold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl ${
+          <a
+            href={SIZLAND_WALLET_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`mt-8 inline-block px-8 py-4 text-lg font-bold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl ${
               isDark
                 ? "bg-white text-green-600 hover:bg-green-50"
                 : "bg-white text-green-600 hover:bg-green-50"
             }`}
-            onClick={() => router.push('/wallet')}
           >
             Generate Your DiD (Non-Custodial)
-          </button>
+          </a>
         </div>
       </div>
     </section>

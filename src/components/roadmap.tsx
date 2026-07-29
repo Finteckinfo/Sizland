@@ -51,7 +51,7 @@ const phases: Phase[] = [
 
 const Roadmap = () => {
   return (
-    <section className="py-16 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto bg-surface-elevated/30 border-t border-border-subtle">
+    <section className="py-8 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto bg-surface-elevated/30 border-t border-border-subtle">
       <div className="text-center mb-10 md:mb-16">
         <h2 className="font-headline text-xl sm:text-2xl md:text-3xl text-on-surface tracking-headline">
           Engineering Total Sovereignty

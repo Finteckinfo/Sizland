@@ -1,19 +1,11 @@
 [
   {
-    "title": "Decentralized Identity (DiD)",
-    "description": "Client-side, private, non-custodial, and entirely censorship-resistant. Your sovereign identity layer—generated on your device, never held by us.",
+    "title": "SizlandWallet",
+    "description": "SizlandWallet is your sovereign identity stack—client-side, private, non-custodial, and censorship-resistant, generated on your device and never held by us. One cryptographic identity maps to addresses across multiple chains, with seamless rotation if compromised. Work history is stored as signed credentials on permanent, user-owned logs (SizChain X), so your reputation persists even if the platform goes offline.",
     "icon": "Fingerprint",
-    "featured": true
-  },
-  {
-    "title": "Multi-Chain Unified Wallet Factory",
-    "description": "One cryptographic identity mapping to addresses across 5 chains, allowing seamless rotation if compromised.",
-    "icon": "Wallet"
-  },
-  {
-    "title": "Self-Custody Reputation Layer",
-    "description": "Work history stored as signed credentials. Historical scores sit on permanent, user-owned logs (SizChain X) so they persist even if the platform goes offline.",
-    "icon": "ShieldCheck"
+    "featured": true,
+    "href": "https://wallet.siz.land",
+    "external": true
   },
   {
     "title": "Institutional-Grade ERP Systems",
@@ -25,17 +17,23 @@
   {
     "title": "Modular CRM Tools",
     "description": "White-label, vertical-specific workflow engines for non-custodial client and delivery management.",
-    "icon": "Users"
+    "icon": "Users",
+    "href": "https://crm.siz.land",
+    "external": true
   },
   {
     "title": "Digital Economies for Remote Teams",
     "description": "Infrastructure for remote teams to establish localized token micro-economies and internal reputation tracking.",
-    "icon": "Network"
+    "icon": "Network",
+    "href": "https://solutions.siz.land",
+    "external": true
   },
   {
     "title": "RWA Tokenization",
     "description": "Laying the groundwork for reputation-backed lending and micro-grants using on-chain credit scores.",
     "icon": "Landmark",
-    "horizontal": true
+    "horizontal": true,
+    "href": "https://buy.siz.land",
+    "external": true
   }
 ]

@@ -27,7 +27,7 @@ const IdentityPivot = () => {
   return (
     <section
       id="solutions"
-      className="py-16 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto"
+      className="py-8 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto"
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-gutter items-center">
         <ScrollReveal className="md:col-span-5 space-y-4 md:space-y-6">

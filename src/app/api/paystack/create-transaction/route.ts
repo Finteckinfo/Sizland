@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         network: 'algorand',
         currency: currency,
       },
-      callback_url: successUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/wallet?success=true&reference=${paymentReference}`,
+      callback_url: successUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/buy-land?success=true&reference=${paymentReference}`,
     });
 
     if (!transactionResult.success) {

@@ -22,7 +22,7 @@ const chainStatus = [
 
 const About = () => {
   return (
-    <section className="py-16 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto">
+    <section className="py-8 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto">
       <div className="flex flex-col md:flex-row gap-10 md:gap-12 lg:gap-16 items-center">
         <ScrollReveal className="w-full md:w-1/2 min-w-0 self-stretch flex flex-col justify-center">
           <IdentityHubDiagram />

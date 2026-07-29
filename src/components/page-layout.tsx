@@ -108,7 +108,7 @@ const MainContainer: React.FC<LayoutProps & { children: React.ReactNode; backgro
 
   return (
     <main
-      className={`min-h-[100vh] p-8 flex ${flexDirectionClass} ${justifyClass} ${alignClass} ${gapClass} py-32`}
+      className={`min-h-[100vh] px-4 py-10 md:p-8 flex ${flexDirectionClass} ${justifyClass} ${alignClass} ${gapClass} md:py-32`}
       style={{ background: background }} // Apply the background style conditionally
     >
       {children}
