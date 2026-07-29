@@ -13,7 +13,7 @@ const CTASection = () => {
     <section className={`relative py-24 ${
       isDark 
         ? "bg-gradient-to-t from-green-950/40 via-green-900/25 to-transparent" 
-        : "bg-gradient-to-t from-green-100/90 via-green-50/70 to-white"
+        : "bg-gradient-to-t from-emerald-100/70 via-surface-elevated/80 to-transparent"
     }`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center space-y-6">
