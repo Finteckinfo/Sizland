@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import * as jwt from 'jsonwebtoken';
+import { resolveAuthRedirect } from '@/lib/auth-callback';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -214,16 +215,9 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // After successful sign in, always redirect to /lobby
-      // This matches the original Clerk behavior from the backup
-      if (url.startsWith('/') && !url.startsWith('//')) {
-        return `${baseUrl}/lobby`;
-      }
-      if (url.startsWith(baseUrl)) {
-        return `${baseUrl}/lobby`;
-      }
-      // For external URLs, return to lobby for safety
-      return `${baseUrl}/lobby`;
+      // Honor callbackUrl when safe (buy.siz.land / buy-land / catalog, etc.).
+      // Fall back to /lobby for unknown or unsafe destinations.
+      return resolveAuthRedirect(url, baseUrl);
     },
     async jwt({ token, user }) {
       if (user) {

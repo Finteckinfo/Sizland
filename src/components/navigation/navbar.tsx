@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -43,6 +43,7 @@ const buyAppPathPrefixes = [
   "/buy-land",
   "/lands",
   "/browse-land",
+  "/catalog",
   "/admin/land",
   "/admin/users",
 ] as const;
@@ -101,8 +102,16 @@ export const Navbar: React.FC = () => {
     : [];
 
   const logoHref = hideMainMarketingLinks ? "/" : "https://siz.land";
+  const buyCallback =
+    typeof window !== "undefined" &&
+    (isBuyAppPath(router.pathname) ||
+      window.location.hostname.includes("buy.siz.land"))
+      ? `${window.location.origin}${router.asPath.split("?")[0] || "/buy-land"}`
+      : null;
   const signInHref = hideMainMarketingLinks
-    ? "/auth-choice"
+    ? buyCallback
+      ? `/auth-choice?callbackUrl=${encodeURIComponent(buyCallback)}`
+      : "/auth-choice"
     : "https://siz.land/auth-choice";
 
   const renderNavLink = (link: NavLink, className: string) => {
@@ -153,11 +162,13 @@ export const Navbar: React.FC = () => {
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggler />
+            <div className="flex h-9 items-center">
+              <ThemeToggler />
+            </div>
             {isLoaded && session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={session.user.image || undefined}
@@ -190,7 +201,7 @@ export const Navbar: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border-subtle text-on-surface-variant"
+                  className="h-9 border-border-subtle text-on-surface-variant"
                   onClick={() => {
                     window.location.href = signInHref;
                   }}
@@ -275,3 +286,4 @@ export const MobileNavLinks: React.FC<{
     </div>
   );
 };
+

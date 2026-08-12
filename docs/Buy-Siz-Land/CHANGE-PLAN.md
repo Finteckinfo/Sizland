@@ -7,7 +7,12 @@
 | Land Page Scope & Flow | `_The Sizland Land Acquisition Workflow (Internalized Logic).pdf` |
 | Land Page UI & Form Spec | `Technical Specifications_ buy.siz.land UX Optimization & Workflow Refinement_.pdf` |
 
-This doc maps those specs to **what we must change in the codebase**, split into **this week (explicit sprint)** vs **full acquisition workflow (roadmap from the internalized logic PDF)**.
+**Broader specs (read with this file):**
+
+- [FULL-WORKFLOW.md](./FULL-WORKFLOW.md) — end-to-end buy.siz.land journey, multi-commodity stage (map vs media), Copernicus/MapLibre hybrid
+- [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) — Explorer UI (list + map/detail), Sizland theme tokens
+
+This doc maps the June PDFs to **near-term code changes**, split into **this week (explicit sprint)** vs later phases. For catalog/map/commodity architecture, prefer FULL-WORKFLOW + DESIGN-SYSTEM.
 
 ---
 
@@ -185,13 +190,22 @@ When those arrive, add a short addendum under this folder rather than expanding 
 
 ## 7. Definition of done (this week)
 
-- [ ] Theme toggle optically aligned with Sign In / hamburger (desktop + mobile).
-- [ ] Unauthenticated “Start a Land Request” (and equivalent CTAs) → auth → **return to buy flow**, never stuck on `/lobby`.
-- [ ] Create Request collects Name + Email (validated); Submit disabled until Name, Email, Terms (+ required land fields).
-- [ ] Email (and name) persisted and usable for manual &lt;48h follow-up.
-- [ ] Zero-plot experience shows **Sourcing in Progress** copy (heading + 48h body), not “No lands at the moment”.
-- [ ] Criteria/filters control hidden or disabled in that sourcing state; exit CTA labeled **Return to Dashboard** or **Close** within buy context.
-- [ ] MOOC + mapping explicitly left pending until follow-up brief.
+- [x] Theme toggle optically aligned with Sign In / hamburger (desktop + mobile).
+- [x] Unauthenticated “Start a Land Request” (and equivalent CTAs) → auth → **return to buy flow**, never stuck on `/lobby`.
+- [x] Create Request collects Name + Email (validated); Submit disabled until Name, Email, Terms (+ required land fields).
+- [x] Email (and name) persisted and usable for manual &lt;48h follow-up.
+- [x] Zero-plot experience shows **Sourcing in Progress** copy (heading + 48h body), not “No lands at the moment”.
+- [x] Criteria/filters control hidden or disabled in that sourcing state; exit CTA labeled **Return to Dashboard** or **Close** within buy context.
+- [x] MOOC + mapping explicitly left pending until follow-up brief.
+
+**Also shipped from FULL-WORKFLOW / DESIGN-SYSTEM (foundation):**
+
+- [x] `/catalog` Explorer (list + satellite/reference map stage + detail panel)
+- [x] Commodity media stage path (empty state until SKUs exist)
+- [x] `/browse-land` redirects to `/catalog`
+- [x] `buy.siz.land` middleware allows `/catalog`
+
+**Ops note:** Run Prisma migration `20260812_land_contact_fields` on SIZBackend2.0 before create-request with contact fields works in production.
 
 ---
 

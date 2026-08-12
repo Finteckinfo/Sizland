@@ -6,10 +6,16 @@ import { useTheme } from 'next-themes';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import Link from 'next/link';
 import AuroraText from '@/components/ui/aurora-text';
+import {
+  appendCallbackParam,
+  callbackFromQuery,
+  clientPostAuthPath,
+} from '@/lib/auth-callback';
 
 const SignUpPage = () => {
   const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
+  const callbackUrl = callbackFromQuery(router.query);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -78,10 +84,14 @@ const SignUpPage = () => {
 
       if (result?.error) {
         // Registration succeeded but login failed - redirect to login
-        router.push('/login?registered=true');
+        router.push(appendCallbackParam('/login?registered=true', callbackUrl));
       } else if (result?.ok) {
-        // Both registration and login succeeded
-        router.push('/lobby');
+        const dest = clientPostAuthPath(callbackUrl);
+        if (dest.startsWith('http')) {
+          window.location.href = dest;
+        } else {
+          router.push(dest);
+        }
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -332,7 +342,7 @@ const SignUpPage = () => {
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                 Already have an account?{' '}
                 <Link 
-                  href="/login" 
+                  href={appendCallbackParam('/login', callbackUrl)}
                   className={`font-semibold transition-colors ${
                     theme === 'dark'
                       ? 'text-emerald-300 hover:text-emerald-200'
