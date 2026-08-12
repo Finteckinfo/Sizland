@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PageLayout } from '@/components/page-layout';
@@ -10,7 +10,11 @@ import {
   appendCallbackParam,
   callbackFromQuery,
   clientPostAuthPath,
+  isBuyHostname,
 } from '@/lib/auth-callback';
+
+/** Google OAuth redirect_uri must match Google Console — always start OAuth on siz.land. */
+const MAIN_AUTH_ORIGIN = 'https://siz.land';
 
 const LoginPage = () => {
   const { resolvedTheme: theme } = useTheme();
@@ -21,6 +25,31 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const callbackUrl = callbackFromQuery(router.query);
+
+  // Auto-start Google when redirected here from buy.siz.land (?google=1)
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.google !== '1') return;
+    const returnTo = callbackFromQuery(router.query) || '/lobby';
+    void signIn('google', { callbackUrl: returnTo });
+  }, [router.isReady, router.query]);
+
+  const handleGoogleSignIn = () => {
+    const returnTo =
+      callbackUrl ||
+      (typeof window !== 'undefined' && isBuyHostname(window.location.hostname)
+        ? `${window.location.origin}/buy-land`
+        : '/lobby');
+
+    // On buy subdomain, bounce to main domain so Google sees redirect_uri = siz.land/.../callback/google
+    if (typeof window !== 'undefined' && isBuyHostname(window.location.hostname)) {
+      const target = `${MAIN_AUTH_ORIGIN}/login?google=1&callbackUrl=${encodeURIComponent(returnTo)}`;
+      window.location.href = target;
+      return;
+    }
+
+    void signIn('google', { callbackUrl: returnTo });
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -235,11 +264,7 @@ const LoginPage = () => {
             {/* Google button */}
             <button
               type="button"
-              onClick={() =>
-                signIn('google', {
-                  callbackUrl: callbackUrl || '/lobby',
-                })
-              }
+              onClick={handleGoogleSignIn}
               className={`w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-full font-semibold transition-all duration-200 ${
                 theme === 'dark'
                   ? 'bg-[#dff6e9] text-gray-800 border border-[#bde7ce] hover:bg-[#e9f9ef]'
