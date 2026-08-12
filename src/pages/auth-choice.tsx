@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { AuthChoiceCard } from '@/components/auth/auth-choice-card';
 import Image from 'next/image';
+import {
+  appendCallbackParam,
+  callbackFromQuery,
+} from '@/lib/auth-callback';
 
 export default function AuthChoice() {
   const router = useRouter();
   const [showHelp, setShowHelp] = useState(false);
+  const callbackUrl = callbackFromQuery(router.query);
 
   const web3Features = [
     'Wallet-first authentication',
@@ -25,12 +30,14 @@ export default function AuthChoice() {
 
   const handleWeb3Choice = () => {
     localStorage.setItem('auth_mode', 'web3');
-    router.push('/wallet-auth');
+    if (callbackUrl) localStorage.setItem('auth_callback_url', callbackUrl);
+    router.push(appendCallbackParam('/wallet-auth', callbackUrl));
   };
 
   const handleWeb2Choice = () => {
     localStorage.setItem('auth_mode', 'web2');
-    router.push('/login');
+    if (callbackUrl) localStorage.setItem('auth_callback_url', callbackUrl);
+    router.push(appendCallbackParam('/login', callbackUrl));
   };
 
   return (

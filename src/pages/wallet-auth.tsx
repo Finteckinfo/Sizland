@@ -10,9 +10,20 @@ import { generateAlgorandWallet, storeWallet, clearWallet, type GeneratedWallet,
 import { Copy, CheckCircle, Download, Trash2, Shield } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { trackWalletAuthEvent, maskWalletAddress, type WalletAuthAnalyticsContext } from '@/lib/analytics'
+import { callbackFromQuery, clientPostAuthPath } from '@/lib/auth-callback'
 
 export default function WalletAuth() {
   const router = useRouter()
+  const callbackUrl =
+    callbackFromQuery(router.query) ||
+    (typeof window !== 'undefined' ? localStorage.getItem('auth_callback_url') : null)
+
+  const goAfterAuth = () => {
+    const dest = clientPostAuthPath(callbackUrl)
+    if (typeof window !== 'undefined') localStorage.removeItem('auth_callback_url')
+    if (dest.startsWith('http')) window.location.href = dest
+    else router.push(dest)
+  }
   const { wallets, isReady } = useWallet()
   const { resolvedTheme: theme } = useTheme()
   const isDark = theme === 'dark'
@@ -87,7 +98,7 @@ export default function WalletAuth() {
           walletAddress: maskWalletAddress(walletAddress),
           stage: 'nextauth-signin',
         })
-        router.push('/lobby')
+        goAfterAuth()
       } else {
         console.error('Failed to create NextAuth session:', result?.error)
         setError(result?.error || 'Failed to create session. Please try again.')
@@ -183,7 +194,7 @@ export default function WalletAuth() {
   }
 
   const handleSuccess = () => {
-    router.push('/lobby')
+    goAfterAuth()
   }
 
   const handleCopy = async (text: string, type: string) => {

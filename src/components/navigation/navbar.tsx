@@ -68,6 +68,7 @@ const buyAppPathPrefixes = [
   "/buy-land",
   "/lands",
   "/browse-land",
+  "/catalog",
   "/admin/land",
   "/admin/users",
 ] as const;
@@ -177,7 +178,17 @@ export const Navbar: React.FC = () => {
 
   const mainSiteOrigin = "https://siz.land";
   const logoHref = hideMainMarketingLinks ? "/" : mainSiteOrigin;
-  const signInHref = hideMainMarketingLinks ? "/auth-choice" : `${mainSiteOrigin}/auth-choice`;
+  const buyCallback =
+    typeof window !== "undefined" &&
+    (isBuyAppPath(router.pathname) ||
+      window.location.hostname.includes("buy.siz.land"))
+      ? `${window.location.origin}${router.asPath.split("?")[0] || "/buy-land"}`
+      : null;
+  const signInHref = hideMainMarketingLinks
+    ? buyCallback
+      ? `/auth-choice?callbackUrl=${encodeURIComponent(buyCallback)}`
+      : "/auth-choice"
+    : `${mainSiteOrigin}/auth-choice`;
   const pillProductLinks = hideMainMarketingLinks ? [] : productLinks;
 
   return (
@@ -216,7 +227,9 @@ export const Navbar: React.FC = () => {
 
         {/* Right Section - Theme + auth actions */}
         <div className="flex-1 flex items-center justify-end gap-3 scale-[0.9] origin-right overflow-visible">
-          <ThemeToggler />
+          <div className="flex h-9 items-center">
+            <ThemeToggler />
+          </div>
           {isLoaded && (
             <>
               {session?.user ? (
@@ -224,7 +237,7 @@ export const Navbar: React.FC = () => {
                   <ConnectWalletButton />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
                           <AvatarFallback>
@@ -251,7 +264,12 @@ export const Navbar: React.FC = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => { window.location.href = signInHref; }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-4"
+                  onClick={() => { window.location.href = signInHref; }}
+                >
                   Sign In
                 </Button>
               )}
@@ -280,8 +298,8 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Mobile Actions */}
-        <div className="flex items-center gap-1 min-w-0">
-          <div className="shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex h-9 shrink-0 items-center">
             <ThemeToggler />
           </div>
           {isLoaded && (
@@ -289,7 +307,7 @@ export const Navbar: React.FC = () => {
               {session?.user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full shrink-0">
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full shrink-0 p-0">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
                         <AvatarFallback>
@@ -318,7 +336,7 @@ export const Navbar: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="shrink-0 max-w-[110px] px-3 text-sm"
+                  className="h-9 shrink-0 max-w-[110px] px-3 text-sm"
                   onClick={() => { window.location.href = signInHref; }}
                 >
                   Sign In
