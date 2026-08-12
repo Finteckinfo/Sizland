@@ -1,34 +1,39 @@
 [
-    {
-      "title": "Unified Wallets",
-      "description": "A streamlined, all-in-one wallet that lets users manage fiat and crypto assets side-by-side.",
-      "variant": "blue",
-      "icon": "Wallet"
-    },
-    {
-      "title": "Siz Token",
-      "description": "The SIZ token is the thread that connects the entire ecosystem.",
-      "variant": "blue",
-      "icon": "Coins"
-    },
-    {
-      "title": "DEX",
-      "description": "Fast, cost-effective, and flexible, the exchange supports decentralized and centralized trading with full wallet integration.",
-      "variant": "blue",
-      "icon": "Shuffle"
-    },
-    {
-      "title": "Fund Manager",
-      "description": "Manage your assets efficiently with our decentralized fund management system.",
-      "variant": "blue",
-      "icon": "PieChart"
-    },
-    {
-      "title": "ERP",
-      "description": "At the heart of Sizland lies the ERP solution created for today’s decentralized world",
-      "variant": "blue",
-      "icon": "Workflow"
-    }
-  ]
-
-  
+  {
+    "title": "SizlandWallet",
+    "description": "SizlandWallet is your sovereign identity stack—client-side, private, non-custodial, and censorship-resistant, generated on your device and never held by us. One cryptographic identity maps to addresses across multiple chains, with seamless rotation if compromised. Work history is stored as signed credentials on permanent, user-owned logs (SizChain X), so your reputation persists even if the platform goes offline.",
+    "icon": "Fingerprint",
+    "featured": true,
+    "href": "https://wallet.siz.land",
+    "external": true
+  },
+  {
+    "title": "Institutional-Grade ERP Systems",
+    "description": "Smart contract tokenized workflows and stablecoin escrows for automated, intermediate-free milestone payouts.",
+    "icon": "Workflow",
+    "href": "https://erp.siz.land",
+    "external": true
+  },
+  {
+    "title": "Modular CRM Tools",
+    "description": "White-label, vertical-specific workflow engines for non-custodial client and delivery management.",
+    "icon": "Users",
+    "href": "https://crm.siz.land",
+    "external": true
+  },
+  {
+    "title": "Digital Economies for Remote Teams",
+    "description": "Infrastructure for remote teams to establish localized token micro-economies and internal reputation tracking.",
+    "icon": "Network",
+    "href": "https://solutions.siz.land",
+    "external": true
+  },
+  {
+    "title": "RWA Tokenization",
+    "description": "Laying the groundwork for reputation-backed lending and micro-grants using on-chain credit scores.",
+    "icon": "Landmark",
+    "horizontal": true,
+    "href": "https://buy.siz.land",
+    "external": true
+  }
+]

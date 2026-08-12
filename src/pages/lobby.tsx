@@ -3,12 +3,12 @@ import { PageLayout } from "@/components/page-layout";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useWallet } from "@txnlab/use-wallet-react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { SIZLAND_WALLET_URL, ERP_URL as ERP_URL_CONST } from "@/lib/external-apps";
 
-const ERP_URL = process.env.NEXT_PUBLIC_ERP_URL || "https://erp.siz.land";
+const ERP_URL = ERP_URL_CONST;
 
 type OnboardingStep = {
   step: number;
@@ -82,7 +82,6 @@ const LobbyPage = () => {
   const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { activeAccount, isReady } = useWallet();
   const [mounted, setMounted] = useState(false);
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -91,42 +90,10 @@ const LobbyPage = () => {
     setMounted(true);
   }, []);
 
-  const isAuthed = !!session?.user || (!!activeAccount && isReady);
+  const isAuthed = !!session?.user;
 
-  // Handle ERP navigation with SSO token
   const handleERPClick = async (e?: React.MouseEvent, destination?: string) => {
     if (e) e.preventDefault();
-
-    console.log('[Lobby] ERP clicked');
-    console.log('[Lobby] Session status:', status);
-    console.log('[Lobby] Has session user:', !!session?.user);
-    console.log('[Lobby] Has active account:', !!activeAccount);
-
-    // For wallet users without NextAuth session, redirect directly
-    if (!session?.user && activeAccount) {
-      console.log('[Lobby] Wallet user detected, creating wallet session...');
-      // Try to create a session first by logging in with wallet
-      try {
-        const walletAddress = activeAccount.address;
-        const signInResponse = await fetch('/api/auth/wallet-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            walletAddress,
-            chainId: 'algorand',
-            domain: window.location.hostname
-          })
-        });
-
-        if (signInResponse.ok) {
-          // Session created, reload to get updated session
-          window.location.reload();
-          return;
-        }
-      } catch (walletError) {
-        console.error('[Lobby] Wallet session creation failed:', walletError);
-      }
-    }
 
     if (!session?.user) {
       console.error('[Lobby] No session found for SSO');
@@ -179,11 +146,11 @@ const LobbyPage = () => {
       variant: "blue" as const
     },
     {
-      title: "Unified Wallets",
-      description: "A streamlined, all-in-one wallet that lets users manage fiat and crypto assets side-by-side.",
-      icon: "Wallet",
-      href: "/wallet",
-      isExternal: false,
+      title: "SizlandWallet",
+      description: "Your sovereign identity stack — client-side DiD, multi-chain wallets, and self-custody reputation.",
+      icon: "Fingerprint",
+      href: SIZLAND_WALLET_URL,
+      isExternal: true,
       isClickable: true,
       variant: "green" as const
     },
@@ -208,13 +175,12 @@ const LobbyPage = () => {
   ];
 
   useEffect(() => {
-    if (mounted && !isAuthed && status !== "loading" && isReady) {
-      // Redirect to login if neither NextAuth session nor wallet is available
+    if (mounted && !isAuthed && status !== "loading") {
       router.push("/login");
     }
-  }, [mounted, isAuthed, status, isReady, router]);
+  }, [mounted, isAuthed, status, router]);
 
-  if (!mounted || (!isAuthed && (status === "loading" || !isReady))) {
+  if (!mounted || (!isAuthed && status === "loading")) {
     return (
       <PageLayout title="Loading - Sizland" description="Loading your dashboard" requireAuth={true}>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -228,7 +194,7 @@ const LobbyPage = () => {
   }
 
   if (!isAuthed) {
-    return null; // Will redirect via useEffect when unauthenticated and no wallet connected
+    return null;
   }
 
   const baseCardClass = `w-full max-w-xs h-full min-h-[240px] flex flex-col items-start text-left p-5 rounded-2xl border transition-all duration-300 backdrop-blur-xl ${
@@ -259,7 +225,7 @@ const LobbyPage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 drop-shadow-lg">
-                Welcome back, {(session?.user?.name || session?.user?.email?.split("@")[0] || activeAccount?.address?.slice(0, 8)) ?? "User"}!
+                Welcome back, {session?.user?.name || session?.user?.email?.split("@")[0] || "User"}!
               </h1>
               <p className="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto drop-shadow-md">
                 Access all Sizland dApps from your personalized dashboard. Manage your business, trade assets, and grow your portfolio - all in one place.

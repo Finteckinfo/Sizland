@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -6,13 +6,8 @@ import React, { useEffect, useState } from "react";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { Button } from "../ui/button";
 import { HeaderSheet } from "./header-sheet";
-import { ConnectWalletButton } from "../ui/connect-button";
-import { loadWallet } from "@/lib/algorand/walletGenerator";
 import { useRouter } from "next/router";
-import PillNav from "../ui/PillNav";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useTheme } from "next-themes";
-import { User, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,20 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  ListItem,
-  navigationMenuTriggerStyle,
-} from "../ui/navigation-menu";
-import { Typography } from "../ui/typography";
-import { Separator } from "@radix-ui/react-separator";
+import { LogOut } from "lucide-react";
+import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
-// Utility to scroll with offset for fixed navbar
 const scrollToSection = (
   e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>,
   id: string
@@ -44,20 +28,11 @@ const scrollToSection = (
   const section = document.querySelector(id) as HTMLElement;
   if (section) {
     window.scrollTo({
-      top: section.offsetTop - 70,
+      top: section.offsetTop - 80,
       behavior: "smooth",
     });
   }
 };
-
-interface DropdownLinks {
-  label: string;
-  paths: {
-    href: string;
-    label: string;
-    description: string;
-  }[];
-}
 
 interface NavLink {
   label: string;
@@ -72,6 +47,14 @@ const buyAppPathPrefixes = [
   "/admin/land",
   "/admin/users",
 ] as const;
+
+const marketingNavLinks: NavLink[] = [
+  { label: "Solutions", href: "#solutions" },
+  { label: "Features", href: "#features" },
+  { label: "Technology", href: "#technology" },
+  { label: "Roadmap", href: "#roadmap" },
+  { label: "Community", href: "#community" },
+];
 
 function isBuyAppPath(pathname: string): boolean {
   return buyAppPathPrefixes.some(
@@ -93,91 +76,32 @@ function isMarketingRestrictedHost(): boolean {
   return onBuy || onSolutions;
 }
 
-const productLinks: DropdownLinks[] = [
-  {
-    label: "Siz",
-    paths: [
-      {
-        href: "#hero",
-        label: "Intro",
-        description: "Introduction to Sizland",
-      },
-      {
-        href: "#roadmap",
-        label: "Roadmap",
-        description: "Sizland Roadmap",
-      },
-      {
-        href: "#about",
-        label: "About",
-        description: "About Sizland",
-      },
-      {
-        href: "#team",
-        label: "Team",
-        description: "Sizland Team",
-      },
-    ],
-  },
-];
-
 export const Navbar: React.FC = () => {
   const router = useRouter();
-  const [hasGeneratedWallet, setHasGeneratedWallet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { data: session, status } = useSession();
-  const { theme, systemTheme } = useTheme();
   const isLoaded = status !== "loading";
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const isDark = currentTheme === "dark";
-
-  useEffect(() => {
-    setMounted(true);
-    const wallet = loadWallet();
-    setHasGeneratedWallet(!!wallet);
-
-    // Listen for wallet generation events
-    const handleWalletGenerated = () => {
-      setHasGeneratedWallet(true);
-    };
-
-    const handleWalletCleared = () => {
-      setHasGeneratedWallet(false);
-    };
-
-    window.addEventListener('walletGenerated', handleWalletGenerated);
-    window.addEventListener('walletCleared', handleWalletCleared);
-
-    return () => {
-      window.removeEventListener('walletGenerated', handleWalletGenerated);
-      window.removeEventListener('walletCleared', handleWalletCleared);
-    };
-  }, []);
-
-  const isSolutionsPage = router.pathname === "/solutions";
   const [marketingRestrictedHost, setMarketingRestrictedHost] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setMarketingRestrictedHost(isMarketingRestrictedHost());
   }, []);
 
+  if (!mounted) return null;
+
+  const isSolutionsPage = router.pathname === "/solutions";
   const hideMainMarketingLinks =
     marketingRestrictedHost || isSolutionsPage || isBuyAppPath(router.pathname);
 
-  const navItems = [
-    { label: "Siz", href: "#hero" },
-    ...(!hideMainMarketingLinks
-      ? [
-          { label: "Whitepaper", href: "/whitepaper" },
-          { label: "Blog", href: "/blog" },
-          { label: "Wallet", href: "/wallet" },
-          ...(hasGeneratedWallet ? [{ label: "New Wallet", href: "/new-wallet" }] : []),
-        ]
-      : []),
-  ];
+  const secondaryLinks: NavLink[] = !hideMainMarketingLinks
+    ? [
+        { label: "Whitepaper", href: "/whitepaper" },
+        { label: "Blog", href: "/blog" },
+      ]
+    : [];
 
-  const mainSiteOrigin = "https://siz.land";
-  const logoHref = hideMainMarketingLinks ? "/" : mainSiteOrigin;
+  const logoHref = hideMainMarketingLinks ? "/" : "https://siz.land";
   const buyCallback =
     typeof window !== "undefined" &&
     (isBuyAppPath(router.pathname) ||
@@ -188,297 +112,178 @@ export const Navbar: React.FC = () => {
     ? buyCallback
       ? `/auth-choice?callbackUrl=${encodeURIComponent(buyCallback)}`
       : "/auth-choice"
-    : `${mainSiteOrigin}/auth-choice`;
-  const pillProductLinks = hideMainMarketingLinks ? [] : productLinks;
+    : "https://siz.land/auth-choice";
+
+  const renderNavLink = (link: NavLink, className: string) => {
+    if (link.href.startsWith("#")) {
+      return (
+        <a
+          key={link.href}
+          href={link.href}
+          onClick={(e) => scrollToSection(e, link.href)}
+          className={className}
+        >
+          {link.label}
+        </a>
+      );
+    }
+    return (
+      <Link key={link.href} href={link.href} className={className}>
+        {link.label}
+      </Link>
+    );
+  };
+
+  const linkClass =
+    "font-body text-on-surface-variant text-xs lg:text-sm hover:text-terminal-green transition-colors duration-200 whitespace-nowrap";
 
   return (
-    <div className="fixed z-50 top-0 left-0 w-screen max-w-screen overflow-x-hidden flex justify-center px-2 sm:px-4 pt-4 sm:pt-6 box-border">
-      {/* Desktop Layout - Pill-style center bar */}
-      <div className="hidden lg:flex w-full max-w-7xl items-center rounded-full bg-white/70 dark:bg-black/75 border border-emerald-500/30 shadow-[0_0_55px_rgba(16,185,129,0.45)] backdrop-blur-2xl px-6 py-3 overflow-visible">
-        {/* Left Section - Navigation pills (keep existing PillNav design) */}
-        <div className="flex-1 flex justify-start items-center scale-[0.9] origin-left">
-          <PillNav
-            logo="/logo1.png"
-            logoAlt="Sizland Logo"
-            items={navItems}
-            activeHref="/"
-            className="custom-nav"
-            ease="power2.easeOut"
-            baseColor="#10b981"
-            pillColor={isDark ? "#000000" : "#ffffff"}
-            hoveredPillTextColor="#ffffff"
-            pillTextColor="#10b981"
-            productLinks={pillProductLinks}
-            onScrollToSection={scrollToSection}
-          />
-        </div>
-
-        {/* Center Section - Brand title - always links to main domain */}
-        <div className="flex-shrink-0 flex justify-center px-6 scale-[0.9] origin-center">
-          <Link href={logoHref} className="flex items-center justify-center">
-            <button className="button1" data-text="Awesome">
-              <span className="actual-text1 font-pj">&nbsp;SIZLAND&nbsp;</span>
-              <span aria-hidden="true" className="hover-text1 font-pj">
-                &nbsp;SIZLAND&nbsp;
-              </span>
-            </button>
-          </Link>
-        </div>
-
-        {/* Right Section - Theme + auth actions */}
-        <div className="flex-1 flex items-center justify-end gap-3 scale-[0.9] origin-right overflow-visible">
-          <div className="flex h-9 items-center">
-            <ThemeToggler />
-          </div>
-          {isLoaded && (
-            <>
-              {session?.user ? (
-                <>
-                  <ConnectWalletButton />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
-                          <AvatarFallback>
-                            {session.user.name?.charAt(0).toUpperCase() || session.user.email?.charAt(0).toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 max-w-[calc(100vw-1.5rem)]">
-                      <DropdownMenuLabel>
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {session.user.email}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => signOut()}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 px-4"
-                  onClick={() => { window.location.href = signInHref; }}
-                >
-                  Sign In
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Layout */}
-      <div className="lg:hidden flex w-full max-w-screen items-center justify-between gap-2 rounded-none border-b border-neutral-400/40 bg-white/70 dark:bg-black/75 px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-2xl overflow-visible min-w-0">
-        {/* Mobile Logo - always links to main domain */}
-        <Link href={logoHref} className="flex items-center justify-start gap-2 min-w-0 flex-1 overflow-hidden">
+    <nav className="sticky top-0 z-[100] chrome-tint-nav backdrop-blur-md supports-[backdrop-filter]:bg-surface-base/80">
+      <div className="flex justify-between items-center w-full px-3 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-14 sm:h-16 md:h-20 gap-2 sm:gap-3">
+        <Link href={logoHref} className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
           <Image
             src="/logo1.png"
             alt="Sizland Logo"
             width={40}
             height={40}
-            className="h-10 w-auto object-contain mr-2"
+            className="h-8 w-8 sm:h-10 sm:w-10 object-contain shrink-0"
+            priority
           />
-          <button className="button1-mobile truncate" data-text="Awesome">
-            <span className="actual-text1-mobile font-pj">&nbsp;SIZLAND&nbsp;</span>
-            <span aria-hidden="true" className="hover-text1-mobile font-pj">
-              &nbsp;SIZLAND&nbsp;
-            </span>
-          </button>
+          <span className="font-headline text-base sm:text-lg tracking-headline text-terminal-green truncate">
+            Sizland
+          </span>
         </Link>
 
-        {/* Mobile Actions */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          <div className="flex h-9 shrink-0 items-center">
-            <ThemeToggler />
+        {!hideMainMarketingLinks && (
+          <div className="hidden lg:flex items-center gap-8">
+            {marketingNavLinks.map((link) => renderNavLink(link, linkClass))}
           </div>
-          {isLoaded && (
-            <>
-              {session?.user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full shrink-0 p-0">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
-                        <AvatarFallback>
-                          {session.user.name?.charAt(0).toUpperCase() || session.user.email?.charAt(0).toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 max-w-[calc(100vw-1.5rem)]">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{session.user.name || "User"}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {session.user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
+        )}
+
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-3">
+            <div className="flex h-9 items-center">
+              <ThemeToggler />
+            </div>
+            {isLoaded && session?.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={session.user.image || undefined}
+                        alt={session.user.name || "User"}
+                      />
+                      <AvatarFallback>
+                        {session.user.name?.charAt(0).toUpperCase() ||
+                          session.user.email?.charAt(0).toUpperCase() ||
+                          "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{session.user.name || "User"}</p>
+                      <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              isLoaded && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 shrink-0 max-w-[110px] px-3 text-sm"
-                  onClick={() => { window.location.href = signInHref; }}
+                  className="h-9 border-border-subtle text-on-surface-variant"
+                  onClick={() => {
+                    window.location.href = signInHref;
+                  }}
                 >
                   Sign In
                 </Button>
-              )}
-            </>
-          )}
-          <div className="shrink-0">
-          <HeaderSheet
-            otherLinks={navItems.filter((item) => item.href !== "#hero")}
-            showProductSections={!hideMainMarketingLinks}
-          />
+              )
+            )}
+            <a href={SIZLAND_WALLET_URL} target="_blank" rel="noopener noreferrer">
+              <button className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap">
+                Launch Wallet
+              </button>
+            </a>
+          </div>
+
+          <div className="md:hidden">
+            <HeaderSheet
+              marketingLinks={hideMainMarketingLinks ? [] : marketingNavLinks}
+              otherLinks={secondaryLinks}
+              signInHref={signInHref}
+            />
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-export const NaviLinks: React.FC<{ otherLinks: NavLink[] }> = ({ otherLinks }) => {
-  return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        {/* Dropdown */}
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Siz</NavigationMenuTrigger>
-          <NavigationMenuContent className="flex">
-            {productLinks.map((navLink, index) => (
-              <ul
-                key={index}
-                className="flex flex-col w-[200px] gap-3 p-4 md:w-[250px] lg:w-[300px]"
-              >
-                <Typography variant="large">{navLink.label}</Typography>
-                {navLink.paths.map((path, index) => (
-                  <React.Fragment key={path.label}>
-                    <ListItem
-                      title={path.label}
-                      href={path.href}
-                      onClick={(e) => scrollToSection(e, path.href)}
-                    >
-                      {path.description}
-                    </ListItem>
-                    {index !== navLink.paths.length - 1 && (
-                      <Separator className="dark:border-[#E8E8E8]/20 border-black/20 border-[1px]" />
-                    )}
-                  </React.Fragment>
-                ))}
-              </ul>
-            ))}
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-
-        {/* Static Links */}
-        {otherLinks.map((navLink, index) => (
-          <NavigationMenuItem key={index}>
-            <Link href={navLink.href} legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                {navLink.label}
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-        ))}
-      </NavigationMenuList>
-    </NavigationMenu>
+    </nav>
   );
 };
 
 export const MobileNavLinks: React.FC<{
+  marketingLinks: NavLink[];
   otherLinks: NavLink[];
-  showProductSections?: boolean;
-}> = ({ otherLinks, showProductSections = true }) => {
-  return (
-    <div className="flex flex-col items-center space-y-4 w-full">
-      {/* Main Navigation Links with PillNav-like styling */}
-      {otherLinks.map((navLink, index) => (
-        <div key={index} className="w-full mobile-sidebar-item" style={{ '--item-index': index } as React.CSSProperties}>
-          <Link
-            href={navLink.href}
-            className="group relative w-full block"
-          >
-            <div className="relative overflow-hidden">
-              {/* PillNav-like background with vertical animation */}
-              <div className="pill-background"></div>
-              
-              {/* Content with proper padding and centering */}
-              <div className="content px-6 py-4 text-center">
-                <span className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-white transition-colors duration-300">
-                  {navLink.label}
-                </span>
-              </div>
-              
-              {/* Subtle border glow */}
-              <div className="absolute inset-0 rounded-full border-2 border-green-400/30 group-hover:border-green-400/50 transition-all duration-300"></div>
-            </div>
-          </Link>
-        </div>
-      ))}
+  onNavigate?: () => void;
+  signInHref?: string;
+}> = ({ marketingLinks, otherLinks, onNavigate, signInHref = "/auth-choice" }) => {
+  const linkClass =
+    "block w-full text-center py-3 px-4 border border-border-subtle rounded font-label text-sm text-on-surface hover:border-terminal-green hover:text-terminal-green transition-colors duration-200";
 
-      {/* Product Links Section with enhanced styling */}
-      {showProductSections &&
-        productLinks.map((navLink, index) => (
-        <div key={index} className="w-full space-y-3">
-          {/* Section Title with PillNav-like styling */}
-          <div className="text-center mb-4">
-            <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 dark:from-green-500/30 dark:to-green-600/30 rounded-full border border-green-400/30">
-              <Typography variant="large" className="font-semibold text-green-700 dark:text-green-300">
-                {navLink.label}
-              </Typography>
-            </div>
-          </div>
-          
-          {/* Product Paths with enhanced styling */}
-          <div className="flex flex-col items-center space-y-3">
-            {navLink.paths.map((path, pathIndex) => (
-              <div key={pathIndex} className="w-full mobile-sidebar-item" style={{ '--item-index': otherLinks.length + pathIndex } as React.CSSProperties}>
-                <button
-                  onClick={(e) => scrollToSection(e, path.href)}
-                  className="group relative w-full block"
-                >
-                  <div className="relative overflow-hidden">
-                    {/* PillNav-like background with vertical animation */}
-                    <div className="pill-background"></div>
-                    
-                    {/* Content with proper padding and centering */}
-                    <div className="content px-4 py-3 text-center">
-                      <div className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-white transition-colors duration-300">
-                        {path.label}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-green-100 transition-colors duration-300 mt-1">
-                        {path.description}
-                      </div>
-                    </div>
-                    
-                    {/* Subtle border glow */}
-                    <div className="absolute inset-0 rounded-full border border-green-400/30 group-hover:border-green-400/50 transition-all duration-300"></div>
-                  </div>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+  const handleAnchorClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string
+  ) => {
+    scrollToSection(e, href);
+    onNavigate?.();
+  };
+
+  const renderLink = (link: NavLink) => {
+    if (link.href.startsWith("#")) {
+      return (
+        <a
+          key={link.href}
+          href={link.href}
+          onClick={(e) => handleAnchorClick(e, link.href)}
+          className={linkClass}
+        >
+          {link.label}
+        </a>
+      );
+    }
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={linkClass}
+        onClick={() => onNavigate?.()}
+      >
+        {link.label}
+      </Link>
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-3 w-full">
+      {marketingLinks.map(renderLink)}
+      {otherLinks.map(renderLink)}
+      <a
+        href={signInHref}
+        className={linkClass}
+        onClick={() => onNavigate?.()}
+      >
+        Sign In
+      </a>
     </div>
   );
 };
+

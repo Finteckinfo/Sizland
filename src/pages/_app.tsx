@@ -2,14 +2,13 @@ import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AppProps } from "next/app";
-import { Montserrat, Inter } from "next/font/google";
+import { Montserrat, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { Providers } from '@/providers/index'
 import { SessionProvider } from "next-auth/react";
 import { config } from "../wagmi";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -36,9 +35,15 @@ export const monsterrat = Montserrat({
   weight: "500",
 });
 
-export const inter = Inter({
+export const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-hanken-grotesk",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+export const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -53,18 +58,16 @@ function MyApp({ Component, pageProps }: AppProps) {
       <SessionProvider session={pageProps.session}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={client}>
-            <Providers>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </ThemeProvider>
-            </Providers>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </ThemeProvider>
           </QueryClientProvider>
         </WagmiProvider>
         <SpeedInsights />
@@ -85,7 +88,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`${monsterrat.variable} ${inter.variable} font-sans`}>
+    <div
+      className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body text-on-surface`}
+    >
       <GlowBackground />
       <AnimatedGrid />
       <Navbar />

@@ -61,45 +61,78 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Stitch marketing tokens — light mode defaults */
+    --stitch-surface-base: #f7faf8;
+    --stitch-surface-elevated: #eef4f0;
+    --stitch-surface-container-lowest: #ffffff;
+    --stitch-surface-variant: #9ca8a2;
+    --stitch-border-subtle: #c8d6ce;
+    --stitch-on-surface: #0f1412;
+    --stitch-on-surface-variant: #3d4f46;
+
+    --stitch-chrome-nav-solid: #ffffff;
+    --stitch-chrome-footer-solid: #ffffff;
+    --stitch-chrome-nav-edge: rgba(16, 185, 129, 0.45);
+    --stitch-chrome-nav-edge-glow: rgba(16, 185, 129, 0.22);
+    --stitch-chrome-footer-tint: rgba(16, 185, 129, 0.1);
+    --stitch-chrome-footer-tint-mid: rgba(16, 185, 129, 0.04);
+    --stitch-chrome-footer-separator: rgba(200, 214, 206, 0.85);
   }
 
   .dark {
     /* CSS: .bg-gradient { background: var(--gradient) } */
-    --gradient: linear-gradient(to top left, #020617, #000000);
+    --gradient: linear-gradient(to top left, #0A0A0A, #000000);
 
-    --background: #000000; /* Dark mode: true black */
-    --foreground: hsl(217, 4.7%, 96.6%);
+    --background: #0A0A0A;
+    --foreground: #e5e2e1;
 
-    --muted: 217 23.5% 9.6%;
-    --muted-foreground: 217 4.7% 53.2%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 150 8% 74%;
 
-    --popover: 217 55.6% 4.16%;
-    --popover-foreground: 217 4.7% 96.6%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 90%;
 
-    --card: 217 55.6% 4.16%;
-    --card-foreground: 217 4.7% 96.6%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 90%;
 
-    --border: 217 23.5% 9.6%;
-    --input: 217 23.5% 9.6%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
 
-    --primary: 217 47% 32%;
-    --primary-foreground: 217 4.7% 96.6%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 217 23.5% 9.6%;
-    --secondary-foreground: 217 4.7% 96.6%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --accent: 217 23.5% 9.6%;
-    --accent-foreground: 217 4.7% 96.6%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 90%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 217 4.7% 96.6%;
+    --destructive-foreground: 0 0% 90%;
 
-    --ring: 217 47% 32%;
+    --ring: 160 84% 39%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --stitch-surface-base: #0a0a0a;
+    --stitch-surface-elevated: #1a1a1a;
+    --stitch-surface-container-lowest: #0e0e0e;
+    --stitch-surface-variant: #353534;
+    --stitch-border-subtle: #262626;
+    --stitch-on-surface: #e5e2e1;
+    --stitch-on-surface-variant: #bbcabf;
+
+    --stitch-chrome-nav-solid: #000000;
+    --stitch-chrome-footer-solid: #000000;
+    --stitch-chrome-nav-edge: rgba(167, 139, 250, 0.6);
+    --stitch-chrome-nav-edge-glow: rgba(139, 92, 246, 0.32);
+    --stitch-chrome-footer-tint: rgba(20, 184, 166, 0.14);
+    --stitch-chrome-footer-tint-mid: rgba(20, 184, 166, 0.05);
+    --stitch-chrome-footer-separator: rgba(38, 38, 38, 0.95);
   }
 }
 
@@ -111,8 +144,8 @@
   }
 
   .dark {
-    --background: #000000; /* Dark mode: true black */
-    --foreground: hsl(217, 4.7%, 96.6%);
+    --background: #0A0A0A;
+    --foreground: #e5e2e1;
   }
 
   /* Apply custom background and foreground */
@@ -120,6 +153,215 @@
     background-color: var(--background);
     color: var(--foreground);
     overflow-x: hidden;
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--stitch-border-subtle);
+  }
+
+  .dark .glass-panel {
+    background: rgba(26, 26, 26, 0.4);
+    border: 1px solid #262626;
+  }
+
+  .grid-bg {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, rgba(38, 38, 38, 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(38, 38, 38, 0.5) 1px, transparent 1px);
+  }
+
+  .terminal-glow {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  }
+
+  .terminal-glow-active {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    border-color: #10b981;
+  }
+
+  .font-body {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+  }
+
+  .font-label {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .font-mono-custom {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .font-headline {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .chrome-tint-nav {
+    position: relative;
+    isolation: isolate;
+    border-bottom: none;
+    background-color: transparent;
+    background-image: linear-gradient(
+      to bottom,
+      var(--stitch-chrome-nav-solid) 0%,
+      var(--stitch-chrome-nav-solid) 58%,
+      color-mix(in srgb, var(--stitch-chrome-nav-solid) 72%, transparent) 78%,
+      color-mix(in srgb, var(--stitch-chrome-nav-solid) 28%, transparent) 92%,
+      transparent 100%
+    );
+  }
+
+  .chrome-tint-footer {
+    position: relative;
+    isolation: isolate;
+    border-top: none;
+    background-color: transparent;
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--stitch-chrome-footer-solid) 35%, transparent) 0.75rem,
+      color-mix(in srgb, var(--stitch-chrome-footer-solid) 70%, transparent) 1.25rem,
+      var(--stitch-chrome-footer-solid) 2rem,
+      var(--stitch-chrome-footer-solid) 100%
+    );
+  }
+
+  .chrome-tint-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--stitch-chrome-footer-separator);
+    pointer-events: none;
+  }
+
+  .scanline {
+    position: relative;
+  }
+
+  .scanline::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background:
+      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+      linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 6s ease-in-out infinite;
+  }
+
+  .animate-gradient-shift {
+    background-size: 200% auto;
+    animation: gradientShift 4s ease-in-out infinite alternate;
+  }
+
+  .stitch-btn {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .stitch-btn:hover,
+  .stitch-btn:focus-visible {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .stitch-card {
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stitch-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .animate-planned-pulse {
+    animation: plannedDotPulse 2.5s ease-in-out infinite;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+@keyframes plannedDotPulse {
+  0%,
+  100% {
+    background-color: var(--stitch-surface-variant);
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.55);
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scanline::before {
+    display: none;
+  }
+
+  .animate-glow-pulse,
+  .animate-gradient-shift,
+  .animate-pulse,
+  .animate-planned-pulse,
+  .animate-\[spin_60s_linear_infinite\],
+  .animate-\[spin_40s_linear_infinite_reverse\],
+  .animate-\[spin_70s_linear_infinite_reverse\],
+  .animate-\[spin_90s_linear_infinite\] {
+    animation: none !important;
+  }
+
+  .stitch-card:hover {
+    transform: none;
   }
 }
 
@@ -130,6 +372,13 @@ html {
   max-width: 100vw;
 }
 
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Ensure the Next.js root never overflows horizontally */
 #__next {
   overflow-x: hidden;
@@ -137,10 +386,24 @@ html {
   max-width: 100vw;
 }
 
-/* Clamp structural containers to viewport width to prevent horizontal scroll */
-main, header, nav, footer, section {
+/* Clamp structural containers to viewport width to prevent horizontal scroll.
+   Exclude sticky nav — overflow:clip on the sticky element breaks stickiness. */
+main, header, footer, section {
   overflow-x: clip;
   max-width: 100vw;
+}
+
+nav {
+  max-width: 100vw;
+}
+
+/* Solid, readable chrome on small screens (fade only on desktop) */
+@media (max-width: 767px) {
+  .chrome-tint-nav {
+    background-color: var(--stitch-chrome-nav-solid);
+    background-image: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--stitch-chrome-nav-edge) 35%, transparent);
+  }
 }
 
 /* === Landing background system === */

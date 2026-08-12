@@ -1,6 +1,6 @@
+"use client";
+
 import Image from "next/image";
-// import logoBlack from "@/../assets/logo-black.svg";
-// import logoWhite from "@/../assets/logo-white.svg";
 import {
   Sheet,
   SheetContent,
@@ -12,9 +12,8 @@ import { MenuIcon } from "lucide-react";
 import { MobileNavLinks } from "./navbar";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { useState } from "react";
-import { ConnectWalletButton } from "../ui/connect-button";
-import { Typography } from "../ui/typography";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
 interface NavLink {
   label: string;
@@ -22,57 +21,56 @@ interface NavLink {
 }
 
 export const HeaderSheet: React.FC<{
+  marketingLinks: NavLink[];
   otherLinks: NavLink[];
-  showProductSections?: boolean;
-}> = ({ otherLinks, showProductSections = true }) => {
+  signInHref?: string;
+}> = ({ marketingLinks, otherLinks, signInHref = "/auth-choice" }) => {
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
+  const closeMenu = () => setIsNavbarOpen(false);
+
   return (
-    <Sheet
-      open={isNavbarOpen}
-      onOpenChange={() => setIsNavbarOpen(!isNavbarOpen)}
-    >
-      <SheetTrigger asChild className="z-[500]">
-        <MenuIcon className="rotate-90" />
+    <Sheet open={isNavbarOpen} onOpenChange={setIsNavbarOpen}>
+      <SheetTrigger asChild>
+        <button
+          type="button"
+          aria-label="Open menu"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border-subtle bg-surface-elevated/80 text-terminal-green hover:border-terminal-green hover:bg-surface-elevated transition-colors"
+        >
+          <MenuIcon className="h-5 w-5" aria-hidden="true" />
+        </button>
       </SheetTrigger>
-      <SheetContent className="border-neutral-600 bg-white/80 dark:bg-black/80 backdrop-blur-xl flex flex-col">
+      <SheetContent className="w-[min(100vw,20rem)] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col text-on-surface p-0">
         <VisuallyHidden>
           <SheetTitle>Mobile Menu</SheetTitle>
-          <SheetDescription>
-            Navigate through the application using the mobile menu options.
-          </SheetDescription>
+          <SheetDescription>Navigation menu</SheetDescription>
         </VisuallyHidden>
 
-        {/* Enhanced Header with PillNav-like styling */}
-        <div className="mb-8 text-center flex-shrink-0">
-          <div className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-lg">
-            <Typography variant="h3" className="font-bold text-white">
-              SIZLAND
-            </Typography>
-          </div>
+        <div className="flex items-center gap-3 px-5 pt-6 pb-4 border-b border-border-subtle">
+          <Image src="/logo1.png" alt="Sizland" width={32} height={32} className="h-8 w-8 object-contain" />
+          <span className="font-headline text-terminal-green tracking-headline">Sizland</span>
         </div>
 
-        {/* Scrollable Content Container */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          {/* Enhanced Navigation Items with PillNav Effect */}
-          <div className="flex flex-col items-center gap-4 px-6 pb-20">
-            {/* Connect Wallet Button with enhanced styling */}
-            <div className="w-full">
-              <ConnectWalletButton />
-            </div>
-            
-            {/* Navigation Links with PillNav-like styling */}
-            <div className="w-full">
-              <MobileNavLinks otherLinks={otherLinks} showProductSections={showProductSections} />
-            </div>
-          </div>
+        <div className="flex-1 overflow-y-auto px-4 py-5">
+          <MobileNavLinks
+            marketingLinks={marketingLinks}
+            otherLinks={otherLinks}
+            onNavigate={closeMenu}
+            signInHref={signInHref}
+          />
         </div>
 
-        {/* Theme Toggler positioned at bottom */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex-shrink-0">
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-full p-2 shadow-lg">
-            <ThemeToggler />
-          </div>
+        <div className="px-4 pb-6 pt-3 border-t border-border-subtle flex items-center justify-between gap-3">
+          <ThemeToggler />
+          <a
+            href={SIZLAND_WALLET_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={closeMenu}
+            className="stitch-btn bg-terminal-green text-surface-base font-label text-xs px-4 py-2.5 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap"
+          >
+            Launch Wallet
+          </a>
         </div>
       </SheetContent>
     </Sheet>

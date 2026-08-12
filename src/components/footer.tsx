@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   GitHubIcon,
@@ -5,127 +6,72 @@ import {
   DiscordIcon,
   XIcon,
 } from "@/assets/icons/social";
-import { Typography } from "./ui/typography";
 
-interface FooterData {
-  label: string;
-  href: string;
-  children?: React.ReactNode;
-}
-
-const footerLinks: FooterData[] = [
-  {
-    label: "Terms of Service",
-    href: "/terms",
-  },
-  {
-    label: "Privacy Policy",
-    href: "/privacy-policy",
-  },
-  {
-    label: "Legal Notice",
-    href: "/legal",
-  },
-  {
-    label: "Contact",
-    href: "/contact",
-  },
+const footerLinks = [
+  { label: "Privacy", href: "/privacy-policy" },
+  { label: "Security", href: "/legal" },
+  { label: "Documentation", href: "/whitepaper" },
+  { label: "Whitepaper", href: "/whitepaper" },
+  { label: "Contact", href: "/contact" },
+  { label: "Terms", href: "/terms" },
 ];
 
-const socialLinks: FooterData[] = [
-  {
-    label: "GitHub",
-    href: "https://github.com/your-profile",
-    children: <GitHubIcon />,
-  },
-  {
-    label: "Telegram",
-    href: "https://t.me/your-telegram",
-    children: <TelegramIcon />,
-  },
-  {
-    label: "Discord",
-    href: "https://discord.com/invite/your-invite",
-    children: <DiscordIcon />,
-  },
-  {
-    label: "Twitter/X",
-    href: "https://twitter.com/your-profile",
-    children: <XIcon />,
-  },
+const socialLinks = [
+  { label: "GitHub", href: "https://github.com/Finteckinfo", icon: GitHubIcon },
+  { label: "Telegram", href: "https://t.me/sizlandofficial", icon: TelegramIcon },
+  { label: "Discord", href: "https://discord.com/invite/sizland", icon: DiscordIcon },
+  { label: "Twitter/X", href: "https://twitter.com/sizlandofficial", icon: XIcon },
 ];
 
 export const Footer: React.FC = () => {
   return (
-    <FooterContainer>
-      <FooterContent />
-    </FooterContainer>
-  );
-};
+    <footer className="chrome-tint-footer text-on-surface-variant">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter px-4 sm:px-6 md:px-margin-desktop py-10 md:py-12 max-w-container-max mx-auto">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo1.png"
+              alt="Sizland Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain opacity-80"
+            />
+            <span className="font-headline text-lg text-terminal-green tracking-headline">Sizland</span>
+          </div>
+          <p className="font-body text-sm text-on-surface-variant">
+            Confidential — Sizland 2026 — Proprietary Technology
+          </p>
+          <p className="font-label text-xs text-on-surface-variant">
+            Engineering Total Sovereignty.
+          </p>
+          <div className="flex gap-4 pt-2">
+            {socialLinks.map((social) => (
+              <Link
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className="font-body text-on-surface-variant hover:text-terminal-green transition-colors"
+              >
+                <social.icon />
+              </Link>
+            ))}
+          </div>
+        </div>
 
-const FooterContent: React.FC = () => {
-  return (
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full p-4">
-      {/* Company Info */}
-      <div className="flex flex-col justify-center items-center text-muted-foreground">
-        <p>© {new Date().getFullYear()} BBS</p>
-        <Link href="#">
-          <Typography variant={"extraSmall"}>All Rights Reserved</Typography>
-        </Link>
+        <div className="flex flex-col md:items-end justify-start mt-8 md:mt-0 space-y-3 text-sm">
+          {footerLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="font-body text-on-surface-variant hover:text-terminal-green transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
       </div>
-
-      {/* Footer Links (Terms, Cookie Policy, etc.) */}
-      <div className="flex flex-col lg:flex-row gap-4 justify-center items-center p-8">
-        {footerLinks.map((link, index) => (
-          <FooterLink key={index} href={link.href} label={link.label}>
-            {link.label}
-          </FooterLink>
-        ))}
-      </div>
-
-      {/* Social Icons */}
-      <div className="flex flex-row gap-4">
-        {socialLinks.map((social, index) => (
-          <FooterIconLink key={index} href={social.href} label={social.label}>
-            {social.children}
-          </FooterIconLink>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const FooterLink: React.FC<FooterData> = ({ href, children }) => {
-  return (
-    <Link
-      href={href}
-      className="text-sm text-muted-foreground hover:text-muted-foreground/60 transition"
-    >
-      {children}
-    </Link>
-  );
-};
-
-const FooterIconLink: React.FC<FooterData> = ({ href, label, children }) => {
-  return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      className="text-gray-500 hover:text-gray-900 transition"
-    >
-      {children}
-    </Link>
-  );
-};
-
-const FooterContainer: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return (
-    <footer className="bg-white/50 dark:bg-black/50 rounded-t-xl px-6 pb-10 pt-20 md:p-16 md:py-16 flex flex-col lg:flex-row items-start justify-between gap-4">
-      {children}
     </footer>
   );
 };

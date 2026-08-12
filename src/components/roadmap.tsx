@@ -1,349 +1,109 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useTheme } from 'next-themes';
-import { AuroraText } from './ui/aurora-text';
-import { Button1 } from "@/components/ui/button1";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
+import React from 'react';
+import ScrollReveal from './ui/scroll-reveal';
 
-// SIZ Logo Icon Component
-const SizLogoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* SIZ Logo - Simplified geometric design */}
-    <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor" opacity="0.1"/>
-    <path 
-      d="M7 8h10M7 12h10M7 16h6" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <circle cx="18" cy="6" r="2" fill="currentColor"/>
-  </svg>
-);
-
-interface RoadmapItem {
+interface Phase {
+  label: string;
+  labelColor: string;
+  dotClass: string;
+  cardHoverClass: string;
   title: string;
-  date: string;
-  description?: string;
-  badge?: string;
-  achievements?: {
-    title: string;
-    date: string;
-    items: string[];
-  };
-  nextSteps?: {
-    title: string;
-    date: string;
-    items: string[];
-  };
-  items?: string[];
+  description: string;
+  detail?: string;
+  reverse?: boolean;
 }
 
-const roadmap: RoadmapItem[] = [
+const phases: Phase[] = [
   {
-    title: 'Phase 1: Laying the Groundwork (Current Phase: Live)',
-    date: 'Months 1-12',
-    description:
-      'We are setting up the secure, foundational technology for the Sizland platform, which is our blockchain-based ERP system. Development officially began in February of this year, building upon the initial ERP concepts and prototypes from 2023. This phase is about establishing the core value proposition for remote teams.',
-    badge: 'Live',
-    achievements: {
-      title: 'Phase 1 Achievements (What\'s DONE Now)',
-      date: 'Months 1-7',
-      items: [
-        'Core ERP Web Application is Live: We launched the central web platform, which is the main hub for teams to manage projects and workflows.',
-        'Automated Workflow System: The fundamental logic for streamlining work is complete, allowing teams to set up token-based tasks that automatically trigger payments and record milestone verification on the blockchain.',
-        'Instant, Automated Payments: The core automated payment system is built and functioning, cutting out manual payment headaches for remote teams.',
-        'Multichain Foundation: We\'ve established the initial smart contract infrastructure across four major blockchain networks: Algorand, Sui, Base, and BNB Chain. This ensures the platform is fast, scalable, and ready for a global user base.',
-        'Community Building: We are actively building our early community and establishing the legal framework to ensure secure and compliant operations.',
-      ],
-    },
-    nextSteps: {
-      title: 'Phase 1 Next Steps (Focusing on DeFi Integration)',
-      date: 'Months 7-12',
-      items: [
-        'Staking: Allowing users to earn passive income by holding our native tokens.',
-        'Swapping: Implementing an in-app tool for users to easily exchange one cryptocurrency for another.',
-        'P2P Services: Building a peer-to-peer module for users to directly exchange tokens for local currency without a central middleman.',
-      ],
-    },
-  },
-  {
-    title: 'Phase 2: Growing the Platform',
-    date: 'Months 12-18',
-    description:
-      'We will take things to the next level by focusing on usability, accessibility, and high-level financial tools. This is where we fully integrate advanced features to make the ERP more powerful and available everywhere.',
-    items: [
-      'Mobile-First Experience: Making the entire platform fully mobile-friendly to ensure remote workers can manage tasks, track progress, and access payments from anywhere.',
-      'AI Integration: Introducing Artificial Intelligence features to streamline workflows, enhance efficiency, and provide intelligent insights for better resource management and risk mitigation.',
-      'Full DeFi Suite & Token Launch: Completing the full suite of DeFi tools (including staking, swapping, and P2P services) and conducting private/public token sales to fund the next stage of growth and expand our community.',
-    ],
-  },
-  {
-    title: 'Phase 3: Going Live & Scaling',
-    date: 'Months 19-36',
-    description:
-      'Everything comes together. This phase is focused on establishing the platform as an industry standard for remote work and rolling out our unique on-chain financial services to the world.',
-    items: [
-      'Launch of On-Chain Credit Score System: Implementing the ultimate financial tool for remote workers: an immutable, transparent credit score generated by verified, on-chain work history within the ERP.',
-      'Decentralized Lending Services: Based on the on-chain credit score, we will launch lending services that can offer fair, decentralized loans to remote workers globally.',
-      'Full Production Deployment: Scaling the platform and launching it officially into the global market to reach a massive user base.',
-      'Global ERP Features: Adding complex, enterprise-level ERP modules (like advanced reporting, HR tools, and deep analytics) tailored for large, globally distributed teams.',
-    ],
-  },
-  {
-    title: 'Phase 4: Decentralization & Ecosystem Growth',
-    date: 'Months 37+',
-    description:
-      'This final phase is about handing over control to the community and driving sustained, decentralized growth for the entire ecosystem.',
-    items: [
-      'Decentralized Governance: Transitioning platform control to a community-run model, where token holders can vote on major decisions for the future of Sizland.',
-      'Ecosystem Incubation: Launching a dedicated fund and program to support third-party developers who want to build new applications and services on top of the Sizland infrastructure.',
-      'Interoperability Focus: Focusing on maximum integration across all multichain networks and Web3 ecosystems to ensure Sizland remains the most flexible and connected platform for remote work.',
-      'Long-Term R&D: Dedicated research and development into future technologies like ZK proofs for enhanced privacy and scalability.',
-    ],
-  },
-];
-
-// Shortened roadmap data for the main display
-const shortenedRoadmap = [
-  {
-    number: '01',
+    label: 'Complete',
+    labelColor: 'text-terminal-green',
+    dotClass: 'bg-terminal-green shadow-[0_0_10px_#10B981]',
+    cardHoverClass: 'group-hover:border-terminal-green/50',
     title: 'Foundation',
-    description: 'Laying the groundwork with core infrastructure, wallet integration, and the initial ERP framework.',
+    detail: 'Delivered June 2026.',
+    description:
+      'Core DiD infrastructure launch. Sizland Identity Protocol, multi-chain wallet factory layer, and production-ready secure API layer.',
+    reverse: false,
   },
   {
-    number: '02',
-    title: 'Growth',
-    description: 'Expanding capabilities with advanced tasks, automated payments, and early DeFi tooling.',
+    label: 'In progress',
+    labelColor: 'text-neon-accent',
+    dotClass: 'bg-neon-accent animate-pulse',
+    cardHoverClass: 'group-hover:border-neon-accent/50',
+    title: 'Reputation Engine',
+    description:
+      'ERP automated bridges, signed credential generation network, decentralized score computation on SizChain X, and the SIZ token staking contract release.',
+    reverse: true,
   },
   {
-    number: '03',
-    title: 'Expansion',
-    description: 'Scaling the ecosystem through collaboration features, shared workspaces, and developer APIs.',
-  },
-  {
-    number: '04',
-    title: 'Future Vision',
-    description: 'The long-term evolution toward DAO governance, a global talent network, and a fully decentralized economy.',
+    label: 'Planned',
+    labelColor: 'text-on-surface-variant',
+    dotClass:
+      'bg-surface-variant border border-border-subtle animate-planned-pulse',
+    cardHoverClass: 'group-hover:border-terminal-green/50',
+    title: 'Scale & Sovereignty',
+    description:
+      'Stablecoin milestone escrow contracts, full multi-chain payment factories, sovereign data indexing, and on-chain reputation-backed DeFi lending protocols.',
+    reverse: false,
   },
 ];
 
 const Roadmap = () => {
-  const { resolvedTheme: theme } = useTheme();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const isDark = theme === 'dark';
-
   return (
-    <>
-      <section className="relative py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Header Section */}
-          <div className="mb-12 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)] items-center">
-            <div className="space-y-4">
-              {/* Pill badge */}
-              <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300">
-                Roadmap
-              </span>
-
-              {/* Title */}
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
-                <span className={isDark ? "text-white" : "text-black"}>
-                  Sizland Product{" "}
-                </span>
-                <AuroraText>Roadmap</AuroraText>
+    <section className="py-8 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto bg-surface-elevated/30 border-t border-border-subtle">
+      <div className="text-center mb-10 md:mb-16">
+        <h2 className="font-headline text-xl sm:text-2xl md:text-3xl text-on-surface tracking-headline">
+          Engineering Total Sovereignty
         </h2>
-
-              {/* Description */}
-              <p className="text-base md:text-lg leading-relaxed max-w-2xl">
-                <span className={isDark ? "text-gray-300" : "text-gray-600"}>
-          Sizland is the all-in-one platform built specifically for remote working teams, integrating a seamless workflow ERP with the financial power of blockchain. Our goal is to solve the daily pain points of remote work and genuinely improve the financial lives of remote workers.
-                </span>
-              </p>
-            </div>
-
-            {/* Learn More Button */}
-            <div className="flex lg:justify-end">
-              <Button1 
-                onClick={() => setIsModalOpen(true)}
-                className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
-              >
-                Learn More
-              </Button1>
-            </div>
-          </div>
-
-          {/* Timeline - Shortened Version */}
-          <div className="relative">
-            {/* Dotted connecting line - only visible on desktop */}
-            <div className={`hidden lg:block absolute top-6 left-[1.5rem] right-[1.5rem] h-0.5 border-t-2 border-dashed ${
-              isDark ? "border-green-500/40" : "border-green-500/50"
-            }`} />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {shortenedRoadmap.map((phase, index) => (
-                <div key={index} className="relative flex flex-col items-start">
-                  {/* Number Circle */}
-                  <div className={`relative z-10 mb-4 flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-                    isDark 
-                      ? "border-green-500 bg-green-500/10" 
-                      : "border-green-500 bg-green-50"
-                  }`}>
-                    <span className={`text-lg font-bold ${
-                      isDark ? "text-green-400" : "text-green-600"
-                    }`}>
-                      {phase.number}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className={`text-xl font-bold mb-3 ${
-                    isDark ? "text-white" : "text-black"
-                  }`}>
-                    {phase.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className={`text-sm leading-6 ${
-                    isDark ? "text-gray-300" : "text-gray-600"
-                  }`}>
-                    {phase.description}
-        </p>
       </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Full Roadmap Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              <span className={isDark ? "text-white" : "text-black"}>
-                Sizland Product{" "}
-              </span>
-              <AuroraText>Roadmap</AuroraText>
-            </DialogTitle>
-            <DialogDescription className={isDark ? "text-gray-300" : "text-gray-600"}>
-              Complete roadmap with detailed information about each phase
-            </DialogDescription>
-          </DialogHeader>
+      <div className="relative border-l-2 border-border-subtle ml-4 md:ml-0 md:pl-0 space-y-10 md:space-y-12">
+        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-border-subtle -translate-x-1/2" />
 
-          <div className="mt-6">
-            <ol className="relative border-s border-gray-200 dark:border-gray-700">
-        {roadmap.map((item, index) => (
-          <li key={index} className="mb-12 ms-6">
-                  <span className={`absolute flex items-center justify-center w-8 h-8 rounded-full -start-4 ring-4 ${
-                    isDark 
-                      ? "bg-green-900 ring-gray-900" 
-                      : "bg-green-100 ring-white"
-                  }`}>
-                    <SizLogoIcon className={`w-4 h-4 ${
-                      isDark ? "text-green-400" : "text-green-600"
-                    }`} />
-            </span>
-                  <h3 className={`flex items-center mb-2 text-xl font-semibold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}>
-              {item.title}
-              {item.badge && (
-                      <span className={`text-sm font-medium me-2 px-2.5 py-0.5 rounded-full ms-3 ${
-                        isDark 
-                          ? "bg-green-900 text-green-300" 
-                          : "bg-green-100 text-green-800"
-                      }`}>
-                  {item.badge}
-                </span>
-              )}
-            </h3>
-                  <time className={`block mb-3 text-sm font-medium leading-none ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}>
-              {item.date}
-            </time>
-            {item.description && (
-                    <p className={`text-base font-normal leading-relaxed mb-4 ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}>
-                {item.description}
+        {phases.map((phase, index) => (
+          <ScrollReveal key={phase.title} delay={index * 0.1} y={20}>
+            <div
+              className={`relative pl-8 md:pl-0 flex flex-col ${
+                phase.reverse ? 'md:flex-row-reverse' : 'md:flex-row'
+              } items-center md:justify-between group`}
+            >
+            <div
+              className={`absolute left-[-5px] md:left-1/2 md:-translate-x-1/2 w-3 h-3 rounded-full shrink-0 ${phase.dotClass}`}
+            />
+
+            <div
+              className={`w-full md:w-[45%] ${
+                phase.reverse
+                  ? 'md:text-left pl-0 md:pl-8 pb-4 md:pb-0'
+                  : 'md:text-right pr-0 md:pr-8 pb-4 md:pb-0'
+              }`}
+            >
+              <p className={`font-label text-xs sm:text-sm mb-1 ${phase.labelColor}`}>
+                Phase {index + 1} · {phase.label}
               </p>
-            )}
-            {item.achievements && (
-              <div className="mt-6 mb-4">
-                      <h4 className={`text-lg font-semibold mb-2 ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}>
-                  {item.achievements.title}
-                </h4>
-                      <time className={`block mb-3 text-sm font-medium leading-none ${
-                        isDark ? "text-green-400" : "text-green-600"
-                      }`}>
-                  {item.achievements.date}
-                </time>
-                      <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}>
-                  {item.achievements.items.map((achievement, idx) => (
-                    <li key={idx}>{achievement}</li>
-                  ))}
-                </ul>
+              <h3 className="font-headline text-lg sm:text-xl text-on-surface tracking-headline">{phase.title}</h3>
+            </div>
+
+            <div
+              className={`w-full md:w-[45%] ${
+                phase.reverse ? 'pr-0 md:pr-8 text-left md:text-right' : 'pl-0 md:pl-8'
+              }`}
+            >
+              <div
+                className={`glass-panel stitch-card p-5 sm:p-6 border border-border-subtle rounded transition-colors duration-200 ${phase.cardHoverClass}`}
+              >
+                {phase.detail && (
+                  <p className="text-sm text-on-surface-variant mb-2">{phase.detail}</p>
+                )}
+                <p className="font-body text-sm sm:text-base text-on-surface leading-relaxed">{phase.description}</p>
               </div>
-            )}
-            {item.nextSteps && (
-              <div className="mt-6 mb-4">
-                      <h4 className={`text-lg font-semibold mb-2 ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}>
-                  {item.nextSteps.title}
-                </h4>
-                      <time className={`block mb-3 text-sm font-medium leading-none ${
-                        isDark ? "text-green-400" : "text-green-600"
-                      }`}>
-                  {item.nextSteps.date}
-                </time>
-                      <p className={`text-base font-normal leading-relaxed mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}>
-                  The immediate next step is to integrate the first set of financial tools into the existing web ERP to boost the financial standing of remote workers:
-                </p>
-                      <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}>
-                  {item.nextSteps.items.map((step, idx) => (
-                    <li key={idx}>{step}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {item.items && (
-                    <ul className={`list-disc list-inside space-y-2 text-base font-normal leading-relaxed mt-4 ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}>
-                {item.items.map((listItem, idx) => (
-                  <li key={idx}>{listItem}</li>
-                ))}
-              </ul>
-            )}
-          </li>
+            </div>
+            </div>
+          </ScrollReveal>
         ))}
-      </ol>
-    </div>
-        </DialogContent>
-      </Dialog>
-    </>
+      </div>
+    </section>
   );
 };
 

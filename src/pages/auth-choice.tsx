@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { AuthChoiceCard } from '@/components/auth/auth-choice-card';
 import Image from 'next/image';
+import { SIZLAND_WALLET_URL } from '@/lib/external-apps';
 import {
   appendCallbackParam,
   callbackFromQuery,
@@ -31,7 +32,11 @@ export default function AuthChoice() {
   const handleWeb3Choice = () => {
     localStorage.setItem('auth_mode', 'web3');
     if (callbackUrl) localStorage.setItem('auth_callback_url', callbackUrl);
-    router.push(appendCallbackParam('/wallet-auth', callbackUrl));
+    // Wallet auth lives on wallet.siz.land (main); keep callback for return flows when supported
+    const walletUrl = callbackUrl
+      ? `${SIZLAND_WALLET_URL}${SIZLAND_WALLET_URL.includes('?') ? '&' : '?'}callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : SIZLAND_WALLET_URL;
+    window.location.href = walletUrl;
   };
 
   const handleWeb2Choice = () => {

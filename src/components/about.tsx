@@ -1,119 +1,63 @@
-import React, { useEffect, useState } from "react";
-import { Button1 } from "@/components/ui/button1";
-import { useTheme } from "next-themes";
-import MagicBento from "@/components/ui/MagicBento";
-import AuroraText from "./ui/aurora-text";
+"use client";
+
+import React from "react";
+import ScrollReveal from "./ui/scroll-reveal";
+import { IdentityHubDiagram } from "./identity-hub";
+
+export const SUPPORTED_CHAINS = [
+  "Algorand",
+  "Base",
+  "BNB Chain",
+  "Sui",
+  "TON",
+] as const;
+
+const chainStatus = [
+  "Algorand Integration Active",
+  "Base Network Bridges Linked",
+  "BNB Chain Settlement Verified",
+  "Sui Network Sync Verified",
+  "TON Network Sync Verified",
+];
 
 const About = () => {
-  const { resolvedTheme: theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  // Custom card data for Multi-Chain Ecosystem section
-  const sizCardData = [
-    {
-      color: "transparent",
-      title: "SIZ Platform",
-      description: "Multi-chain ecosystem",
-      label: "CORE",
-      content: "Multi-chain ecosystem built on decentralized blockchain infrastructure.",
-      image: "/sizland-platform.png",
-      imageAlt: "SIZ Platform"
-    },
-    {
-      color: "transparent",
-      title: "Algorand",
-      description: "Fast, secure, and efficient.",
-      label: "BLOCKCHAIN",
-      content: "The ideal network for the SIZ utility token.",
-      image: "/algorandimage.png",
-      imageAlt: "Algorand"
-    },
-    {
-      color: "transparent",
-      title: "Sui",
-      description: "High throughput.",
-      label: "BLOCKCHAIN",
-      content: "Optimized for fast execution and data efficiency.",
-      image: "/SuiImage.png",
-      imageAlt: "Sui"
-    },
-    {
-      color: "transparent",
-      title: "Base",
-      description: "Ethereum L2.",
-      label: "BLOCKCHAIN",
-      content: "A Coinbase‑built platform for secure, scalable operations.",
-      image: "/baseimage.png",
-      imageAlt: "Base"
-    },
-    {
-      color: "transparent",
-      title: "BNB Smart Chain",
-      description: "Growing global access.",
-      label: "BLOCKCHAIN",
-      content: "Connecting emerging and underserved markets.",
-      image: "/BNBimage.png",
-      imageAlt: "BNB Smart Chain"
-    }
-  ];
-
   return (
-    <section className="overflow-hidden pt-16 pb-6 lg:pt-[96px] lg:pb-[40px] bg-transparent">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="mb-12 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)] items-center">
-          <div className="space-y-4">
-            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300">
-              Multi‑Chain Ecosystem
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
-              Built upon state-of-the-art blockchain platforms in a{" "}
-              <AuroraText className="inline-block text-emerald-400">
-                multi‑chain world!
-              </AuroraText>
-            </h2>
-            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl">
-              Sizland strategically integrates with Algorand, Sui, Base, and BNB to deliver robust, scalable, and
-              efficient blockchain‑backed ERP infrastructure.
-            </p>
+    <section className="py-8 md:py-24 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto">
+      <div className="flex flex-col md:flex-row gap-10 md:gap-12 lg:gap-16 items-center">
+        <ScrollReveal className="w-full md:w-1/2 min-w-0 self-stretch flex flex-col justify-center">
+          <IdentityHubDiagram />
+          <div className="flex flex-wrap justify-center gap-2 md:hidden mt-4">
+            {SUPPORTED_CHAINS.map((chain) => (
+              <span
+                key={chain}
+                className="bg-surface-base px-3 py-1.5 border border-border-subtle rounded-full font-label text-[10px] text-on-surface"
+              >
+                {chain}
+              </span>
+            ))}
           </div>
+        </ScrollReveal>
 
-          <div className="flex lg:justify-end">
-            <a
-              href="https://linktr.ee/sizlandinvest"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex"
-            >
-              <Button1 className="px-8 py-3 text-lg font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200">
-                Learn More
-              </Button1>
-            </a>
-          </div>
-        </div>
-
-        {/* Magic Bento Grid with design images and same effects */}
-        <div className="w-full">
-          <MagicBento
-            textAutoHide={false}
-            enableStars={true}
-            enableSpotlight={true}
-            enableBorderGlow={true}
-            enableTilt={true}
-            enableMagnetism={true}
-            clickEffect={true}
-            spotlightRadius={300}
-            particleCount={12}
-            glowColor="150, 196, 97"
-            customCardData={sizCardData}
-          />
-        </div>
+        <ScrollReveal className="w-full md:w-1/2 min-w-0 space-y-4 md:space-y-6" delay={0.1}>
+          <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] text-on-surface tracking-headline leading-tight">
+            One Identity,{" "}
+            <span className="text-terminal-green">Unlimited Chains.</span>
+          </h2>
+          <p className="font-body text-sm sm:text-base md:text-lg text-on-surface-variant leading-relaxed">
+            Sizland&apos;s architecture abstracts network complexity into unified access. Your single Decentralized Identity acts as a universal passport—manage tasks on one chain and settle payments on another seamlessly, because the client-side cryptographic layer unifies them all.
+          </p>
+          <ul className="space-y-3 sm:space-y-4 font-mono-custom text-sm mt-4 md:mt-8">
+            {chainStatus.map((item) => (
+              <li
+                key={item}
+                className="flex items-center gap-3 pb-3 sm:pb-4 border-b border-border-subtle"
+              >
+                <span className="w-2 h-2 rounded-full bg-terminal-green shrink-0" />
+                <span className="text-on-surface-variant leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </ScrollReveal>
       </div>
     </section>
   );

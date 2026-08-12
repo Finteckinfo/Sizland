@@ -1,7 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "./src/types/**/*.json"],
+  safelist: [
+    "md:col-span-4",
+    "md:col-span-8",
+    "md:col-span-12",
+    "md:row-span-1",
+    "md:row-span-2",
+    "animate-[spin_70s_linear_infinite_reverse]",
+    "animate-[spin_90s_linear_infinite]",
+    "animate-planned-pulse",
+  ],
   theme: {
     extend: {
       borderRadius: {
@@ -12,6 +22,16 @@ module.exports = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        "terminal-green": "#10B981",
+        "neon-accent": "#00FF00",
+        "encryption-purple": "#4F46E5",
+        "surface-base": "var(--stitch-surface-base)",
+        "surface-elevated": "var(--stitch-surface-elevated)",
+        "surface-container-lowest": "var(--stitch-surface-container-lowest)",
+        "surface-variant": "var(--stitch-surface-variant)",
+        "border-subtle": "var(--stitch-border-subtle)",
+        "on-surface": "var(--stitch-on-surface)",
+        "on-surface-variant": "var(--stitch-on-surface-variant)",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -53,8 +73,26 @@ module.exports = {
       },
       fontFamily: {
         pj:['"PIXymbols Very Loose W01 Reg"', 'sans-serif'],
-        inter: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        body: ['var(--font-hanken-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-hanken-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        inter: ['var(--font-hanken-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         'helvetica-97-condensed-oblique': ['"Helvetica Neue LT Pro 97 Black Condensed Oblique"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
+        label: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
+        headline: ['var(--font-hanken-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        headline: "0.08em",
+        label: "0.05em",
+      },
+      spacing: {
+        "margin-mobile": "16px",
+        "margin-desktop": "48px",
+        gutter: "24px",
+        "container-max": "1440px",
+      },
+      maxWidth: {
+        "container-max": "1440px",
       },
 
     },

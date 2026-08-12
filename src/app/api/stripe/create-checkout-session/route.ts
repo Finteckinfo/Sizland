@@ -43,8 +43,8 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: successUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/wallet?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/wallet?canceled=true`,
+      success_url: successUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/buy-land?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/buy-land?canceled=true`,
       customer_email: userEmail,
       metadata: {
         token_amount: tokenAmount.toString(),

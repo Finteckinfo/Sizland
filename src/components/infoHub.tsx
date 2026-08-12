@@ -1,73 +1,48 @@
+"use client";
+
 import React from "react";
-import { useTheme } from "next-themes";
-import InfoCard from "./ui/infoCard";
-import { AuroraText } from "./ui/aurora-text";
+import { Code, Users } from "lucide-react";
+import ScrollReveal from "./ui/scroll-reveal";
+import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
 const InfoHub = () => {
-    const { resolvedTheme: theme } = useTheme();
-    
-    const cardData = [
-        {
-            title: "What We're Building",
-            description: "Task → Approval → Instant Payout. We're building the boring rails remote teams need for clean operations and fast payments.",
-            icon: { src: "https://www.svgrepo.com/show/530438/ddos-protection.svg", alt: "Building Icon" },
-            variant: "default" as const,
-            buttonText: "Try Our Platform",
-            buttonLink: "/wallet",
-        },
-        {
-            title: "Community",
-            description: "Join our growing community of remote teams and blockchain enthusiasts. Follow our daily updates and be part of the journey.",
-            icon: { src: "https://www.svgrepo.com/show/530442/port-detection.svg", alt: "Community Icon" },
-            variant: "highlight" as const,
-            buttonText: "Join our community",
-            buttonLink: "https://twitter.com/sizlandofficial",
-        },
-        {
-            title: "Daily Updates",
-            description: "We ship in public, daily. Follow our progress as we build the future of remote team management and blockchain solutions.",
-            icon: { src: "https://www.svgrepo.com/show/530444/availability.svg", alt: "Updates Icon" },
-            variant: "default" as const,
-            buttonText: "Follow Updates",
-            buttonLink: "https://twitter.com/sizlandofficial",
-        },
-    ];
-
-    return (
-        <section className="relative py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                {/* Pill badge */}
-                <div className="flex justify-center mb-4">
-                    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300">
-                        Infohub
-                    </span>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-center font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-16 leading-tight">
-                    <span className={theme === "dark" ? "text-white" : "text-black"}>
-                        Sizland Info{" "}
-                    </span>
-                    <AuroraText>hub</AuroraText>
-                </h2>
-
-                {/* Cards grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {cardData.map((card, index) => (
-                        <InfoCard 
-                            key={index} 
-                            title={card.title} 
-                            description={card.description} 
-                            icon={card.icon}
-                            variant={card.variant}
-                            buttonText={card.buttonText}
-                            buttonLink={card.buttonLink}
-                        />
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+  return (
+    <section
+      id="community"
+      className="py-8 md:py-24 lg:py-32 px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto text-center border-t border-border-subtle"
+    >
+      <ScrollReveal>
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-on-surface mb-4 md:mb-6 tracking-headline leading-snug">
+          Join the Off-Grid Remote Economy.
+        </h2>
+      </ScrollReveal>
+      <ScrollReveal delay={0.08}>
+        <p className="font-body text-sm sm:text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed">
+          Help us build the invisible infrastructure. Whether you&apos;re a sovereign worker or a protocol developer, your node belongs here.
+        </p>
+      </ScrollReveal>
+      <ScrollReveal delay={0.16} className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center max-w-lg sm:max-w-none mx-auto">
+        <a
+          href="https://twitter.com/sizlandofficial"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="stitch-btn bg-surface-elevated border border-border-subtle text-on-surface font-label text-sm px-5 sm:px-8 py-3.5 sm:py-4 rounded hover:bg-surface-variant transition-colors flex items-center justify-center gap-2"
+        >
+          <Code className="h-4 w-4 shrink-0" />
+          Build in Public
+        </a>
+        <a
+          href={SIZLAND_WALLET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="stitch-btn bg-transparent border border-terminal-green text-terminal-green font-label text-sm px-5 sm:px-8 py-3.5 sm:py-4 rounded hover:bg-terminal-green/10 transition-colors flex items-center justify-center gap-2"
+        >
+          <Users className="h-4 w-4 shrink-0" />
+          Join Our Developer Community
+        </a>
+      </ScrollReveal>
+    </section>
+  );
 };
 
 export default InfoHub;
