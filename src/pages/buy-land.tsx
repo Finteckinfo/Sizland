@@ -610,8 +610,8 @@ export default function BuyLandPage() {
     >
       <div className="w-full">
         {/* Hero Section - no bg (layout provides it) */}
-        <section className="relative min-h-[70vh] flex items-center">
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <section className="relative flex items-start">
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-10 md:pt-4 md:pb-14 text-center">
             <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Invest in African Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>

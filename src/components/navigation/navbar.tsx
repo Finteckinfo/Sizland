@@ -88,7 +88,12 @@ export const Navbar: React.FC = () => {
     setMarketingRestrictedHost(isMarketingRestrictedHost());
   }, []);
 
-  if (!mounted) return null;
+  // Reserve nav height so fixed bar never covers page content (all hosts).
+  const navSpacer = (
+    <div className="h-14 sm:h-16 md:h-20 shrink-0" aria-hidden="true" />
+  );
+
+  if (!mounted) return navSpacer;
 
   const isSolutionsPage = router.pathname === "/solutions";
   const hideMainMarketingLinks =
@@ -138,95 +143,99 @@ export const Navbar: React.FC = () => {
     "font-body text-on-surface-variant text-xs lg:text-sm hover:text-terminal-green transition-colors duration-200 whitespace-nowrap";
 
   return (
-    <nav className="sticky top-0 z-[100] chrome-tint-nav backdrop-blur-md supports-[backdrop-filter]:bg-surface-base/80">
-      <div className="flex justify-between items-center w-full px-3 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-14 sm:h-16 md:h-20 gap-2 sm:gap-3">
-        <Link href={logoHref} className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
-          <Image
-            src="/logo1.png"
-            alt="Sizland Logo"
-            width={40}
-            height={40}
-            className="h-8 w-8 sm:h-10 sm:w-10 object-contain shrink-0"
-            priority
-          />
-          <span className="font-headline text-base sm:text-lg tracking-headline text-terminal-green truncate">
-            Sizland
-          </span>
-        </Link>
-
-        {!hideMainMarketingLinks && (
-          <div className="hidden lg:flex items-center gap-8">
-            {marketingNavLinks.map((link) => renderNavLink(link, linkClass))}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex h-9 items-center">
-              <ThemeToggler />
-            </div>
-            {isLoaded && session?.user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={session.user.image || undefined}
-                        alt={session.user.name || "User"}
-                      />
-                      <AvatarFallback>
-                        {session.user.name?.charAt(0).toUpperCase() ||
-                          session.user.email?.charAt(0).toUpperCase() ||
-                          "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{session.user.name || "User"}</p>
-                      <p className="text-xs text-muted-foreground">{session.user.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              isLoaded && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 border-border-subtle text-on-surface-variant"
-                  onClick={() => {
-                    window.location.href = signInHref;
-                  }}
-                >
-                  Sign In
-                </Button>
-              )
-            )}
-            <a href={SIZLAND_WALLET_URL} target="_blank" rel="noopener noreferrer">
-              <button className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap">
-                Launch Wallet
-              </button>
-            </a>
-          </div>
-
-          <div className="md:hidden">
-            <HeaderSheet
-              marketingLinks={hideMainMarketingLinks ? [] : marketingNavLinks}
-              otherLinks={secondaryLinks}
-              signInHref={signInHref}
+    <>
+      {/* fixed (not sticky): parent overflow-x:hidden on #__next / layout breaks sticky */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] chrome-tint-nav backdrop-blur-md supports-[backdrop-filter]:bg-surface-base/80">
+        <div className="flex justify-between items-center w-full px-3 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto h-14 sm:h-16 md:h-20 gap-2 sm:gap-3">
+          <Link href={logoHref} className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+            <Image
+              src="/logo1.png"
+              alt="Sizland Logo"
+              width={40}
+              height={40}
+              className="h-8 w-8 sm:h-10 sm:w-10 object-contain shrink-0"
+              priority
             />
+            <span className="font-headline text-base sm:text-lg tracking-headline text-terminal-green truncate">
+              Sizland
+            </span>
+          </Link>
+
+          {!hideMainMarketingLinks && (
+            <div className="hidden lg:flex items-center gap-8">
+              {marketingNavLinks.map((link) => renderNavLink(link, linkClass))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="hidden md:flex items-center gap-3">
+              <div className="flex h-9 items-center">
+                <ThemeToggler />
+              </div>
+              {isLoaded && session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={session.user.image || undefined}
+                          alt={session.user.name || "User"}
+                        />
+                        <AvatarFallback>
+                          {session.user.name?.charAt(0).toUpperCase() ||
+                            session.user.email?.charAt(0).toUpperCase() ||
+                            "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">{session.user.name || "User"}</p>
+                        <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                isLoaded && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 border-border-subtle text-on-surface-variant"
+                    onClick={() => {
+                      window.location.href = signInHref;
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                )
+              )}
+              <a href={SIZLAND_WALLET_URL} target="_blank" rel="noopener noreferrer">
+                <button className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap">
+                  Launch Wallet
+                </button>
+              </a>
+            </div>
+
+            <div className="md:hidden">
+              <HeaderSheet
+                marketingLinks={hideMainMarketingLinks ? [] : marketingNavLinks}
+                otherLinks={secondaryLinks}
+                signInHref={signInHref}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      {navSpacer}
+    </>
   );
 };
 
