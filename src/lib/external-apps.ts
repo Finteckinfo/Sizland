@@ -16,3 +16,6 @@ export const SOLUTIONS_URL =
 
 export const BUY_LAND_URL =
   process.env.NEXT_PUBLIC_BUY_LAND_URL?.replace(/\/$/, '') || 'https://buy.siz.land'
+
+export const MYTAB_URL =
+  process.env.NEXT_PUBLIC_MYTAB_URL?.replace(/\/$/, '') || 'https://mytab.siz.land'

@@ -2,6 +2,8 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import * as jwt from 'jsonwebtoken';
+import { resolveAuthRedirect } from '@/lib/mytab/auth-redirect';
+import type { WalletTrack } from '@/lib/mytab/constants';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -214,18 +216,9 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // After successful sign in, always redirect to /lobby
-      // This matches the original Clerk behavior from the backup
-      if (url.startsWith('/') && !url.startsWith('//')) {
-        return `${baseUrl}/lobby`;
-      }
-      if (url.startsWith(baseUrl)) {
-        return `${baseUrl}/lobby`;
-      }
-      // For external URLs, return to lobby for safety
-      return `${baseUrl}/lobby`;
+      return resolveAuthRedirect(url, baseUrl);
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = (user as any).id;
         token.email = (user as any).email;
@@ -240,13 +233,36 @@ export const authOptions: NextAuthOptions = {
             email: token.email,
             name: token.name,
             walletAddress: token.walletAddress,
-            authType: token.authType
+            authType: token.authType,
           };
           token.accessToken = jwt.sign(payload, secret, {
             expiresIn: '30d',
           });
         }
       }
+
+      if (trigger === 'update' && session) {
+        const update = session as {
+          mytabAlias?: string;
+          mytabAccountAddress?: string;
+          walletTrack?: string;
+          phoneVerified?: boolean;
+        };
+
+        if (update.mytabAlias !== undefined) {
+          token.mytabAlias = update.mytabAlias;
+        }
+        if (update.mytabAccountAddress !== undefined) {
+          token.mytabAccountAddress = update.mytabAccountAddress;
+        }
+        if (update.walletTrack !== undefined) {
+          token.walletTrack = update.walletTrack;
+        }
+        if (update.phoneVerified !== undefined) {
+          token.phoneVerified = update.phoneVerified;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -254,11 +270,20 @@ export const authOptions: NextAuthOptions = {
         session.user.id = (token.id as string) || '';
         session.user.email = (token.email as string) || '';
         session.user.name = (token.name as string) || '';
-        (session.user as any).walletAddress = (token.walletAddress as string) || '';
-        (session.user as any).authType = (token.authType as string) || 'web2';
+        session.user.walletAddress = (token.walletAddress as string) || '';
+        session.user.authType = (token.authType as string) || 'web2';
+        session.user.mytabAlias = (token.mytabAlias as string) || undefined;
+        session.user.mytabAccountAddress =
+          (token.mytabAccountAddress as string) || undefined;
+        const track = token.walletTrack as string | undefined;
+        session.user.walletTrack =
+          track === 'external' || track === 'smart_account'
+            ? (track as WalletTrack)
+            : undefined;
+        session.user.phoneVerified = Boolean(token.phoneVerified);
 
         if (token.accessToken) {
-          (session as any).accessToken = token.accessToken as string;
+          session.accessToken = token.accessToken as string;
         }
       }
       return session;

@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 const MAIN_ORIGIN = 'https://siz.land'
 const BUY_ORIGIN = 'https://buy.siz.land'
 const SOLUTIONS_ORIGIN = 'https://solutions.siz.land'
+const MYTAB_ORIGIN = 'https://mytab.siz.land'
 
 function hostBase(host: string | null): string {
   if (!host) return ''
@@ -26,6 +27,14 @@ function isSolutionsHost(h: string): boolean {
   )
 }
 
+function isMytabHost(h: string): boolean {
+  return (
+    h === 'mytab.siz.land' ||
+    h === 'www.mytab.siz.land' ||
+    h.endsWith('.mytab.siz.land')
+  )
+}
+
 /** Only apply strict subdomain routing on real siz.land hosts (not localhost / preview apps). */
 function shouldApplySubdomainRouting(h: string): boolean {
   if (!h) return false
@@ -45,6 +54,9 @@ const BUY_APP_PREFIXES = [
   '/admin/land',
   '/admin/users',
 ]
+
+/** Paths that belong to the MyTab app. */
+const MYTAB_APP_PREFIXES = ['/mytab']
 
 /** Shared auth and post-auth entry used from buy (and main). */
 const SHARED_AUTH_PREFIXES = [
@@ -69,6 +81,21 @@ function isAllowedOnBuyHost(pathname: string): boolean {
 
 function isBuyOnlyPath(pathname: string): boolean {
   return BUY_APP_PREFIXES.some((p) => pathMatchesPrefix(pathname, p))
+}
+
+function isMytabOnlyPath(pathname: string): boolean {
+  return MYTAB_APP_PREFIXES.some((p) => pathMatchesPrefix(pathname, p))
+}
+
+function isAllowedOnMytabHost(pathname: string): boolean {
+  if (pathname === '/') return true
+  for (const p of MYTAB_APP_PREFIXES) {
+    if (pathMatchesPrefix(pathname, p)) return true
+  }
+  for (const p of SHARED_AUTH_PREFIXES) {
+    if (pathMatchesPrefix(pathname, p)) return true
+  }
+  return false
 }
 
 function isAllowedOnSolutionsHost(pathname: string): boolean {
@@ -96,6 +123,9 @@ const publicRoutes = [
   '/whitepaper',
   '/solutions',
   '/ratecard',
+  '/mytab',
+  '/mytab/onboarding',
+  '/mytab/settings',
 ]
 
 // API routes that are public
@@ -109,6 +139,10 @@ const publicApiRoutes = [
   '/api/auth/signin',
   '/api/auth/signout',
   '/api/auth/providers',
+  '/api/mytab/alias/check',
+  '/api/mytab/alias/register',
+  '/api/mytab/phone/verify',
+  '/api/mytab/phone/register-hash',
 ]
 
 export function middleware(request: NextRequest) {
@@ -139,6 +173,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url.toString(), 308)
   }
 
+  // Main domain: mytab app routes → mytab.siz.land
+  if (applySplit && isMainDomain && isMytabOnlyPath(pathname)) {
+    const url = new URL(pathname + request.nextUrl.search, MYTAB_ORIGIN)
+    return NextResponse.redirect(url.toString(), 308)
+  }
+
   // buy.siz.land: home + buy app + auth; anything else → same path on main (marketing site)
   if (applySplit && isBuyHost(h)) {
     if (isAllowedOnBuyHost(pathname)) {
@@ -159,6 +199,20 @@ export function middleware(request: NextRequest) {
       if (pathname === '/' || pathname === '/solutions') {
         const url = request.nextUrl.clone()
         url.pathname = '/solutions'
+        return NextResponse.rewrite(url)
+      }
+      return NextResponse.next()
+    }
+    const mainUrl = new URL(pathname + request.nextUrl.search, MAIN_ORIGIN)
+    return NextResponse.redirect(mainUrl.toString(), 302)
+  }
+
+  // mytab.siz.land: mytab app + auth; anything else → main
+  if (applySplit && isMytabHost(h)) {
+    if (isAllowedOnMytabHost(pathname)) {
+      if (pathname === '/' || pathname === '/mytab') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/mytab'
         return NextResponse.rewrite(url)
       }
       return NextResponse.next()

@@ -50,6 +50,30 @@
       "destination": "https://buy.siz.land/:path*",
       "permanent": true,
       "has": [{ "type": "host", "value": "www.siz.land" }]
+    },
+    {
+      "source": "/mytab",
+      "destination": "https://mytab.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/mytab/:path*",
+      "destination": "https://mytab.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "siz.land" }]
+    },
+    {
+      "source": "/mytab",
+      "destination": "https://mytab.siz.land",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
+    },
+    {
+      "source": "/mytab/:path*",
+      "destination": "https://mytab.siz.land/:path*",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.siz.land" }]
     }
   ],
   "rewrites": [
@@ -62,6 +86,11 @@
       "source": "/",
       "destination": "/buy-land",
       "has": [{ "type": "host", "value": "buy.siz.land" }]
+    },
+    {
+      "source": "/",
+      "destination": "/mytab",
+      "has": [{ "type": "host", "value": "mytab.siz.land" }]
     }
   ]
 }

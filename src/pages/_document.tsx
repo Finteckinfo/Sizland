@@ -6,6 +6,10 @@ export default function Document({ nonce }: { nonce: string }) {
     <Html>
       <Head nonce={nonce}>
         <meta httpEquiv="Content-Security-Policy" content={getCSP(nonce, process.env.NODE_ENV === 'development')} />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        />
       </Head>
       <body>
         <Main />

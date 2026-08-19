@@ -380,6 +380,54 @@
   }
 }
 
+/* ── MyTab design tokens ── */
+.mytab-app {
+  --mt-primary: #42ee93;
+  --mt-primary-fixed: #5affa3;
+  --mt-primary-fixed-dim: #30e289;
+  --mt-primary-container: #00d17a;
+  --mt-on-primary: #00391d;
+  --mt-on-primary-container: #00532d;
+  --mt-surface: #0f1412;
+  --mt-surface-dim: #0f1412;
+  --mt-surface-bright: #353a38;
+  --mt-surface-tint: #30e289;
+  --mt-surface-container: #1c211e;
+  --mt-surface-container-low: #181d1a;
+  --mt-surface-container-high: #262b29;
+  --mt-surface-container-highest: #313633;
+  --mt-surface-container-lowest: #0a0f0d;
+  --mt-surface-variant: #313633;
+  --mt-on-surface: #dfe4e0;
+  --mt-on-surface-variant: #bbcbbc;
+  --mt-on-background: #dfe4e0;
+  --mt-background: #0f1412;
+  --mt-outline: #859587;
+  --mt-outline-variant: #3c4a3f;
+  --mt-secondary: #c0c9c2;
+  --mt-secondary-container: #404944;
+  --mt-on-secondary: #2a322e;
+  --mt-on-secondary-container: #aeb7b1;
+  --mt-tertiary: #c9d6cd;
+  --mt-tertiary-container: #adbab2;
+  --mt-on-tertiary: #28332d;
+  --mt-on-tertiary-container: #3f4a44;
+  --mt-error: #ffb4ab;
+  --mt-error-container: #93000a;
+  --mt-on-error: #690005;
+  --mt-on-error-container: #ffdad6;
+  --mt-inverse-surface: #dfe4e0;
+  --mt-inverse-on-surface: #2c322f;
+  --mt-inverse-primary: #006d3d;
+  --mt-liquid-mint: #00F58C;
+  --mt-ledger-white: #F1F4F1;
+  --mt-glass-border: rgba(255, 255, 255, 0.1);
+  --mt-pure-black: #000000;
+
+  background-color: var(--mt-background);
+  color: var(--mt-on-background);
+}
+
 /* Prevent horizontal scrolling across the site */
 html {
   overflow-x: hidden;
