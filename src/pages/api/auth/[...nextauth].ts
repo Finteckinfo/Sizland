@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import * as jwt from 'jsonwebtoken';
 import { resolveAuthRedirect } from '@/lib/auth-callback';
+import type { WalletTrack } from '@/lib/mytab/constants';
 
 export const authOptions: NextAuthOptions = {
   providers: [
