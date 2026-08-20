@@ -36,6 +36,8 @@ export default function BuyLandPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [budget, setBudget] = useState('');
   const [sizeCurve, setSizeCurve] = useState('');
   const [purpose, setPurpose] = useState('');
@@ -55,6 +57,12 @@ export default function BuyLandPage() {
     if (status === 'authenticated') {
       setCurrentStep('CONNECT_WALLET');
       fetchProgress();
+      if (session?.user?.email && !contactEmail) {
+        setContactEmail(session.user.email);
+      }
+      if (session?.user?.name && !contactName) {
+        setContactName(session.user.name.split(' ')[0] || session.user.name);
+      }
     }
   }, [status, router]);
 
@@ -73,6 +81,8 @@ export default function BuyLandPage() {
         if (req) {
           setShowForm(true);
           if (req.walletAddress) setWalletAddress(req.walletAddress);
+          if (req.contactName) setContactName(req.contactName);
+          if (req.contactEmail) setContactEmail(req.contactEmail);
           if (req.budget != null) setBudget(String(req.budget));
           if (req.sizeCurve) setSizeCurve(req.sizeCurve);
           if (req.purpose) setPurpose(req.purpose);
@@ -125,10 +135,17 @@ export default function BuyLandPage() {
       setError('Please accept the Terms and Conditions');
       return;
     }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim());
+    if (!contactName.trim() || !emailOk) {
+      setError('Please provide a valid name and email');
+      return;
+    }
     const data = await api('create-request', {
       method: 'POST',
       body: JSON.stringify({
         walletAddress: request?.walletAddress || walletAddress.trim(),
+        contactName: contactName.trim(),
+        contactEmail: contactEmail.trim(),
         budget: parseFloat(budget) || 0,
         sizeCurve: sizeCurve || '1 Acre',
         purpose: purpose || 'Farming',
@@ -138,6 +155,13 @@ export default function BuyLandPage() {
     setRequest(data.request);
     setCurrentStep('CONFIRMATION');
   };
+
+  const canSubmitRequest =
+    !!contactName.trim() &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim()) &&
+    !!purpose &&
+    termsAccepted &&
+    !loading;
 
   const handleSelectPlot = async () => {
     if (!selectedPlotId || !request?.id) return;
@@ -263,6 +287,29 @@ export default function BuyLandPage() {
             <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tell us more about your land needs.</p>
             <div className="space-y-4">
               <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Name</label>
+                <input
+                  type="text"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  placeholder="e.g., Jay"
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+                <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  For communication only — legal names are collected during later processing.
+                </p>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Email</label>
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <div>
                 <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Budget</label>
                 <input
                   type="text"
@@ -311,7 +358,7 @@ export default function BuyLandPage() {
               </label>
               <button
                 type="submit"
-                disabled={loading || !purpose}
+                disabled={!canSubmitRequest}
                 className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Submit'}
@@ -323,7 +370,11 @@ export default function BuyLandPage() {
         {currentStep === 'CONFIRMATION' && request && (
           <div>
             <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Confirmation</h2>
-            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Your request has been successfully created. We&apos;ll be in touch shortly.</p>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {request.plots?.length > 0
+                ? 'Your request has been successfully created. Review curated plots below.'
+                : 'Our Notary and Sourcing team are now identifying verified titles that match your criteria.'}
+            </p>
             <div className="space-y-6">
               {pilotEscrowSimulated && (
                 <div className="mx-auto w-fit rounded-full bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
@@ -476,22 +527,36 @@ export default function BuyLandPage() {
                   </button>
                 </div>
               ) : (
-                <div>
-                  <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Choose Your Plot</h3>
-                  <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Verified plots sourced by Sizland. Select one to proceed.</p>
+                <div
+                  className={`rounded-2xl border p-8 text-center ${
+                    isDark
+                      ? 'border-[#1f2f3f] bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)]'
+                      : 'border-[#e5efe7] bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)]'
+                  }`}
+                >
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+                    <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Request Received & Expert Sourcing Initiated
+                  </h3>
+                  <p className={`text-sm max-w-md mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Our property experts have received your criteria. We are currently manually vetting viable plots
+                    that match your budget and purpose. You will receive an update with curated options in less than 48 hours.
+                  </p>
                   <button
-                    onClick={() => router.push('/lands')}
-                    className="w-full py-3 rounded-xl font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
+                    onClick={() => router.push('/catalog')}
+                    className="mt-6 w-full py-3 rounded-xl font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
                   >
-                    View Available Lands →
+                    Close
                   </button>
                 </div>
               )}
               <button
-                onClick={() => router.push('/lobby')}
+                onClick={() => router.push('/buy-land')}
                 className="w-full py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
               >
-                Done
+                Return to Dashboard
               </button>
             </div>
           </div>
@@ -502,9 +567,12 @@ export default function BuyLandPage() {
 
   const handleStartLandRequest = () => {
     if (status === 'unauthenticated') {
-      const callback = typeof window !== 'undefined' && window.location.hostname === 'buy.siz.land'
-        ? 'https://buy.siz.land'
-        : 'https://siz.land/buy-land';
+      const callback =
+        typeof window !== 'undefined' && window.location.hostname.includes('buy.siz.land')
+          ? `${window.location.origin}/buy-land`
+          : typeof window !== 'undefined'
+            ? `${window.location.origin}/buy-land`
+            : 'https://buy.siz.land/buy-land';
       router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
@@ -542,8 +610,8 @@ export default function BuyLandPage() {
     >
       <div className="w-full">
         {/* Hero Section - no bg (layout provides it) */}
-        <section className="relative min-h-[70vh] flex items-center">
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <section className="relative flex items-start">
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-10 md:pt-4 md:pb-14 text-center">
             <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Invest in African Land From <AuroraText className="inline">Anywhere in Europe</AuroraText>
             </h1>
@@ -564,10 +632,16 @@ export default function BuyLandPage() {
               >
                 How it Works
               </button>
+              <button
+                onClick={() => router.push('/catalog')}
+                className={`px-8 py-4 rounded-lg font-bold border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-500/10 transition-colors ${isDark ? 'dark:text-emerald-400' : ''}`}
+              >
+                Explore catalog
+              </button>
             </div>
             <p className={`mt-6 text-center text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <Link href="/browse-land" className="font-medium text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">
-                Browse published land listings (map previews)
+              <Link href="/catalog" className="font-medium text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">
+                Browse published listings (satellite map)
               </Link>
             </p>
           </div>

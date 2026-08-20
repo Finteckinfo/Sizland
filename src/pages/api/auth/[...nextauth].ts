@@ -2,8 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import * as jwt from 'jsonwebtoken';
-import { resolveAuthRedirect } from '@/lib/mytab/auth-redirect';
-import type { WalletTrack } from '@/lib/mytab/constants';
+import { resolveAuthRedirect } from '@/lib/auth-callback';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -216,6 +215,8 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
+      // Honor callbackUrl when safe (buy.siz.land / buy-land / catalog, etc.).
+      // Fall back to /lobby for unknown or unsafe destinations.
       return resolveAuthRedirect(url, baseUrl);
     },
     async jwt({ token, user, trigger, session }) {

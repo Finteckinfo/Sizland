@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { SIZLAND_WALLET_URL, ERP_URL as ERP_URL_CONST } from "@/lib/external-apps";
+import { SIZLAND_WALLET_URL, ERP_URL as ERP_URL_CONST, BUY_LAND_URL } from "@/lib/external-apps";
 
 const ERP_URL = ERP_URL_CONST;
 
@@ -146,6 +146,15 @@ const LobbyPage = () => {
       variant: "blue" as const
     },
     {
+      title: "Buy Land",
+      description: "Satellite-verified land acquisition with escrow and due diligence — invest in African land from anywhere.",
+      icon: "MapPin",
+      href: BUY_LAND_URL,
+      isExternal: true,
+      isClickable: true,
+      variant: "green" as const
+    },
+    {
       title: "SizlandWallet",
       description: "Your sovereign identity stack — client-side DiD, multi-chain wallets, and self-custody reputation.",
       icon: "Fingerprint",
@@ -239,7 +248,7 @@ const LobbyPage = () => {
           {/* Tiles Grid */}
           {!showOnboarding && (
             <div className="flex justify-center items-center mb-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full justify-items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl w-full justify-items-center">
                 {dappTiles.map((tile, index) => {
                   const Icon = (Icons[tile.icon as keyof typeof Icons] as LucideIcon) || Icons.Star;
 
