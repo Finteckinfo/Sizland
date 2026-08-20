@@ -25,36 +25,36 @@
 
 @layer base {
   :root {
-    /* CSS: .bg-gradient { background: var(--gradient) } */
-    --gradient: linear-gradient(to top left, #0f172a, #020617);
-    --background: #ffffff; /* Light mode: clean white */
-    --foreground: hsl(243, 10%, 0.52%);
+    /* Soft mint page — keep background in family with stitch surfaces */
+    --gradient: linear-gradient(to top left, #e8f0eb, #f4f7f5);
+    --background: #f4f7f5;
+    --foreground: #14201a;
 
-    --muted: 243 10% 91.3%;
-    --muted-foreground: 243 5% 41.3%;
+    --muted: 150 14% 92%;
+    --muted-foreground: 160 12% 36%;
 
-    --popover: 243 10% 91.3%;
-    --popover-foreground: 243 10% 0.65%;
+    --popover: 150 20% 98%;
+    --popover-foreground: 160 18% 12%;
 
-    --card: 243 10% 91.3%;
-    --card-foreground: 243 10% 0.65%;
+    --card: 150 20% 98%;
+    --card-foreground: 160 18% 12%;
 
-    --border: 243 15% 89.52%;
-    --input: 243 15% 89.52%;
+    --border: 150 16% 86%;
+    --input: 150 16% 86%;
 
-    --primary: 243 100% 13%;
-    --primary-foreground: 243 2% 91.3%;
+    --primary: 160 64% 32%;
+    --primary-foreground: 150 30% 98%;
 
-    --secondary: 243 5% 95.65%;
-    --secondary-foreground: 243 7% 11.3%;
+    --secondary: 150 18% 93%;
+    --secondary-foreground: 160 18% 16%;
 
-    --accent: 243 5% 95.65%;
-    --accent-foreground: 243 7% 11.3%;
+    --accent: 150 22% 92%;
+    --accent-foreground: 160 18% 16%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 243 100% 13%;
+    --ring: 160 64% 36%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -62,22 +62,25 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Stitch marketing tokens — light mode defaults */
-    --stitch-surface-base: #f7faf8;
-    --stitch-surface-elevated: #eef4f0;
-    --stitch-surface-container-lowest: #ffffff;
-    --stitch-surface-variant: #9ca8a2;
-    --stitch-border-subtle: #c8d6ce;
-    --stitch-on-surface: #0f1412;
-    --stitch-on-surface-variant: #3d4f46;
+    /* Stitch marketing tokens — light mode (single mint family) */
+    --stitch-surface-base: #f4f7f5;
+    --stitch-surface-elevated: #e8f0eb;
+    --stitch-surface-container-lowest: #fafcfb;
+    --stitch-surface-variant: #8fa39a;
+    --stitch-border-subtle: #d5e3da;
+    --stitch-on-surface: #14201a;
+    --stitch-on-surface-variant: #4a5c54;
 
-    --stitch-chrome-nav-solid: #ffffff;
-    --stitch-chrome-footer-solid: #ffffff;
-    --stitch-chrome-nav-edge: rgba(16, 185, 129, 0.45);
-    --stitch-chrome-nav-edge-glow: rgba(16, 185, 129, 0.22);
-    --stitch-chrome-footer-tint: rgba(16, 185, 129, 0.1);
-    --stitch-chrome-footer-tint-mid: rgba(16, 185, 129, 0.04);
-    --stitch-chrome-footer-separator: rgba(200, 214, 206, 0.85);
+    --stitch-chrome-nav-solid: #f4f7f5;
+    --stitch-chrome-footer-solid: #f4f7f5;
+    --stitch-chrome-nav-edge: rgba(16, 185, 129, 0.22);
+    --stitch-chrome-nav-edge-glow: rgba(16, 185, 129, 0.12);
+    --stitch-chrome-footer-tint: rgba(16, 185, 129, 0.07);
+    --stitch-chrome-footer-tint-mid: rgba(16, 185, 129, 0.03);
+    --stitch-chrome-footer-separator: rgba(213, 227, 218, 0.9);
+
+    --terminal-green: #059669;
+    --neon-accent: #0d9488;
   }
 
   .dark {
@@ -133,41 +136,40 @@
     --stitch-chrome-footer-tint: rgba(20, 184, 166, 0.14);
     --stitch-chrome-footer-tint-mid: rgba(20, 184, 166, 0.05);
     --stitch-chrome-footer-separator: rgba(38, 38, 38, 0.95);
+
+    --terminal-green: #10B981;
+    --neon-accent: #34d399;
   }
 }
 
 @layer base {
-  :root {
-    --gradient: linear-gradient(to top left, #0f172a, #020617);
-    --background: #ffffff; /* Light mode: clean white */
-    --foreground: hsl(243, 10%, 0.52%);
-  }
-
-  .dark {
-    --background: #0A0A0A;
-    --foreground: #e5e2e1;
-  }
-
   /* Apply custom background and foreground */
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: var(--stitch-surface-base);
+    color: var(--stitch-on-surface);
     overflow-x: hidden;
     font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .dark body {
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
 @layer utilities {
   .glass-panel {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--stitch-border-subtle);
+    background: color-mix(in srgb, var(--stitch-surface-container-lowest) 82%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid color-mix(in srgb, var(--stitch-border-subtle) 80%, transparent);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 28px rgba(20, 32, 26, 0.04);
   }
 
   .dark .glass-panel {
     background: rgba(26, 26, 26, 0.4);
     border: 1px solid #262626;
+    box-shadow: none;
   }
 
   .grid-bg {
@@ -178,12 +180,20 @@
   }
 
   .terminal-glow {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.14);
+  }
+
+  .dark .terminal-glow {
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
   }
 
   .terminal-glow-active {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.22);
     border-color: #10b981;
+  }
+
+  .dark .terminal-glow-active {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
   }
 
   .font-body {
@@ -289,6 +299,11 @@
 
   .stitch-btn:hover,
   .stitch-btn:focus-visible {
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+  }
+
+  .dark .stitch-btn:hover,
+  .dark .stitch-btn:focus-visible {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
   }
 
@@ -365,6 +380,54 @@
   }
 }
 
+/* ── MyTab design tokens ── */
+.mytab-app {
+  --mt-primary: #42ee93;
+  --mt-primary-fixed: #5affa3;
+  --mt-primary-fixed-dim: #30e289;
+  --mt-primary-container: #00d17a;
+  --mt-on-primary: #00391d;
+  --mt-on-primary-container: #00532d;
+  --mt-surface: #0f1412;
+  --mt-surface-dim: #0f1412;
+  --mt-surface-bright: #353a38;
+  --mt-surface-tint: #30e289;
+  --mt-surface-container: #1c211e;
+  --mt-surface-container-low: #181d1a;
+  --mt-surface-container-high: #262b29;
+  --mt-surface-container-highest: #313633;
+  --mt-surface-container-lowest: #0a0f0d;
+  --mt-surface-variant: #313633;
+  --mt-on-surface: #dfe4e0;
+  --mt-on-surface-variant: #bbcbbc;
+  --mt-on-background: #dfe4e0;
+  --mt-background: #0f1412;
+  --mt-outline: #859587;
+  --mt-outline-variant: #3c4a3f;
+  --mt-secondary: #c0c9c2;
+  --mt-secondary-container: #404944;
+  --mt-on-secondary: #2a322e;
+  --mt-on-secondary-container: #aeb7b1;
+  --mt-tertiary: #c9d6cd;
+  --mt-tertiary-container: #adbab2;
+  --mt-on-tertiary: #28332d;
+  --mt-on-tertiary-container: #3f4a44;
+  --mt-error: #ffb4ab;
+  --mt-error-container: #93000a;
+  --mt-on-error: #690005;
+  --mt-on-error-container: #ffdad6;
+  --mt-inverse-surface: #dfe4e0;
+  --mt-inverse-on-surface: #2c322f;
+  --mt-inverse-primary: #006d3d;
+  --mt-liquid-mint: #00F58C;
+  --mt-ledger-white: #F1F4F1;
+  --mt-glass-border: rgba(255, 255, 255, 0.1);
+  --mt-pure-black: #000000;
+
+  background-color: var(--mt-background);
+  color: var(--mt-on-background);
+}
+
 /* Prevent horizontal scrolling across the site */
 html {
   overflow-x: hidden;
@@ -400,8 +463,15 @@ nav {
 /* Solid, readable chrome on small screens (fade only on desktop) */
 @media (max-width: 767px) {
   .chrome-tint-nav {
-    background-color: var(--stitch-chrome-nav-solid);
+    background-color: color-mix(in srgb, var(--stitch-chrome-nav-solid) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     background-image: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--stitch-border-subtle) 70%, transparent);
+  }
+
+  .dark .chrome-tint-nav {
+    background-color: var(--stitch-chrome-nav-solid);
     border-bottom: 1px solid color-mix(in srgb, var(--stitch-chrome-nav-edge) 35%, transparent);
   }
 }
@@ -421,22 +491,21 @@ nav {
 .glow-ellipse-primary {
   width: min(110rem, 150vw);
   height: 30rem;
-  /* Wide glow centered at the very top – slightly stronger but not blown out */
   background: radial-gradient(circle at 50% 0%,
-      rgba(150, 196, 97, 0.4),
-      rgba(16, 185, 129, 0.26),
-      transparent 70%);
-  opacity: 0.85;
+      rgba(16, 185, 129, 0.16),
+      rgba(150, 196, 97, 0.1),
+      transparent 72%);
+  opacity: 0.55;
 }
 
 .glow-ellipse-secondary {
   width: min(120rem, 170vw);
   height: 40rem;
   background: radial-gradient(circle at 50% 0%,
-      rgba(150, 196, 97, 0.42),
-      rgba(21, 128, 61, 0.3),
+      rgba(16, 185, 129, 0.12),
+      rgba(21, 128, 61, 0.08),
       transparent 78%);
-  opacity: 0.9;
+  opacity: 0.5;
 }
 
 .dark .glow-ellipse-primary {
@@ -444,6 +513,7 @@ nav {
       rgba(34, 197, 94, 0.55),
       rgba(16, 185, 129, 0.36),
       transparent 72%);
+  opacity: 0.85;
 }
 
 .dark .glow-ellipse-secondary {
@@ -451,6 +521,7 @@ nav {
       rgba(34, 197, 94, 0.7),
       rgba(22, 163, 74, 0.45),
       transparent 82%);
+  opacity: 0.9;
 }
 
 /* === Animated hero grid (top of landing page) === */
@@ -470,14 +541,14 @@ nav {
   height: 100%;
 
   /* Rounded-rectangle grid using an SVG mask to match the design's soft vertices */
-  --grid-stroke: rgba(22, 101, 52, 0.32);
+  --grid-stroke: rgba(16, 185, 129, 0.14);
   --cell-size: 90px;
 
   /* The pattern is an SVG of a rounded rectangle outline. We apply a color via background-color. */
   background-color: var(--grid-stroke);
   --grid-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect x='0.5' y='0.5' width='179' height='179' rx='28' ry='28' fill='none' stroke='white' stroke-width='1.2'/></svg>");
 
-  opacity: 0.75;
+  opacity: 0.4;
 
   /* Fade the grid near the edges */
   --fade-horizontal: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
@@ -496,6 +567,7 @@ nav {
 
 .dark .hero-grid-surface {
   --grid-stroke: rgba(74, 222, 128, 0.22);
+  opacity: 0.75;
 }
 
 /* (streak logic removed for now – grid only) */

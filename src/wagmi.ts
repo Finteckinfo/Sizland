@@ -15,7 +15,7 @@ if (!projectId && process.env.NODE_ENV !== 'development') {
 }
 
 export const config = getDefaultConfig({
-  appName: 'RainbowKit App',
+  appName: 'Sizland MyTab',
   projectId: projectId || 'dev-local-placeholder',
   chains: [
     mainnet,
