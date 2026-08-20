@@ -49,7 +49,7 @@ const Hero = () => {
         >
           The Remote Economy, Decentralized.
           <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 via-green-600 to-teal-600 dark:from-terminal-green dark:to-neon-accent animate-gradient-shift">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 dark:from-terminal-green dark:to-neon-accent animate-gradient-shift">
             Zero Data. Zero Footprint.
           </span>
           <br />

@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { SessionProvider } from "next-auth/react";
 import { config } from "../wagmi";
@@ -47,8 +48,6 @@ export const jetbrainsMono = JetBrains_Mono({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-
   return (
     <>
       <Head>
@@ -58,16 +57,18 @@ function MyApp({ Component, pageProps }: AppProps) {
       <SessionProvider session={pageProps.session}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={client}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </ThemeProvider>
+            <RainbowKitProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </ThemeProvider>
+            </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
         <SpeedInsights />
@@ -77,6 +78,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -85,6 +87,18 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return null;
+  }
+
+  const isMytab = router.pathname.startsWith("/mytab");
+
+  if (isMytab) {
+    return (
+      <div
+        className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body`}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (
