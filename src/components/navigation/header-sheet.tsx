@@ -13,7 +13,6 @@ import { MobileNavLinks } from "./navbar";
 import { ThemeToggler } from "../ui/theme-toggler";
 import { useState } from "react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
 
 interface NavLink {
   label: string;
@@ -60,17 +59,8 @@ export const HeaderSheet: React.FC<{
           />
         </div>
 
-        <div className="px-4 pb-6 pt-3 border-t border-border-subtle flex items-center justify-between gap-3">
+        <div className="px-4 pb-6 pt-3 border-t border-border-subtle flex items-center justify-end">
           <ThemeToggler />
-          <a
-            href={SIZLAND_WALLET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={closeMenu}
-            className="stitch-btn bg-terminal-green text-surface-base font-label text-xs px-4 py-2.5 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap"
-          >
-            Launch Wallet
-          </a>
         </div>
       </SheetContent>
     </Sheet>
