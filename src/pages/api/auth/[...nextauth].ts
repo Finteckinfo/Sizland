@@ -4,32 +4,37 @@ import GoogleProvider from 'next-auth/providers/google';
 import * as jwt from 'jsonwebtoken';
 import { resolveAuthRedirect } from '@/lib/auth-callback';
 import type { WalletTrack } from '@/lib/mytab/constants';
+import { sizwalletIssuer, sizwalletProvider } from '@/lib/sizwallet-oidc';
+
+const sizwalletEnabled = Boolean(
+  process.env.SIZWALLET_CLIENT_ID && process.env.SIZWALLET_CLIENT_SECRET
+);
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Google Authentication
+    // Primary: Sign in with SizWallet (OIDC). Pairwise sub only — no DID in tokens.
+    ...(sizwalletEnabled ? [sizwalletProvider()] : []),
+
+    // Legacy providers (kept for existing sessions / transition). Prefer SizWallet in UI.
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
-          // Ensure we request email and profile
-          scope: "openid email profile"
-        }
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+          scope: 'openid email profile',
+        },
       },
-      // Allow account linking by email
-      allowDangerousEmailAccountLinking: true
+      allowDangerousEmailAccountLinking: true,
     }),
-    // Web2 Authentication: Traditional Email/Password
     CredentialsProvider({
       id: 'credentials',
       name: 'Email & Password',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -42,8 +47,8 @@ export const authOptions: NextAuthOptions = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               email: credentials.email,
-              password: credentials.password
-            })
+              password: credentials.password,
+            }),
           });
 
           const data = await res.json();
@@ -55,7 +60,7 @@ export const authOptions: NextAuthOptions = {
               name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email,
               firstName: data.firstName,
               lastName: data.lastName,
-              authType: 'web2'
+              authType: 'web2',
             };
           }
 
@@ -64,15 +69,14 @@ export const authOptions: NextAuthOptions = {
           console.error('Authorization error:', error);
           return null;
         }
-      }
+      },
     }),
 
-    // Web3 Authentication: Wallet Address (Algorand, etc.)
     CredentialsProvider({
       id: 'wallet',
       name: 'Web3 Wallet',
       credentials: {
-        walletAddress: { label: "Wallet Address", type: "text" }
+        walletAddress: { label: 'Wallet Address', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.walletAddress) {
@@ -80,55 +84,30 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          console.log('[NextAuth Wallet] Starting wallet authentication');
-          console.log('[NextAuth Wallet] Wallet address:', credentials.walletAddress);
-
-          // IMPORTANT: In serverless environments, we can't reliably fetch our own domain
-          // So we'll create the user object directly here instead of calling an API
           const walletAddress = credentials.walletAddress.toString().trim();
-
-          // Construct user object for wallet authentication
-          const data = {
+          return {
             id: walletAddress,
             email: `${walletAddress.substring(0, 8)}@wallet.local`,
             name: `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`,
             firstName: 'Wallet',
             lastName: 'User',
-            walletAddress: walletAddress,
-            chainId: 'algorand',
-            authType: 'web3'
-          };
-
-          console.log('[NextAuth Wallet] User object created:', data.id);
-
-          // Return the user object for NextAuth session
-          return {
-            id: data.id,
-            email: data.email,
-            name: data.name,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            walletAddress: data.walletAddress,
-            authType: 'web3'
+            walletAddress,
+            authType: 'web3',
           };
         } catch (error) {
           console.error('[NextAuth Wallet] Authorization error:', error);
-          if (error instanceof Error) {
-            console.error('[NextAuth Wallet] Error details:', error.message);
-          }
           return null;
         }
-      }
+      },
     }),
 
-    // Web3 Authentication: MetaMask/SIWE
     CredentialsProvider({
       id: 'siwe',
       name: 'MetaMask',
       credentials: {
-        message: { label: "Message", type: "text" },
-        signature: { label: "Signature", type: "text" },
-        nonceKey: { label: "Nonce Key", type: "text" }
+        message: { label: 'Message', type: 'text' },
+        signature: { label: 'Signature', type: 'text' },
+        nonceKey: { label: 'Nonce Key', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.message || !credentials?.signature || !credentials?.nonceKey) {
@@ -136,15 +115,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Verify the signature with our SIWE endpoint
           const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/siwe/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               message: credentials.message,
               signature: credentials.signature,
-              nonceKey: credentials.nonceKey
-            })
+              nonceKey: credentials.nonceKey,
+            }),
           });
 
           const data = await res.json();
@@ -155,7 +133,7 @@ export const authOptions: NextAuthOptions = {
               email: data.user.email,
               name: data.user.name,
               walletAddress: data.user.walletAddress,
-              authType: 'web3'
+              authType: 'web3',
             };
           }
 
@@ -164,69 +142,83 @@ export const authOptions: NextAuthOptions = {
           console.error('SIWE authorization error:', error);
           throw error;
         }
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.session-token'
-        : 'next-auth.session-token',
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.session-token'
+          : 'next-auth.session-token',
       options: {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-domain in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         path: '/',
-        // Critical for SSO: Set domain to .siz.land in production to share cookies across subdomains
         domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
-        secure: process.env.NODE_ENV === 'production'
-      }
+        secure: process.env.NODE_ENV === 'production',
+      },
     },
     callbackUrl: {
-      name: process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.callback-url'
-        : 'next-auth.callback-url',
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.callback-url'
+          : 'next-auth.callback-url',
       options: {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         path: '/',
         domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
-        secure: process.env.NODE_ENV === 'production'
-      }
+        secure: process.env.NODE_ENV === 'production',
+      },
     },
     csrfToken: {
-      name: process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.csrf-token'
-        : 'next-auth.csrf-token',
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.csrf-token'
+          : 'next-auth.csrf-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-subdomain compatibility
+        sameSite: 'lax',
         path: '/',
         domain: process.env.NODE_ENV === 'production' ? '.siz.land' : undefined,
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   pages: {
-    signIn: '/login',
+    signIn: '/auth-choice',
     signOut: '/logout',
     error: '/login',
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Honor callbackUrl when safe (buy.siz.land / buy-land / catalog, etc.).
-      // Fall back to /lobby for unknown or unsafe destinations.
       return resolveAuthRedirect(url, baseUrl);
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
       if (user) {
-        token.id = (user as any).id;
-        token.email = (user as any).email;
-        token.name = (user as any).name;
-        token.walletAddress = (user as any).walletAddress || '';
-        token.authType = (user as any).authType || 'web2';
+        const authType =
+          account?.provider === 'sizwallet'
+            ? 'sizwallet'
+            : (user as { authType?: string }).authType || 'web2';
+
+        token.id = user.id;
+        token.email = (user.email as string) || '';
+        token.name = (user.name as string) || '';
+        token.walletAddress = (user as { walletAddress?: string }).walletAddress || '';
+        token.authType = authType;
+
+        if (account?.provider === 'sizwallet' && profile && typeof (profile as { sub?: string }).sub === 'string') {
+          const claims = profile as { sub: string; iss?: string };
+          token.id = claims.sub;
+          token.sub = claims.sub;
+          if (typeof claims.iss === 'string') {
+            token.sizwalletIss = claims.iss;
+          }
+        }
 
         const secret = process.env.NEXTAUTH_SECRET;
         if (secret) {
@@ -269,7 +261,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = (token.id as string) || '';
+        session.user.id = (token.id as string) || (token.sub as string) || '';
         session.user.email = (token.email as string) || '';
         session.user.name = (token.name as string) || '';
         session.user.walletAddress = (token.walletAddress as string) || '';
@@ -287,9 +279,18 @@ export const authOptions: NextAuthOptions = {
         if (token.accessToken) {
           session.accessToken = token.accessToken as string;
         }
+
+        if (token.authType === 'sizwallet') {
+          const sub = session.user.id;
+          session.sizwallet = {
+            sub,
+            iss: (token.sizwalletIss as string) || sizwalletIssuer(),
+            looksLikeDid: sub.includes('did:key'),
+          };
+        }
       }
       return session;
-    }
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',

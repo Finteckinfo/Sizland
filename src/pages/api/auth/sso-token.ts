@@ -61,11 +61,14 @@ export default async function handler(
       return res.status(500).json({ error: 'Server configuration error' });
     }
 
-    // Extract user info, handling both regular and wallet authentication
+    // Extract user info — SizWallet sessions use pairwise sub (no email / DID).
     const userId = session.user.id || session.user.email || 'unknown';
-    const userEmail = session.user.email || `${userId}@wallet.local`;
-    const userName = session.user.name || userId;
-    const walletAddress = (session.user as any).walletAddress || '';
+    const authMethod = (session.user as { authType?: string }).authType || 'standard';
+    const userEmail =
+      session.user.email ||
+      (authMethod === 'sizwallet' ? `${userId}@sizwallet.local` : `${userId}@wallet.local`);
+    const userName = session.user.name || (authMethod === 'sizwallet' ? 'SizWallet user' : userId);
+    const walletAddress = (session.user as { walletAddress?: string }).walletAddress || '';
 
     const ssoToken = jwt.sign(
       {
@@ -73,14 +76,14 @@ export default async function handler(
         email: userEmail,
         name: userName,
         type: 'sso-token',
-        authMethod: (session.user as any).authType || 'standard',
-        walletAddress: walletAddress
+        authMethod,
+        walletAddress,
       },
       secret,
       {
-        expiresIn: '60m', // Token expires in 60 minutes
+        expiresIn: '60m',
         issuer: 'siz.land',
-        audience: 'erp.siz.land'
+        audience: 'erp.siz.land',
       }
     );
 
