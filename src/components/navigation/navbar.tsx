@@ -18,7 +18,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
-import { SIZLAND_WALLET_URL } from "@/lib/external-apps";
+import { authChoiceHref } from "@/lib/auth-callback";
 
 const scrollToSection = (
   e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>,
@@ -107,17 +107,7 @@ export const Navbar: React.FC = () => {
     : [];
 
   const logoHref = hideMainMarketingLinks ? "/" : "https://siz.land";
-  const buyCallback =
-    typeof window !== "undefined" &&
-    (isBuyAppPath(router.pathname) ||
-      window.location.hostname.includes("buy.siz.land"))
-      ? `${window.location.origin}${router.asPath.split("?")[0] || "/buy-land"}`
-      : null;
-  const signInHref = hideMainMarketingLinks
-    ? buyCallback
-      ? `/auth-choice?callbackUrl=${encodeURIComponent(buyCallback)}`
-      : "/auth-choice"
-    : "https://siz.land/auth-choice";
+  const signInHref = authChoiceHref();
 
   const renderNavLink = (link: NavLink, className: string) => {
     if (link.href.startsWith("#")) {
@@ -205,23 +195,17 @@ export const Navbar: React.FC = () => {
                 </DropdownMenu>
               ) : (
                 isLoaded && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 border-border-subtle text-on-surface-variant"
+                  <button
+                    type="button"
+                    className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap"
                     onClick={() => {
                       window.location.href = signInHref;
                     }}
                   >
                     Sign In
-                  </Button>
+                  </button>
                 )
               )}
-              <a href={SIZLAND_WALLET_URL} target="_blank" rel="noopener noreferrer">
-                <button className="stitch-btn bg-terminal-green text-surface-base font-label text-xs lg:text-sm px-4 lg:px-6 py-2 rounded hover:bg-neon-accent terminal-glow whitespace-nowrap">
-                  Launch Wallet
-                </button>
-              </a>
             </div>
 
             <div className="md:hidden">
@@ -287,7 +271,7 @@ export const MobileNavLinks: React.FC<{
       {otherLinks.map(renderLink)}
       <a
         href={signInHref}
-        className={linkClass}
+        className="stitch-btn bg-terminal-green text-surface-base font-label text-sm px-4 py-3 rounded hover:bg-neon-accent terminal-glow text-center"
         onClick={() => onNavigate?.()}
       >
         Sign In
