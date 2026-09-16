@@ -10,14 +10,19 @@ import { Loader2, Check, X, MapPin, Shield, Search, FileCheck, Wallet, FileText 
 import Image from 'next/image';
 import AuroraText from '@/components/ui/aurora-text';
 
-type Step = 'LOGIN' | 'CONNECT_WALLET' | 'CREATE_REQUEST' | 'CONFIRMATION';
+type Step = 'LOGIN' | 'CREATE_REQUEST' | 'CONFIRMATION';
 
 const STEPS: { key: Step; label: string }[] = [
-  { key: 'LOGIN', label: 'Login' },
-  { key: 'CONNECT_WALLET', label: 'Connect Wallet' },
+  { key: 'LOGIN', label: 'Sign in' },
   { key: 'CREATE_REQUEST', label: 'Create Request' },
   { key: 'CONFIRMATION', label: 'Confirmation' },
 ];
+
+const OPEN_FORM_KEY = 'sizland_buy_open_form';
+
+function normalizeIntakeStep(step: string | undefined): Step {
+  return step === 'CONFIRMATION' ? 'CONFIRMATION' : 'CREATE_REQUEST';
+}
 
 const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
 
@@ -35,7 +40,6 @@ export default function BuyLandPage() {
   const [request, setRequest] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [walletAddress, setWalletAddress] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [budget, setBudget] = useState('');
@@ -55,13 +59,21 @@ export default function BuyLandPage() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      setCurrentStep('CONNECT_WALLET');
+      setCurrentStep('CREATE_REQUEST');
       fetchProgress();
       if (session?.user?.email && !contactEmail) {
         setContactEmail(session.user.email);
       }
       if (session?.user?.name && !contactName) {
         setContactName(session.user.name.split(' ')[0] || session.user.name);
+      }
+      try {
+        if (sessionStorage.getItem(OPEN_FORM_KEY) === '1') {
+          sessionStorage.removeItem(OPEN_FORM_KEY);
+          setShowForm(true);
+        }
+      } catch {
+        // ignore
       }
     }
   }, [status, router]);
@@ -76,11 +88,12 @@ export default function BuyLandPage() {
         const pilotIds = Array.isArray(req?.pilotEscrowPlotIds) ? req.pilotEscrowPlotIds : [];
         if (isPilotEscrow && (req?.escrowId || pilotIds.length > 0)) setPilotEscrowSimulated(true);
         if (req?.currentStep) {
-          setCurrentStep(req.currentStep);
+          setCurrentStep(normalizeIntakeStep(req.currentStep));
+        } else if (!req) {
+          setCurrentStep('CREATE_REQUEST');
         }
         if (req) {
           setShowForm(true);
-          if (req.walletAddress) setWalletAddress(req.walletAddress);
           if (req.contactName) setContactName(req.contactName);
           if (req.contactEmail) setContactEmail(req.contactEmail);
           if (req.budget != null) setBudget(String(req.budget));
@@ -115,20 +128,6 @@ export default function BuyLandPage() {
     }
   };
 
-  const handleConnectWallet = async () => {
-    const addr = walletAddress.trim();
-    if (!addr) {
-      setError('Please connect your wallet or enter an address');
-      return;
-    }
-    const data = await api('connect-wallet', {
-      method: 'PATCH',
-      body: JSON.stringify({ walletAddress: addr }),
-    });
-    setRequest(data.request);
-    setCurrentStep('CREATE_REQUEST');
-  };
-
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!termsAccepted) {
@@ -143,7 +142,6 @@ export default function BuyLandPage() {
     const data = await api('create-request', {
       method: 'POST',
       body: JSON.stringify({
-        walletAddress: request?.walletAddress || walletAddress.trim(),
         contactName: contactName.trim(),
         contactEmail: contactEmail.trim(),
         budget: parseFloat(budget) || 0,
@@ -206,6 +204,7 @@ export default function BuyLandPage() {
   const cardClass = isDark
     ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
     : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]';
+  const wizardStep: Step = currentStep === 'CONFIRMATION' ? 'CONFIRMATION' : 'CREATE_REQUEST';
 
   const renderFormContent = () => (
     <>
@@ -221,7 +220,7 @@ export default function BuyLandPage() {
 
       <div className="flex items-center justify-between gap-2 mb-12">
         {STEPS.map((s, i) => {
-          const idx = STEPS.findIndex((x) => x.key === currentStep);
+          const idx = STEPS.findIndex((x) => x.key === wizardStep);
           const done = i < idx;
           const active = i === idx;
           return (
@@ -257,31 +256,7 @@ export default function BuyLandPage() {
           </div>
         )}
 
-        {currentStep === 'CONNECT_WALLET' && (
-          <div>
-            <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Connect Wallet</h2>
-            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Connect your wallet seamlessly.</p>
-            <div className="space-y-4">
-              <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Wallet Address</label>
-              <input
-                type="text"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
-                placeholder="0x..."
-                className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
-              />
-              <button
-                onClick={handleConnectWallet}
-                disabled={loading || !walletAddress.trim()}
-                className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Connect Wallet'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 'CREATE_REQUEST' && (
+        {wizardStep === 'CREATE_REQUEST' && (
           <form onSubmit={handleCreateRequest}>
             <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Create Request</h2>
             <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tell us more about your land needs.</p>
@@ -367,7 +342,7 @@ export default function BuyLandPage() {
           </form>
         )}
 
-        {currentStep === 'CONFIRMATION' && request && (
+        {wizardStep === 'CONFIRMATION' && request && (
           <div>
             <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Confirmation</h2>
             <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -385,9 +360,14 @@ export default function BuyLandPage() {
                 <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Request Summary</h3>
                 <div className={`rounded-lg p-4 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
                   <div className="grid gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Wallet</span>
-                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.walletAddress ? `${request.walletAddress.slice(0, 6)}...${request.walletAddress.slice(-4)}` : '—'}</span>
+                    <div className="flex justify-between gap-4">
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Settlement</span>
+                      <span className={`text-right ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        SizWallet
+                        <span className={`block text-xs font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                          You’ll sign and fund escrow in SizWallet when a plot is ready.
+                        </span>
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Budget</span>
@@ -567,6 +547,11 @@ export default function BuyLandPage() {
 
   const handleStartLandRequest = () => {
     if (status === 'unauthenticated') {
+      try {
+        sessionStorage.setItem(OPEN_FORM_KEY, '1');
+      } catch {
+        // ignore
+      }
       const callback =
         typeof window !== 'undefined' && window.location.hostname.includes('buy.siz.land')
           ? `${window.location.origin}/buy-land`
@@ -577,6 +562,7 @@ export default function BuyLandPage() {
       return;
     }
     setShowForm(true);
+    setCurrentStep((step) => (step === 'CONFIRMATION' ? 'CONFIRMATION' : 'CREATE_REQUEST'));
   };
 
   // Form view: show only the form when user clicks "Start a Land Request"
