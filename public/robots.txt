@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# LLM / GEO
+Allow: /llms.txt
+Allow: /llms-full.txt
+
 # Sitemaps
 Sitemap: https://siz.land/sitemap.xml
 Sitemap: https://solutions.siz.land/sitemap.xml

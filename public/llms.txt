@@ -1,0 +1,30 @@
+# Sizland
+
+> Invisible, censorship-resistant infrastructure for the global remote workforce.
+
+Sizland is the decentralized operating system for sovereign remote workers. It provides client-side Decentralized Identity (DiD), a multi-chain wallet factory, and unified access so people can own their reputation, settle across chains, and work without leaving a digital trace.
+
+Website: https://www.siz.land/
+
+## Status (2026)
+
+- Phase 1 Foundation: Complete (June 2026). Core DiD infrastructure, Sizland Identity Protocol, multi-chain wallet factory layer, and production-ready secure API.
+- Phase 2 Reputation Engine: In progress. ERP automated bridges, signed credential generation, decentralized score computation on SizChain X, and SIZ token staking.
+- Phase 3 Scale & Sovereignty: Planned. Stablecoin milestone escrow, multi-chain payment factories, sovereign data indexing, and reputation-backed DeFi.
+
+## Core architecture
+
+- Decentralized Identity (DiD) — non-custodial, client-side
+- Multi-chain wallet factory (Algorand, Base, BNB Chain, Sui, TON)
+- Blockchain ERP and sovereign reputation
+
+## Official sites
+
+- https://www.siz.land/
+- https://wallet.siz.land/
+- https://buy.siz.land/
+- https://solutions.siz.land/
+
+## Contact
+
+- X/Twitter: https://twitter.com/sizlandofficial

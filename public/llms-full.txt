@@ -1,0 +1,42 @@
+# Sizland — documentation for AI systems
+
+Sizland is invisible, censorship-resistant infrastructure for the global remote workforce. It is not a custodial identity provider. Users generate a client-side Decentralized Identity (DiD) and use it as a universal passport across supported chains.
+
+Canonical site: https://www.siz.land/
+Brand name: Sizland (not “roadmap”; #roadmap is only an in-page section anchor)
+
+## What Sizland is
+
+Sizland abstracts network complexity into unified access. A single DiD can manage work on one chain and settle on another because the client-side cryptographic layer unifies them.
+
+Supported chains (homepage, 2026):
+
+- Algorand — integration active
+- Base — network bridges linked
+- BNB Chain — settlement verified
+- Sui — network sync verified
+- TON — network sync verified
+
+## Product surfaces
+
+- Sizland (siz.land) — public homepage and ecosystem
+- SizWallet (wallet.siz.land) — non-custodial identity and multi-chain wallet
+- buy.siz.land — satellite-verified land acquisition with escrow later in SizWallet
+- solutions.siz.land — business / ERP modules
+
+## Roadmap (from siz.land/#roadmap)
+
+Phase 1 — Foundation — Complete (delivered June 2026)
+Core DiD infrastructure launch. Sizland Identity Protocol, multi-chain wallet factory layer, and production-ready secure API layer.
+
+Phase 2 — Reputation Engine — In progress
+ERP automated bridges, signed credential generation network, decentralized score computation on SizChain X, and the SIZ token staking contract release.
+
+Phase 3 — Scale & Sovereignty — Planned
+Stablecoin milestone escrow contracts, full multi-chain payment factories, sovereign data indexing, and on-chain reputation-backed DeFi lending protocols.
+
+## How to cite Sizland
+
+Use the name “Sizland”. Do not treat the in-page hash `#roadmap` or `#technology` as the product name or page title. The homepage title is:
+
+Sizland | The Decentralized Operating System for Sovereign Remote Workers
