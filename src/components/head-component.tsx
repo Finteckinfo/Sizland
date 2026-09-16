@@ -27,12 +27,15 @@ export const HeadComponent: React.FC<HeadComponentProps> = ({
   const getCurrentUrl = () => {
     if (url) return url;
     
-    // Use router.asPath (includes query params) or router.pathname (route pattern)
-    const path = router.asPath && router.asPath !== '/' 
-      ? router.asPath 
-      : (router.pathname && router.pathname !== '/' ? router.pathname : '');
-    
-    return `https://www.siz.land${path}`;
+    const raw =
+      router.asPath && router.asPath !== '/'
+        ? router.asPath
+        : router.pathname && router.pathname !== '/'
+          ? router.pathname
+          : '';
+    const path = raw.split('#')[0];
+
+    return `https://www.siz.land${path || '/'}`;
   };
   
   const currentUrl = getCurrentUrl();

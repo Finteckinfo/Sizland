@@ -19,6 +19,7 @@ interface PageLayoutProps extends LayoutProps {
   image?: string; // Optional custom image for social sharing
   url?: string; // Optional custom URL for social sharing
   setSocialMetadata?: boolean; // Control whether to set Open Graph/Twitter Card metadata
+  includeHead?: boolean; // False for in-page section wrappers that must not overwrite <title>
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -34,10 +35,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   image, // Optional custom image
   url, // Optional custom URL
   setSocialMetadata = true, // Default to true - set metadata for all pages
+  includeHead = true,
 }) => {
   const content = (
     <>
-      <HeadComponent title={title} description={description} image={image} url={url} setSocialMetadata={setSocialMetadata} />
+      {includeHead && (
+        <HeadComponent title={title} description={description} image={image} url={url} setSocialMetadata={setSocialMetadata} />
+      )}
       <MainContainer
         flexDirection={flexDirection}
         justify={justify}
