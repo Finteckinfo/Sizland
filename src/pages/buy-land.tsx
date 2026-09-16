@@ -42,8 +42,6 @@ export default function BuyLandPage() {
   const [error, setError] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  const [budget, setBudget] = useState('');
-  const [sizeCurve, setSizeCurve] = useState('');
   const [purpose, setPurpose] = useState('');
   const [plotReference, setPlotReference] = useState('N/A');
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -96,8 +94,6 @@ export default function BuyLandPage() {
           setShowForm(true);
           if (req.contactName) setContactName(req.contactName);
           if (req.contactEmail) setContactEmail(req.contactEmail);
-          if (req.budget != null) setBudget(String(req.budget));
-          if (req.sizeCurve) setSizeCurve(req.sizeCurve);
           if (req.purpose) setPurpose(req.purpose);
           if (req.plotReference) setPlotReference(req.plotReference);
         }
@@ -139,19 +135,21 @@ export default function BuyLandPage() {
       setError('Please provide a valid name and email');
       return;
     }
-    const data = await api('create-request', {
-      method: 'POST',
-      body: JSON.stringify({
-        contactName: contactName.trim(),
-        contactEmail: contactEmail.trim(),
-        budget: parseFloat(budget) || 0,
-        sizeCurve: sizeCurve || '1 Acre',
-        purpose: purpose || 'Farming',
-        plotReference: plotReference || 'N/A',
-      }),
-    });
-    setRequest(data.request);
-    setCurrentStep('CONFIRMATION');
+    try {
+      const data = await api('create-request', {
+        method: 'POST',
+        body: JSON.stringify({
+          contactName: contactName.trim(),
+          contactEmail: contactEmail.trim(),
+          purpose: purpose || 'Farming',
+          plotReference: plotReference || 'N/A',
+        }),
+      });
+      setRequest(data.request);
+      setCurrentStep('CONFIRMATION');
+    } catch {
+      // Error already shown in the form
+    }
   };
 
   const canSubmitRequest =
@@ -259,7 +257,7 @@ export default function BuyLandPage() {
         {wizardStep === 'CREATE_REQUEST' && (
           <form onSubmit={handleCreateRequest}>
             <h2 className={`text-xl font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Create Request</h2>
-            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tell us more about your land needs.</p>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tell us your intended use and how we can reach you. Budget and size can be filtered later while browsing.</p>
             <div className="space-y-4">
               <div>
                 <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Name</label>
@@ -281,26 +279,6 @@ export default function BuyLandPage() {
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
-                />
-              </div>
-              <div>
-                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Budget</label>
-                <input
-                  type="text"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                  placeholder="$100,000"
-                  className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
-                />
-              </div>
-              <div>
-                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Size</label>
-                <input
-                  type="text"
-                  value={sizeCurve}
-                  onChange={(e) => setSizeCurve(e.target.value)}
-                  placeholder="1 Acre"
                   className={`w-full px-4 py-3 rounded-xl border ${isDark ? 'bg-[#1c2a3a] border-[#32465b] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                 />
               </div>
@@ -368,14 +346,6 @@ export default function BuyLandPage() {
                           You’ll sign and fund escrow in SizWallet when a plot is ready.
                         </span>
                       </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Budget</span>
-                      <span className={isDark ? 'text-white' : 'text-gray-900'}>${request.budget?.toLocaleString() ?? '—'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Size</span>
-                      <span className={isDark ? 'text-white' : 'text-gray-900'}>{request.sizeCurve ?? '—'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Purpose</span>
@@ -522,7 +492,7 @@ export default function BuyLandPage() {
                   </h3>
                   <p className={`text-sm max-w-md mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Our property experts have received your criteria. We are currently manually vetting viable plots
-                    that match your budget and purpose. You will receive an update with curated options in less than 48 hours.
+                    that match your purpose. You will receive an update with curated options in less than 48 hours.
                   </p>
                   <button
                     onClick={() => router.push('/catalog')}
@@ -675,7 +645,7 @@ export default function BuyLandPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[
-                { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your budget, land size and intended use. Our local sources will find properties that match your criteria.', highlight: false },
+                { icon: Search, title: 'Define Your Requirements', desc: 'Tell us your intended use and how we can reach you. Filter budget and size later while browsing plots.', highlight: false },
                 { icon: FileCheck, title: 'Review & Due Diligence', desc: 'Our experts review legal checks. A licensed surveyor conducts property searches and on-ground site visits.', highlight: true },
                 { icon: Wallet, title: 'Secure the Purchase', desc: 'Once approved, funds are released from secure Sizland managed escrow. Payment, statutory fees, and document custody handled.', highlight: false },
                 { icon: FileText, title: 'Registry Transfer & Delivery', desc: 'Track the title transfer at the national land registry. Once issued, the title is securely shipped to your address.', highlight: false },
