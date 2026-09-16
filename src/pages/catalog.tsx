@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { PageLayout } from '@/components/page-layout';
 import { Loader2, MapPin, X } from 'lucide-react';
-import { defaultBuyCallbackUrl } from '@/lib/auth-callback';
 
 const EoMapLibre = dynamic(
   () => import('@/components/maps/EoMapLibre').then((m) => ({ default: m.EoMapLibre })),
@@ -148,13 +147,15 @@ export default function CatalogPage() {
     kindFilter === 'COMMODITY' || selected?.kind === 'COMMODITY' ? 'MEDIA' : 'MAP';
 
   const startAcquisition = (item: CatalogItem) => {
-    const callback = defaultBuyCallbackUrl();
-    const withListing = `${callback}${callback.includes('?') ? '&' : '?'}listingId=${encodeURIComponent(item.id)}`;
+    const catalogUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/catalog?id=${encodeURIComponent(item.id)}`
+        : `/catalog?id=${encodeURIComponent(item.id)}`;
     if (status !== 'authenticated') {
-      router.push(`/auth-choice?callbackUrl=${encodeURIComponent(withListing)}`);
+      router.push(`/auth-choice?callbackUrl=${encodeURIComponent(catalogUrl)}`);
       return;
     }
-    router.push(`/buy-land?listingId=${encodeURIComponent(item.id)}`);
+    setSelectedId(item.id);
   };
 
   const panelClass = isDark
@@ -276,7 +277,7 @@ export default function CatalogPage() {
                   <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {kindFilter === 'COMMODITY'
                       ? 'Switch to Land to explore satellite-mapped parcels.'
-                      : 'Try clearing filters or check back after sourcing.'}
+                      : 'Try clearing filters or check back for new listings.'}
                   </p>
                   {kindFilter === 'COMMODITY' && (
                     <button
