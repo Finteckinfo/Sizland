@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import { authChoiceHref } from "@/lib/auth-callback";
 
 const MAIN_DOMAIN = "https://siz.land";
 const WHATSAPP_CONTACT = "https://chat.whatsapp.com/FY0OAor6s72ErtxgxaP1ZL";
@@ -554,7 +555,7 @@ const RatecardPage: NextPage = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center pt-2">
                   <Link
-                    href={isLoggedIn ? WHATSAPP_CONTACT : `${MAIN_DOMAIN}/auth-choice`}
+                    href={isLoggedIn ? WHATSAPP_CONTACT : authChoiceHref("/ratecard")}
                     className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                       isDark
                         ? "bg-[#00E07A] text-[#0B1F16] hover:bg-[#00c96a]"

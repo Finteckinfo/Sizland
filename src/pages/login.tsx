@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
@@ -10,7 +10,9 @@ import {
   appendCallbackParam,
   callbackFromQuery,
   clientPostAuthPath,
+  currentReturnUrl,
   isBuyHostname,
+  persistReturnUrl,
 } from '@/lib/auth-callback';
 import {
   SIZLAND_AUTH_ORIGIN,
@@ -20,6 +22,7 @@ import {
 const LoginPage = () => {
   const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,10 +30,16 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [legacyOpen, setLegacyOpen] = useState(false);
   const callbackUrl = callbackFromQuery(router.query);
-  const returnTo = clientPostAuthPath(callbackUrl);
+  const returnTo = clientPostAuthPath(callbackUrl || currentReturnUrl());
 
   useEffect(() => {
     if (!router.isReady) return;
+    persistReturnUrl(returnTo);
+    if (status === 'authenticated') {
+      if (returnTo.startsWith('http')) window.location.replace(returnTo);
+      else void router.replace(returnTo);
+      return;
+    }
     if (router.query.sizwallet === '1') {
       void signIn('sizwallet', { callbackUrl: returnTo });
       return;
@@ -38,7 +47,7 @@ const LoginPage = () => {
     if (router.query.google === '1') {
       void signIn('google', { callbackUrl: returnTo });
     }
-  }, [router.isReady, router.query, returnTo]);
+  }, [router.isReady, router.query, returnTo, status, router]);
 
   const handleSizWalletSignIn = () => {
     if (typeof window !== 'undefined' && shouldBounceToApexForOAuth(window.location.hostname)) {
@@ -49,11 +58,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleSignIn = () => {
-    const dest =
-      callbackUrl ||
-      (typeof window !== 'undefined' && isBuyHostname(window.location.hostname)
-        ? `${window.location.origin}/buy-land`
-        : '/lobby');
+    const dest = returnTo;
 
     if (typeof window !== 'undefined' && isBuyHostname(window.location.hostname)) {
       window.location.href = `${SIZLAND_AUTH_ORIGIN}/login?google=1&callbackUrl=${encodeURIComponent(dest)}`;

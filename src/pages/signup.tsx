@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, FormEvent, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
@@ -10,12 +10,16 @@ import {
   appendCallbackParam,
   callbackFromQuery,
   clientPostAuthPath,
+  currentReturnUrl,
+  persistReturnUrl,
 } from '@/lib/auth-callback';
 
 const SignUpPage = () => {
   const { resolvedTheme: theme } = useTheme();
   const router = useRouter();
+  const { status } = useSession();
   const callbackUrl = callbackFromQuery(router.query);
+  const returnTo = clientPostAuthPath(callbackUrl || currentReturnUrl());
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,6 +31,14 @@ const SignUpPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    persistReturnUrl(returnTo);
+    if (status === 'authenticated') {
+      if (returnTo.startsWith('http')) window.location.replace(returnTo);
+      else void router.replace(returnTo);
+    }
+  }, [status, returnTo, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -86,7 +98,7 @@ const SignUpPage = () => {
         // Registration succeeded but login failed - redirect to login
         router.push(appendCallbackParam('/login?registered=true', callbackUrl));
       } else if (result?.ok) {
-        const dest = clientPostAuthPath(callbackUrl);
+        const dest = clientPostAuthPath(callbackUrl || returnTo);
         if (dest.startsWith('http')) {
           window.location.href = dest;
         } else {

@@ -4,6 +4,11 @@ import { useSession } from 'next-auth/react';
 import { PageLayout } from '@/components/page-layout';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
+import {
+  callbackFromQuery,
+  clientPostAuthPath,
+  currentReturnUrl,
+} from '@/lib/auth-callback';
 
 const SSOCallbackPage = () => {
   const { data: session, status } = useSession();
@@ -14,11 +19,14 @@ const SSOCallbackPage = () => {
     if (status === 'loading') return;
     
     if (session) {
-      // Redirect to lobby after successful SSO
-      router.push('/lobby');
+      const dest = clientPostAuthPath(callbackFromQuery(router.query) || currentReturnUrl());
+      if (dest.startsWith('http')) {
+        window.location.replace(dest);
+      } else {
+        void router.push(dest);
+      }
     } else {
-      // Redirect to login if not signed in
-      router.push('/login');
+      void router.push('/login');
     }
   }, [status, session, router]);
 
