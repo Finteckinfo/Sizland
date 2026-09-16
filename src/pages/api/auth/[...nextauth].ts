@@ -222,13 +222,16 @@ export const authOptions: NextAuthOptions = {
 
         const secret = process.env.NEXTAUTH_SECRET;
         if (secret) {
-          const payload = {
+          const payload: Record<string, unknown> = {
             id: token.id,
-            email: token.email,
+            sub: token.id || token.sub,
             name: token.name,
             walletAddress: token.walletAddress,
             authType: token.authType,
           };
+          if (token.email) {
+            payload.email = token.email;
+          }
           token.accessToken = jwt.sign(payload, secret, {
             expiresIn: '30d',
           });
