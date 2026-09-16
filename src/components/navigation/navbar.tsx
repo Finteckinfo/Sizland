@@ -18,6 +18,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
+import { authChoiceHref } from "@/lib/auth-callback";
 
 const scrollToSection = (
   e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>,
@@ -106,17 +107,7 @@ export const Navbar: React.FC = () => {
     : [];
 
   const logoHref = hideMainMarketingLinks ? "/" : "https://siz.land";
-  const buyCallback =
-    typeof window !== "undefined" &&
-    (isBuyAppPath(router.pathname) ||
-      window.location.hostname.includes("buy.siz.land"))
-      ? `${window.location.origin}${router.asPath.split("?")[0] || "/buy-land"}`
-      : null;
-  const signInHref = hideMainMarketingLinks
-    ? buyCallback
-      ? `/auth-choice?callbackUrl=${encodeURIComponent(buyCallback)}`
-      : "/auth-choice"
-    : "https://siz.land/auth-choice";
+  const signInHref = authChoiceHref();
 
   const renderNavLink = (link: NavLink, className: string) => {
     if (link.href.startsWith("#")) {

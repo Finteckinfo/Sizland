@@ -7,6 +7,7 @@ import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { SIZLAND_WALLET_URL, ERP_URL as ERP_URL_CONST, BUY_LAND_URL } from "@/lib/external-apps";
+import { authChoiceHref } from "@/lib/auth-callback";
 
 const ERP_URL = ERP_URL_CONST;
 
@@ -185,7 +186,7 @@ const LobbyPage = () => {
 
   useEffect(() => {
     if (mounted && !isAuthed && status !== "loading") {
-      router.push("/login");
+      router.push(authChoiceHref("/lobby"));
     }
   }, [mounted, isAuthed, status, router]);
 

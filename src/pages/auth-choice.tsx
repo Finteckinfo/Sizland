@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import {
   callbackFromQuery,
   clientPostAuthPath,
+  currentReturnUrl,
+  persistReturnUrl,
 } from '@/lib/auth-callback';
 import {
   SIZLAND_AUTH_ORIGIN,
@@ -17,17 +19,26 @@ import {
  */
 export default function AuthChoice() {
   const router = useRouter();
+  const { status } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const callbackUrl = callbackFromQuery(router.query);
 
-  const returnTo = clientPostAuthPath(callbackUrl);
+  const returnTo = clientPostAuthPath(callbackUrl || currentReturnUrl());
+
+  function goToReturn() {
+    if (returnTo.startsWith('http')) {
+      window.location.replace(returnTo);
+    } else {
+      void router.replace(returnTo);
+    }
+  }
 
   function startSizWallet() {
     setError(null);
     setStarting(true);
     localStorage.setItem('auth_mode', 'sizwallet');
-    if (callbackUrl) localStorage.setItem('auth_callback_url', callbackUrl);
+    persistReturnUrl(returnTo);
 
     if (typeof window !== 'undefined' && shouldBounceToApexForOAuth(window.location.hostname)) {
       const target = `${SIZLAND_AUTH_ORIGIN}/auth-choice?sizwallet=1&callbackUrl=${encodeURIComponent(returnTo)}`;
@@ -41,13 +52,17 @@ export default function AuthChoice() {
     });
   }
 
-  // Auto-start when bounced from a subdomain (?sizwallet=1)
   useEffect(() => {
     if (!router.isReady) return;
+    persistReturnUrl(returnTo);
+    if (status === 'authenticated') {
+      goToReturn();
+      return;
+    }
     if (router.query.sizwallet !== '1') return;
     startSizWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, router.query.sizwallet]);
+  }, [router.isReady, router.query.sizwallet, status]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 py-12 px-4 sm:px-6 lg:px-8">

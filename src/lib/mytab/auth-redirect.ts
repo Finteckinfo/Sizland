@@ -38,11 +38,36 @@ export function isAllowedAuthRedirect(url: string, baseUrl: string): boolean {
 }
 
 export function resolveAuthRedirect(url: string, baseUrl: string): string {
+  const lobby = `${baseUrl.replace(/\/$/, "")}/lobby`;
   if (url.startsWith("/") && !url.startsWith("//")) {
-    return `${baseUrl}${url}`;
+    const path = url.split("?")[0] || "/";
+    if (
+      path === "/auth-choice" ||
+      path === "/login" ||
+      path === "/signup" ||
+      path === "/logout" ||
+      path === "/sso-callback"
+    ) {
+      return lobby;
+    }
+    return `${baseUrl.replace(/\/$/, "")}${url}`;
   }
   if (isAllowedAuthRedirect(url, baseUrl)) {
+    try {
+      const path = new URL(url).pathname;
+      if (
+        path === "/auth-choice" ||
+        path === "/login" ||
+        path === "/signup" ||
+        path === "/logout" ||
+        path === "/sso-callback"
+      ) {
+        return lobby;
+      }
+    } catch {
+      return lobby;
+    }
     return url;
   }
-  return `${baseUrl}/lobby`;
+  return lobby;
 }

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { authChoiceHref } from '@/lib/auth-callback';
 
 interface AuthWrapperProps {
   children: ReactNode;
@@ -20,7 +21,11 @@ const AuthWrapper = ({ children, fallback }: AuthWrapperProps) => {
 
   useEffect(() => {
     if (status === 'unauthenticated' && !isPublicRoute) {
-      router.replace('/auth-choice');
+      const here =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${router.asPath}`
+          : router.asPath;
+      router.replace(authChoiceHref(here));
     }
   }, [status, isPublicRoute, router]);
 

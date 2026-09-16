@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { authChoiceHref } from "@/lib/auth-callback";
 
 const infrastructureModules = [
   {
@@ -205,7 +206,7 @@ const SolutionsPage: NextPage = () => {
 
                   <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                     <Link
-                      href={`${MAIN_DOMAIN}/auth-choice`}
+                      href={authChoiceHref("/solutions")}
                       className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base font-bold text-white bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 rounded-full transition-all duration-200"
                       aria-label="Initialize deployment - sign in or create account"
                     >
@@ -445,7 +446,7 @@ const SolutionsPage: NextPage = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Link
-                    href={isLoggedIn ? WHATSAPP_CONTACT : `${MAIN_DOMAIN}/auth-choice`}
+                    href={isLoggedIn ? WHATSAPP_CONTACT : authChoiceHref("/solutions")}
                     className={`inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                       isDark
                         ? "bg-[#00E07A] text-[#E6FFF2] hover:bg-[#00c96a]"
