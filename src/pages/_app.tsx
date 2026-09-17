@@ -91,8 +91,9 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   const isMytab = router.pathname.startsWith("/mytab");
   const isBuyDashboard = router.pathname.startsWith("/dashboard");
+  const isBuyAdmin = router.pathname.startsWith("/admin");
 
-  if (isMytab || isBuyDashboard) {
+  if (isMytab || isBuyDashboard || isBuyAdmin) {
     return (
       <div
         className={`${monsterrat.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} relative min-h-screen overflow-x-hidden font-body`}

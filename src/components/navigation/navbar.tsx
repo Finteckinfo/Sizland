@@ -45,8 +45,7 @@ const buyAppPathPrefixes = [
   "/browse-land",
   "/catalog",
   "/dashboard",
-  "/admin/land",
-  "/admin/users",
+  "/admin",
 ] as const;
 
 const marketingNavLinks: NavLink[] = [

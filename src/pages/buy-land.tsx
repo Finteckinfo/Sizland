@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes';
 import { PageLayout } from '@/components/page-layout';
 import { Loader2, Check, MapPin, Shield, Search, FileCheck, Wallet, FileText } from 'lucide-react';
 import Image from 'next/image';
-import AuroraText from '@/components/ui/aurora-text';
+import { fetchLandAdminAccess } from '@/lib/buy/land-admin';
 
 type Step = 'LOGIN' | 'CREATE_REQUEST';
 
@@ -51,9 +51,15 @@ export default function BuyLandPage() {
   }, []);
 
   useEffect(() => {
-    if (status === 'authenticated' && !showForm && !intakeComplete) {
-      router.replace('/dashboard');
-    }
+    if (status !== 'authenticated' || showForm || intakeComplete) return;
+    let cancelled = false;
+    (async () => {
+      const admin = await fetchLandAdminAccess();
+      if (!cancelled) router.replace(admin ? '/admin' : '/dashboard');
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [status, showForm, intakeComplete, router]);
 
   const fetchProgress = async () => {
@@ -307,7 +313,9 @@ export default function BuyLandPage() {
       router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
-    router.push('/dashboard');
+    void fetchLandAdminAccess().then((admin) => {
+      router.push(admin ? '/admin' : '/dashboard');
+    });
   };
 
   // Form view: show only the form when user clicks "Start a Land Request"
