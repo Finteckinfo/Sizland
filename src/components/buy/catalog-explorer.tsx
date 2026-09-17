@@ -62,6 +62,8 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
   const [satelliteOnly, setSatelliteOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>('match');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [selectErr, setSelectErr] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,25 +76,35 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
           setErr(data?.error || 'Could not load catalog');
           setItems([]);
         } else {
-          const landItems: CatalogItem[] = (Array.isArray(data) ? data : []).map((L: any) => ({
-            id: L.id,
-            kind: 'LAND' as const,
-            title: L.title,
-            description: L.description,
-            fullAddress: L.fullAddress,
-            listPrice: L.listPrice,
-            currency: L.currency,
-            latitude: L.latitude,
-            longitude: L.longitude,
-            region: L.region || 'Africa',
-            badges: [
-              ...(L.latitude != null && L.longitude != null ? ['Satellite-Verified'] : []),
-              ...(L.status === 'PUBLISHED' ? ['Listed'] : []),
-            ],
-            tags: [],
-            media: [],
-            score: null,
-          }));
+          const landItems: CatalogItem[] = (Array.isArray(data) ? data : []).map((L: any) => {
+            const media = Array.isArray(L.media)
+              ? L.media
+              : Array.isArray(L.media?.images)
+                ? L.media.images.map((url: string) => ({ url }))
+                : [];
+            const badges = Array.isArray(L.badges) && L.badges.length
+              ? L.badges
+              : [
+                  ...(L.latitude != null && L.longitude != null ? ['Satellite-Verified'] : []),
+                  ...(L.status === 'PUBLISHED' ? ['Listed'] : []),
+                ];
+            return {
+              id: L.id,
+              kind: L.kind === 'COMMODITY' ? 'COMMODITY' : 'LAND',
+              title: L.title,
+              description: L.description,
+              fullAddress: L.fullAddress,
+              listPrice: L.listPrice,
+              currency: L.currency,
+              latitude: L.latitude,
+              longitude: L.longitude,
+              region: L.region || null,
+              badges,
+              tags: [],
+              media,
+              score: null,
+            };
+          });
           setItems(landItems);
         }
       } catch {
@@ -145,7 +157,7 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
   const stageMode: 'MAP' | 'MEDIA' =
     kindFilter === 'COMMODITY' || selected?.kind === 'COMMODITY' ? 'MEDIA' : 'MAP';
 
-  const startAcquisition = (item: CatalogItem) => {
+  const startAcquisition = async (item: CatalogItem) => {
     const next = `/dashboard/catalog?id=${encodeURIComponent(item.id)}`;
     const catalogUrl =
       typeof window !== 'undefined' ? `${window.location.origin}${next}` : next;
@@ -154,7 +166,24 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
       return;
     }
     setSelectedId(item.id);
-    if (!embedded) router.push(next);
+    setSelectErr(null);
+    setSelecting(true);
+    try {
+      const res = await fetch('/api/land/select-listing', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: item.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || 'Could not start deal');
+      const dealId = data?.deal?.id;
+      router.push(dealId ? `/dashboard/deals/${dealId}` : '/dashboard/deals');
+    } catch (e) {
+      setSelectErr(e instanceof Error ? e.message : 'Could not start deal');
+    } finally {
+      setSelecting(false);
+    }
   };
 
   const panelClass = isDark
@@ -342,13 +371,27 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
                 {selected.fullAddress || selected.description || '—'}
               </p>
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatPrice(selected)}</p>
+              {!!selected.badges?.length && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selected.badges.map((b) => (
+                    <span
+                      key={b}
+                      className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400"
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              )}
               <button
                 type="button"
+                disabled={selecting}
                 onClick={() => startAcquisition(selected)}
-                className="w-full rounded-full bg-emerald-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
+                className="w-full rounded-full bg-emerald-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 disabled:opacity-50"
               >
-                Select this asset
+                {selecting ? 'Starting deal…' : 'Select this asset'}
               </button>
+              {selectErr && <p className="text-center text-sm text-red-500">{selectErr}</p>}
               {!embedded && (
                 <Link href="/buy-land" className={`block text-center text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Back to landing

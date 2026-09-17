@@ -1,16 +1,10 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
 import { BuyDashboardLayout } from '@/components/buy/buy-dashboard-layout';
-import {
-  listAssetSubmissions,
-  saveAssetSubmission,
-  type AssetKind,
-  type AssetSubmission,
-} from '@/lib/buy/asset-submissions';
+import { landApi, listingStatusLabel, type LandListing } from '@/lib/buy/land-api';
 
 const inputClass = (isDark: boolean) =>
   `w-full rounded-xl border px-4 py-3 ${
@@ -18,47 +12,59 @@ const inputClass = (isDark: boolean) =>
   }`;
 
 export default function DashboardUploadPage() {
-  const { data: session } = useSession();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-  const userId = session?.user?.id || '';
 
   const [title, setTitle] = useState('');
-  const [kind, setKind] = useState<AssetKind>('LAND');
+  const [kind, setKind] = useState<'LAND' | 'COMMODITY'>('LAND');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
   const [fileName, setFileName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [items, setItems] = useState<AssetSubmission[]>([]);
+  const [error, setError] = useState('');
+  const [items, setItems] = useState<LandListing[]>([]);
+
+  const load = async () => {
+    const data = await landApi<LandListing[]>('submissions');
+    setItems(Array.isArray(data) ? data : []);
+  };
 
   useEffect(() => {
-    if (userId) setItems(listAssetSubmissions(userId));
-  }, [userId]);
+    load().catch(() => setItems([]));
+  }, []);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!userId || !title.trim() || !location.trim()) return;
+    if (!title.trim() || !location.trim()) return;
     setSaving(true);
-    const next = saveAssetSubmission(userId, {
-      title: title.trim(),
-      kind,
-      location: location.trim(),
-      description: description.trim(),
-      askingPrice: askingPrice.trim(),
-      fileName: fileName.trim(),
-    });
-    setItems(listAssetSubmissions(userId));
-    setTitle('');
-    setLocation('');
-    setDescription('');
-    setAskingPrice('');
-    setFileName('');
-    setSaved(true);
-    setSaving(false);
-    window.setTimeout(() => setSaved(false), 2500);
-    void next;
+    setError('');
+    try {
+      await landApi('submissions', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: title.trim(),
+          kind,
+          location: location.trim(),
+          description: description.trim(),
+          askingPrice: askingPrice.trim(),
+          fileName: fileName.trim() || undefined,
+        }),
+      });
+      await load();
+      setTitle('');
+      setLocation('');
+      setDescription('');
+      setAskingPrice('');
+      setFileName('');
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -71,16 +77,17 @@ export default function DashboardUploadPage() {
         >
           <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Upload an asset</h1>
           <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Submit land or a related offering. It will sit in <strong>pending vetting</strong> until review is enabled.
+            Submissions go to the admin vetting queue. Nothing is public until it is approved.
           </p>
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
+            {error && <p className="text-sm text-red-500">{error}</p>}
             <div>
               <label className="mb-1 block text-sm font-medium">Title</label>
               <input className={inputClass(isDark)} value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Type</label>
-              <select className={inputClass(isDark)} value={kind} onChange={(e) => setKind(e.target.value as AssetKind)}>
+              <select className={inputClass(isDark)} value={kind} onChange={(e) => setKind(e.target.value as 'LAND' | 'COMMODITY')}>
                 <option value="LAND">Land</option>
                 <option value="COMMODITY">Commodity</option>
               </select>
@@ -109,7 +116,7 @@ export default function DashboardUploadPage() {
                 onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
               />
               <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                Files are recorded by name for now. Full document custody comes with vetting.
+                File name is stored with the submission. Document custody stays with admin review.
               </p>
             </div>
             <button
@@ -119,12 +126,12 @@ export default function DashboardUploadPage() {
             >
               {saving ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Submit for vetting'}
             </button>
-            {saved && <p className="text-center text-sm text-emerald-500">Submitted. Pending vetting.</p>}
+            {saved && <p className="text-center text-sm text-emerald-500">Submitted. Admin will review it.</p>}
           </form>
         </section>
 
         <section>
-          <h2 className={`mb-4 text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Pending vetting</h2>
+          <h2 className={`mb-4 text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Your submissions</h2>
           {items.length === 0 ? (
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Nothing in the queue yet.</p>
           ) : (
@@ -137,14 +144,16 @@ export default function DashboardUploadPage() {
                   <div className="flex items-start justify-between gap-2">
                     <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>
                     <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-                      Pending vetting
+                      {listingStatusLabel(item.status)}
                     </span>
                   </div>
-                  <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.location}</p>
+                  <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.fullAddress}</p>
                   <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                    {item.kind} · {new Date(item.createdAt).toLocaleString()}
-                    {item.fileName ? ` · ${item.fileName}` : ''}
+                    {item.kind || 'LAND'} · {new Date(item.createdAt).toLocaleString()}
                   </p>
+                  {item.status === 'REJECTED' && item.rejectionReason && (
+                    <p className="mt-2 text-xs text-red-500">{item.rejectionReason}</p>
+                  )}
                 </li>
               ))}
             </ul>
