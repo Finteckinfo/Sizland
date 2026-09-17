@@ -8,6 +8,7 @@ import { useTheme } from 'next-themes';
 import { PageLayout } from '@/components/page-layout';
 import { Loader2, Check, MapPin, Shield, Search, FileCheck, Wallet, FileText } from 'lucide-react';
 import Image from 'next/image';
+import AuroraText from '@/components/ui/aurora-text';
 import { fetchLandAdminAccess } from '@/lib/buy/land-admin';
 
 type Step = 'LOGIN' | 'CREATE_REQUEST';
