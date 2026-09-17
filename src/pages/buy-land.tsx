@@ -51,25 +51,10 @@ export default function BuyLandPage() {
   }, []);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      setCurrentStep('CREATE_REQUEST');
-      fetchProgress();
-      if (session?.user?.email && !contactEmail) {
-        setContactEmail(session.user.email);
-      }
-      if (session?.user?.name && !contactName) {
-        setContactName(session.user.name.split(' ')[0] || session.user.name);
-      }
-      try {
-        if (sessionStorage.getItem(OPEN_FORM_KEY) === '1') {
-          sessionStorage.removeItem(OPEN_FORM_KEY);
-          setShowForm(true);
-        }
-      } catch {
-        // ignore
-      }
+    if (status === 'authenticated' && !showForm && !intakeComplete) {
+      router.replace('/dashboard');
     }
-  }, [status, router]);
+  }, [status, showForm, intakeComplete, router]);
 
   const fetchProgress = async () => {
     try {
@@ -143,7 +128,7 @@ export default function BuyLandPage() {
   useEffect(() => {
     if (!intakeComplete) return;
     const t = window.setTimeout(() => {
-      router.push('/catalog');
+      router.push('/dashboard');
     }, 1600);
     return () => window.clearTimeout(t);
   }, [intakeComplete, router]);
@@ -156,6 +141,16 @@ export default function BuyLandPage() {
     !loading;
 
   if (!mounted) return null;
+
+  if (status === 'authenticated' && !showForm && !intakeComplete) {
+    return (
+      <PageLayout title="Dashboard - Sizland" requireAuth={false}>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        </div>
+      </PageLayout>
+    );
+  }
 
   const cardClass = isDark
     ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
@@ -223,10 +218,10 @@ export default function BuyLandPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push('/catalog')}
+              onClick={() => router.push('/dashboard')}
               className="w-full py-3.5 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600"
             >
-              Browse catalog
+              Go to dashboard
             </button>
           </div>
         ) : (
@@ -306,20 +301,13 @@ export default function BuyLandPage() {
         // ignore
       }
       const callback =
-        typeof window !== 'undefined' && window.location.hostname.includes('buy.siz.land')
-          ? `${window.location.origin}/buy-land`
-          : typeof window !== 'undefined'
-            ? `${window.location.origin}/buy-land`
-            : 'https://buy.siz.land/buy-land';
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/dashboard`
+          : 'https://buy.siz.land/dashboard';
       router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
-    if (hasCompletedIntake(request)) {
-      router.push('/catalog');
-      return;
-    }
-    setShowForm(true);
-    setCurrentStep('CREATE_REQUEST');
+    router.push('/dashboard');
   };
 
   // Form view: show only the form when user clicks "Start a Land Request"
@@ -367,7 +355,7 @@ export default function BuyLandPage() {
                 onClick={handleStartLandRequest}
                 className="px-8 py-4 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
               >
-                {hasCompletedIntake(request) ? 'Browse catalog' : 'Start a Land Request'}
+                {status === 'authenticated' ? 'Go to dashboard' : 'Start a Land Request'}
               </button>
               <button
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
@@ -376,7 +364,7 @@ export default function BuyLandPage() {
                 How it Works
               </button>
               <button
-                onClick={() => router.push('/catalog')}
+                onClick={() => router.push(status === 'authenticated' ? '/dashboard/catalog' : '/catalog')}
                 className={`px-8 py-4 rounded-lg font-bold border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-500/10 transition-colors ${isDark ? 'dark:text-emerald-400' : ''}`}
               >
                 Explore catalog

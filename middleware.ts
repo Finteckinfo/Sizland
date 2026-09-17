@@ -52,6 +52,7 @@ const BUY_APP_PREFIXES = [
   '/lands',
   '/browse-land',
   '/catalog',
+  '/dashboard',
   '/admin/land',
   '/admin/users',
 ]
