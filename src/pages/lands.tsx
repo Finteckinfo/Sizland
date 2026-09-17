@@ -242,21 +242,17 @@ export default function LandsPage() {
                   : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]'
               }`}
             >
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-              </div>
               <p className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Request Received & Expert Sourcing Initiated
+                Browse available land
               </p>
               <p className={`mt-3 max-w-lg mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Our property experts have received your criteria. We are currently manually vetting viable plots that
-                match your budget and purpose. You will receive an update with curated options in less than 48 hours.
+                Published listings live in the catalog. Select an asset there when you’re ready to confirm a request.
               </p>
               <button
-                onClick={() => router.push('/buy-land')}
-                className="mt-6 px-6 py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
+                onClick={() => router.push('/catalog')}
+                className="mt-6 px-6 py-3 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600"
               >
-                Return to Dashboard
+                Open catalog
               </button>
             </div>
           ) : (

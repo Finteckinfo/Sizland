@@ -44,6 +44,7 @@ const buyAppPathPrefixes = [
   "/lands",
   "/browse-land",
   "/catalog",
+  "/dashboard",
   "/admin/land",
   "/admin/users",
 ] as const;

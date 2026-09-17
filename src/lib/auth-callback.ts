@@ -24,12 +24,12 @@ export function isBuyHostname(hostname: string | null | undefined): boolean {
 
 export function defaultBuyCallbackUrl(): string {
   if (typeof window !== 'undefined' && isBuyHostname(window.location.hostname)) {
-    return `${window.location.origin}/buy-land`;
+    return `${window.location.origin}/dashboard`;
   }
   if (typeof window !== 'undefined') {
-    return `${window.location.origin}/buy-land`;
+    return `${window.location.origin}/dashboard`;
   }
-  return 'https://buy.siz.land/buy-land';
+  return 'https://buy.siz.land/dashboard';
 }
 
 function isAuthPath(pathname: string): boolean {
@@ -52,7 +52,7 @@ export function defaultPostAuthPath(): string {
   if (typeof window === 'undefined') return '/lobby';
   const h = window.location.hostname.toLowerCase();
   const origin = window.location.origin;
-  if (h.includes('buy.siz.land')) return `${origin}/buy-land`;
+  if (h.includes('buy.siz.land')) return `${origin}/dashboard`;
   if (h.includes('mytab.siz.land')) return `${origin}/`;
   if (h.includes('solutions.siz.land')) return `${origin}/solutions`;
   return '/lobby';
