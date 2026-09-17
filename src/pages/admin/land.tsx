@@ -42,8 +42,11 @@ type LandRequest = {
   purpose?: string | null;
   status: string;
   currentStep: string;
+  listingId?: string | null;
+  listing?: LandListing | null;
   user?: { id: string; email?: string; firstName?: string; lastName?: string };
   plots: Plot[];
+  documents?: { id: string; type: string; fileUrl: string }[];
   createdAt: string;
 };
 
@@ -56,7 +59,12 @@ type LandListing = {
   currency?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  kind?: string;
+  region?: string | null;
   status: string;
+  rejectionReason?: string | null;
+  submittedByUserId?: string | null;
+  submittedBy?: { id: string; email?: string; firstName?: string; lastName?: string } | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -117,8 +125,10 @@ const AdminLandPage: React.FC = () => {
   const { data: session, status } = useSession();
   const [requests, setRequests] = useState<LandRequest[]>([]);
   const [listings, setListings] = useState<LandListing[]>([]);
+  const [submissions, setSubmissions] = useState<LandListing[]>([]);
   const [loading, setLoading] = useState(false);
   const [listingsLoading, setListingsLoading] = useState(false);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
@@ -219,12 +229,27 @@ const AdminLandPage: React.FC = () => {
     }
   }, []);
 
+  const fetchSubmissions = useCallback(async () => {
+    setSubmissionsLoading(true);
+    try {
+      const resp = await fetch('/api/land/admin/submissions', { credentials: 'include' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      setSubmissions(Array.isArray(data) ? data : []);
+    } catch {
+      /* ignore */
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (status === 'authenticated') {
       fetchRequests();
       fetchListings();
+      fetchSubmissions();
     }
-  }, [status, fetchListings, fetchRequests]);
+  }, [status, fetchListings, fetchRequests, fetchSubmissions]);
 
   useEffect(() => {
     if (satisfyParam && requests.some((r) => r.id === satisfyParam)) {
@@ -470,6 +495,28 @@ const AdminLandPage: React.FC = () => {
     }
   };
 
+  const reviewSubmission = async (id: string, action: 'approve' | 'reject') => {
+    let reason = '';
+    if (action === 'reject') {
+      reason = window.prompt('Rejection reason (visible to the submitter)') || '';
+      if (!reason.trim()) return;
+    }
+    try {
+      const resp = await fetch(`/api/land/admin/submissions/${id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action, reason: reason.trim() }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error || 'Review failed');
+      fetchSubmissions();
+      fetchListings();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Review failed');
+    }
+  };
+
   const plotPickerLat = formLat.trim() ? parseFloat(formLat) : null;
   const plotPickerLng = formLng.trim() ? parseFloat(formLng) : null;
   const invPickerLat = invLat.trim() ? parseFloat(invLat) : null;
@@ -481,13 +528,17 @@ const AdminLandPage: React.FC = () => {
   const activeSatisfyRequest = requests.find((r) => r.id === activeSatisfyRequestId);
 
   const sortedRequests = [...requests].sort((a, b) => {
+    const aDeal = !!a.listingId;
+    const bDeal = !!b.listingId;
+    if (aDeal !== bDeal) return aDeal ? -1 : 1;
     const aSat = isRequestSatisfied(a.status);
     const bSat = isRequestSatisfied(b.status);
-    if (aSat !== bSat) return aSat ? 1 : -1; // unsatisfied first
+    if (aSat !== bSat) return aSat ? 1 : -1;
     const at = new Date(a.createdAt).getTime();
     const bt = new Date(b.createdAt).getTime();
-    return at - bt; // oldest first
+    return at - bt;
   });
+  const pendingVetting = submissions.filter((s) => s.status === 'PENDING_VETTING');
   const requestsTotalPages = Math.max(1, Math.ceil(sortedRequests.length / REQUESTS_PER_PAGE));
   const clampedRequestsPage = Math.min(Math.max(1, requestsPage), requestsTotalPages);
   const requestsPageItems = sortedRequests.slice(
@@ -547,13 +598,59 @@ const AdminLandPage: React.FC = () => {
 
           {viewMode === 'dashboard' && (
             <>
+              <section className="mb-8 sm:mb-10">
+                <h2 className="mb-3 text-base font-semibold text-foreground sm:text-lg">Vetting inbox</h2>
+                {submissionsLoading ? (
+                  <p className="text-muted-foreground">Loading submissions…</p>
+                ) : pendingVetting.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No client uploads waiting for review.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingVetting.map((s) => (
+                      <div key={s.id} className="rounded-xl border border-border bg-card p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="font-semibold text-foreground">{s.title}</p>
+                            <p className="text-sm text-muted-foreground">{s.fullAddress}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {s.kind || 'LAND'} · {s.submittedBy?.email || s.submittedByUserId || 'client'}
+                              {s.listPrice != null ? ` · ${s.currency || 'USD'} ${s.listPrice.toLocaleString()}` : ''}
+                            </p>
+                            {s.description && <p className="mt-2 text-sm text-foreground">{s.description}</p>}
+                          </div>
+                          <div className="flex shrink-0 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => reviewSubmission(s.id, 'approve')}
+                              className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                            >
+                              Publish
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => reviewSubmission(s.id, 'reject')}
+                              className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
               {/* —— Requests table —— */}
               <section className="mb-8 sm:mb-10">
-                <h2 className="mb-3 text-base font-semibold text-foreground sm:text-lg">Land acquisition requests</h2>
+                <h2 className="mb-1 text-base font-semibold text-foreground sm:text-lg">Deals and contacts</h2>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  Deals are bound to a catalog listing. Rows without an asset are contact leads only.
+                </p>
                 {loading ? (
                   <p className="text-muted-foreground">Loading…</p>
                 ) : sortedRequests.length === 0 ? (
-                  <p className="text-muted-foreground">No requests yet. Buyers start from Buy land.</p>
+                  <p className="text-muted-foreground">No deals yet. A deal starts when a buyer selects a catalog asset.</p>
                 ) : (
                   <>
                     <div className="-mx-3 overflow-x-auto rounded-lg border border-border sm:mx-0">
@@ -562,6 +659,7 @@ const AdminLandPage: React.FC = () => {
                           <tr>
                             <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">ID</th>
                             <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">User</th>
+                            <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Asset</th>
                             <th className="px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-3">Status</th>
                             <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell sm:px-3">Step</th>
                             <th className="hidden px-2 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell lg:px-3">Budget</th>
@@ -577,6 +675,9 @@ const AdminLandPage: React.FC = () => {
                                 <td className="max-w-[140px] truncate px-2 py-2.5 text-foreground sm:max-w-[220px] sm:px-3">
                                   {r.user?.email || r.userId}
                                 </td>
+                                <td className="max-w-[160px] truncate px-2 py-2.5 text-foreground sm:max-w-[220px] sm:px-3">
+                                  {r.listing?.title || (r.listingId ? r.listingId.slice(0, 10) : 'Contact only')}
+                                </td>
                                 <td className="whitespace-nowrap px-2 py-2.5 text-xs text-foreground sm:px-3 sm:text-sm">{r.status}</td>
                                 <td className="hidden whitespace-nowrap px-2 py-2.5 text-muted-foreground sm:table-cell sm:px-3">{r.currentStep}</td>
                                 <td className="hidden px-2 py-2.5 text-foreground lg:table-cell lg:px-3">{r.budget ?? '—'}</td>
@@ -585,27 +686,35 @@ const AdminLandPage: React.FC = () => {
                                   <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
                                     <button
                                       type="button"
-                                      onClick={() => onSatisfyRequest(r.id)}
+                                      onClick={() => setExpandedRequestId(expandedRequestId === r.id ? null : r.id)}
                                       className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
                                     >
-                                      Satisfy request
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setExpandedRequestId(expandedRequestId === r.id ? null : r.id)}
-                                      className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
-                                    >
-                                      {expandedRequestId === r.id ? 'Hide' : 'Details'}
+                                      {expandedRequestId === r.id ? 'Hide' : r.listingId ? 'Work deal' : 'View lead'}
                                     </button>
                                   </div>
                                 </td>
                               </tr>
                               {expandedRequestId === r.id && (
                                 <tr>
-                                  <td colSpan={7} className="bg-muted/30 px-3 py-4 sm:px-4">
+                                  <td colSpan={8} className="bg-muted/30 px-3 py-4 sm:px-4">
                                     <p className="mb-2 text-sm text-foreground">
-                                      Size: {r.sizeCurve ?? '—'} | Purpose: {r.purpose ?? '—'} | Wallet: {r.walletAddress ?? '—'}
+                                      {r.listing
+                                        ? `Asset: ${r.listing.title} · ${r.listing.fullAddress}`
+                                        : 'Contact lead — no catalog asset selected.'}{' '}
+                                      | Purpose: {r.purpose ?? '—'} | Wallet: {r.walletAddress ?? '—'}
                                     </p>
+                                    {!!r.documents?.length && (
+                                      <ul className="mb-3 list-inside list-disc text-sm text-muted-foreground">
+                                        {r.documents.map((d) => (
+                                          <li key={d.id}>
+                                            {d.type}{' '}
+                                            <a href={d.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                                              open
+                                            </a>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
                                     <div className="mb-3 flex flex-wrap items-center gap-2">
                                       <label className="text-xs text-muted-foreground">Status</label>
                                       <select
@@ -737,7 +846,11 @@ const AdminLandPage: React.FC = () => {
                                           </li>
                                         ))
                                       ) : (
-                                        <li>None yet — use Satisfy request above.</li>
+                                        <li>
+                                          {r.listingId
+                                            ? 'Not used for catalog deals — diligence lives on the listing.'
+                                            : 'None. Do not invent plots for contacts who have not selected an asset.'}
+                                        </li>
                                       )}
                                     </ul>
                                   </td>
@@ -795,9 +908,9 @@ const AdminLandPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">Loading listings…</p>
                 ) : sortedListings.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center">
-                    <p className="text-lg font-semibold text-foreground">No lands at the moment</p>
+                    <p className="text-lg font-semibold text-foreground">No published inventory</p>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Plots matching your criteria will appear here once our team sources them.
+                      Create a listing here, or publish a client upload from the vetting inbox.
                     </p>
                   </div>
                 ) : (

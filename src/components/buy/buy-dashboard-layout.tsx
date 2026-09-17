@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   Leaf,
+  Handshake,
 } from 'lucide-react';
 import AuthWrapper from '@/components/auth-wrapper';
 import GlowBackground from '@/components/ui/GlowBackground';
@@ -23,6 +24,7 @@ import AnimatedGrid from '@/components/ui/AnimatedGrid';
 
 const NAV = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/deals', label: 'My deals', icon: Handshake },
   { href: '/dashboard/catalog', label: 'Catalog', icon: Map },
   { href: '/dashboard/upload', label: 'Upload asset', icon: Upload },
   { href: '/dashboard/profile', label: 'Profile', icon: User },

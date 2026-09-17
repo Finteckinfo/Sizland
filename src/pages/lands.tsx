@@ -249,7 +249,7 @@ export default function LandsPage() {
                 Published listings live in the catalog. Select an asset there when you’re ready to confirm a request.
               </p>
               <button
-                onClick={() => router.push('/catalog')}
+                onClick={() => router.push('/dashboard/catalog')}
                 className="mt-6 px-6 py-3 rounded-full font-semibold text-white bg-emerald-500 hover:bg-emerald-600"
               >
                 Open catalog
