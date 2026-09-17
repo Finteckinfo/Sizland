@@ -18,6 +18,7 @@ import { fetchLandAdminAccess, shouldStayOnClientDashboard } from '@/lib/buy/lan
 
 export default function BuyDashboardHome() {
   const router = useRouter();
+  const { isReady, query, replace } = router;
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const [deals, setDeals] = useState<LandDeal[]>([]);
@@ -26,11 +27,11 @@ export default function BuyDashboardHome() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!isReady) return;
     let cancelled = false;
     (async () => {
-      if (!shouldStayOnClientDashboard(router.query) && (await fetchLandAdminAccess())) {
-        if (!cancelled) await router.replace('/admin');
+      if (!shouldStayOnClientDashboard(query) && (await fetchLandAdminAccess())) {
+        if (!cancelled) await replace('/admin');
         return;
       }
       if (!cancelled) setReady(true);
@@ -38,7 +39,7 @@ export default function BuyDashboardHome() {
     return () => {
       cancelled = true;
     };
-  }, [router.isReady, router.query]);
+  }, [isReady, query, replace]);
 
   useEffect(() => {
     if (!ready) return;
