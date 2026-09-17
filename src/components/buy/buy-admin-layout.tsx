@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,54 +8,87 @@ import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import {
   LayoutDashboard,
+  ClipboardCheck,
+  Handshake,
   Map,
-  Upload,
-  User,
-  Settings,
+  Users,
+  Wallet,
+  Satellite,
+  MessageSquare,
+  ScrollText,
   LogOut,
   Menu,
   X,
-  Leaf,
-  Handshake,
   Shield,
+  Loader2,
 } from 'lucide-react';
 import AuthWrapper from '@/components/auth-wrapper';
 import GlowBackground from '@/components/ui/GlowBackground';
 import AnimatedGrid from '@/components/ui/AnimatedGrid';
 
 const NAV = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { href: '/dashboard/deals', label: 'My deals', icon: Handshake },
-  { href: '/dashboard/catalog', label: 'Catalog', icon: Map },
-  { href: '/dashboard/upload', label: 'Upload asset', icon: Upload },
-  { href: '/dashboard/profile', label: 'Profile', icon: User },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-  { href: '/admin', label: 'Admin', icon: Shield },
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard },
+  { href: '/admin/vetting', label: 'Vetting', icon: ClipboardCheck },
+  { href: '/admin/deals', label: 'Deals', icon: Handshake },
+  { href: '/admin/catalog', label: 'Catalog', icon: Map },
+  { href: '/admin/settlement', label: 'Settlement', icon: Wallet },
+  { href: '/admin/satellite', label: 'Satellite', icon: Satellite },
+  { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
+  { href: '/admin/operators', label: 'Operators', icon: Users },
+  { href: '/admin/audit', label: 'Audit', icon: ScrollText },
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === '/dashboard') return pathname === '/dashboard';
+  if (href === '/admin') return pathname === '/admin';
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function BuyDashboardLayout({
+export function BuyAdminLayout({
   children,
-  title = 'Dashboard — buy.siz.land',
-  description = 'Browse land, upload assets, and manage your Sizland buy account.',
+  title = 'Admin — buy.siz.land',
+  description = 'Operate catalog, vetting, and deals for buy.siz.land.',
 }: {
   children: ReactNode;
   title?: string;
   description?: string;
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [allowed, setAllowed] = useState(false);
+  const [gateError, setGateError] = useState('');
   const isDark = resolvedTheme === 'dark';
   const label =
     session?.user?.name?.trim() ||
     session?.user?.email?.trim() ||
-    'SizWallet';
+    'Operator';
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await fetch('/api/land/admin/requests', { credentials: 'include' });
+        if (cancelled) return;
+        if (resp.status === 401 || resp.status === 403) {
+          router.replace('/dashboard?error=land_admin_required');
+          return;
+        }
+        if (!resp.ok) {
+          const body = await resp.json().catch(() => ({}));
+          setGateError(body?.error || 'Could not verify admin access');
+          return;
+        }
+        setAllowed(true);
+      } catch {
+        if (!cancelled) setGateError('Could not verify admin access');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [status, router]);
 
   const navClass = (href: string) =>
     `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
@@ -95,11 +128,11 @@ export function BuyDashboardLayout({
         >
           <div className="flex items-center gap-3 px-5 py-6">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white">
-              <Leaf className="h-5 w-5" />
+              <Shield className="h-5 w-5" />
             </div>
             <div>
               <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Sizland Buy</p>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Client dashboard</p>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Admin dashboard</p>
             </div>
             <button
               type="button"
@@ -111,7 +144,7 @@ export function BuyDashboardLayout({
             </button>
           </div>
 
-          <nav className="flex flex-1 flex-col gap-1 px-3">
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3">
             {NAV.map((item) => {
               const Icon = item.icon;
               return (
@@ -132,6 +165,14 @@ export function BuyDashboardLayout({
             <p className={`mb-3 truncate text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
               {label}
             </p>
+            <Link
+              href="/dashboard?view=client"
+              className={`mb-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm ${
+                isDark ? 'text-gray-400 hover:bg-white/5 hover:text-white' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Client dashboard
+            </Link>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/buy-land' })}
@@ -151,21 +192,30 @@ export function BuyDashboardLayout({
               isDark ? 'border-[#1f2f3f] bg-[#0c1a22]/90 backdrop-blur-xl' : 'border-emerald-100 bg-white/90 backdrop-blur-xl'
             }`}
           >
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="rounded-lg p-2"
-              aria-label="Open navigation"
-            >
+            <button type="button" onClick={() => setOpen(true)} className="rounded-lg p-2" aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
-            <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Sizland Buy</span>
+            <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Admin</span>
           </header>
-          <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+            {!allowed && !gateError && (
+              <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+              </div>
+            )}
+            {gateError && <p className="text-sm text-red-500">{gateError}</p>}
+            {allowed && children}
+          </main>
         </div>
       </div>
     </>
   );
 
   return <AuthWrapper>{shell}</AuthWrapper>;
+}
+
+export function adminCardClass(isDark: boolean) {
+  return isDark
+    ? 'rounded-2xl border border-[#1f2f3f] bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] p-5'
+    : 'rounded-2xl border border-[#e5efe7] bg-white p-5';
 }

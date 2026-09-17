@@ -53,8 +53,7 @@ const BUY_APP_PREFIXES = [
   '/browse-land',
   '/catalog',
   '/dashboard',
-  '/admin/land',
-  '/admin/users',
+  '/admin',
 ]
 
 /** Paths that belong to the MyTab app. */

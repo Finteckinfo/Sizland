@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
-import { Map, Upload, Handshake, Bell, ArrowRight } from 'lucide-react';
+import { Map, Upload, Handshake, Bell, ArrowRight, Loader2 } from 'lucide-react';
 import { BuyDashboardLayout } from '@/components/buy/buy-dashboard-layout';
 import {
   dealStatusLabel,
@@ -13,15 +14,34 @@ import {
   type LandListing,
   type LandNotification,
 } from '@/lib/buy/land-api';
+import { fetchLandAdminAccess, shouldStayOnClientDashboard } from '@/lib/buy/land-admin';
 
 export default function BuyDashboardHome() {
+  const router = useRouter();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const [deals, setDeals] = useState<LandDeal[]>([]);
   const [submissions, setSubmissions] = useState<LandListing[]>([]);
   const [notes, setNotes] = useState<LandNotification[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!router.isReady) return;
+    let cancelled = false;
+    (async () => {
+      if (!shouldStayOnClientDashboard(router.query) && (await fetchLandAdminAccess())) {
+        if (!cancelled) await router.replace('/admin');
+        return;
+      }
+      if (!cancelled) setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router.isReady, router.query]);
+
+  useEffect(() => {
+    if (!ready) return;
     let cancelled = false;
     (async () => {
       try {
@@ -41,7 +61,7 @@ export default function BuyDashboardHome() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ready]);
 
   const card = isDark
     ? 'rounded-2xl border border-[#1f2f3f] bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] p-5'
@@ -57,6 +77,16 @@ export default function BuyDashboardHome() {
       setNotes((prev) => prev.map((n) => (n.id === note.id ? { ...n, read: true } : n)));
     }
   };
+
+  if (!ready) {
+    return (
+      <BuyDashboardLayout title="Overview — buy.siz.land">
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        </div>
+      </BuyDashboardLayout>
+    );
+  }
 
   return (
     <BuyDashboardLayout title="Overview — buy.siz.land">
