@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { BuyAdminLayout, adminCardClass } from '@/components/buy/buy-admin-layout';
-import { listingStatusLabel } from '@/lib/buy/land-api';
+import { listingStatusLabel, openLandFile } from '@/lib/buy/land-api';
 
 type Submission = {
   id: string;
@@ -17,6 +17,7 @@ type Submission = {
   rejectionReason?: string | null;
   submittedByUserId?: string | null;
   submittedBy?: { email?: string | null } | null;
+  files?: { id: string; filename: string; kind: string }[];
   createdAt: string;
 };
 
@@ -122,6 +123,23 @@ export default function AdminVettingPage() {
                       {s.listPrice != null ? ` · ${s.currency || 'USD'} ${s.listPrice.toLocaleString()}` : ''}
                     </p>
                     {s.description && <p className={`mt-2 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{s.description}</p>}
+                    {s.files?.length ? (
+                      <ul className="mt-2 space-y-1">
+                        {s.files.map((file) => (
+                          <li key={file.id}>
+                            <button
+                              type="button"
+                              onClick={() => openLandFile(file.id).catch((err) => setError(err.message))}
+                              className="text-xs text-emerald-500 hover:underline"
+                            >
+                              {file.filename} · {file.kind}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className={`mt-2 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>No files attached</p>
+                    )}
                     {s.rejectionReason && <p className="mt-2 text-xs text-red-500">{s.rejectionReason}</p>}
                   </div>
                   {s.status === 'PENDING_VETTING' && (

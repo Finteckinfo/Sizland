@@ -17,7 +17,10 @@ type Listing = {
   kind?: string;
   region?: string | null;
   status: string;
+  files?: { id: string }[];
 };
+
+const LISTING_STATUSES = ['DRAFT', 'PENDING_VETTING', 'PUBLISHED', 'RESERVED', 'SOLD', 'REJECTED'] as const;
 
 const inputClass = (isDark: boolean) =>
   `w-full rounded-xl border px-4 py-3 text-sm ${
@@ -106,6 +109,22 @@ export default function AdminCatalogPage() {
     await load();
   };
 
+  const setListingStatus = async (id: string, next: string) => {
+    setError('');
+    const resp = await fetch(`/api/land/admin/catalog/listings/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      setError(data?.error || 'Status update failed');
+      return;
+    }
+    await load();
+  };
+
   const card = adminCardClass(isDark);
 
   return (
@@ -137,11 +156,27 @@ export default function AdminCatalogPage() {
                         {listingStatusLabel(L.status)}
                         {L.listPrice != null ? ` · ${L.currency || 'USD'} ${L.listPrice.toLocaleString()}` : ''}
                         {L.region ? ` · ${L.region}` : ''}
+                        {L.files?.length ? ` · ${L.files.length} file${L.files.length === 1 ? '' : 's'}` : ''}
                       </p>
                     </div>
-                    <button type="button" onClick={() => remove(L.id)} className="text-xs text-red-500 hover:underline">
-                      Delete
-                    </button>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <select
+                        value={L.status}
+                        onChange={(e) => setListingStatus(L.id, e.target.value)}
+                        className={`rounded-lg border px-2 py-1 text-xs ${
+                          isDark ? 'border-[#32465b] bg-[#1c2a3a] text-white' : 'border-gray-200 bg-white text-gray-900'
+                        }`}
+                      >
+                        {LISTING_STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {listingStatusLabel(s)}
+                          </option>
+                        ))}
+                      </select>
+                      <button type="button" onClick={() => remove(L.id)} className="text-xs text-red-500 hover:underline">
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}

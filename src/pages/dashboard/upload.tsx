@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
 import { BuyDashboardLayout } from '@/components/buy/buy-dashboard-layout';
-import { landApi, listingStatusLabel, type LandListing } from '@/lib/buy/land-api';
+import { filesToPayload, landApi, listingStatusLabel, openLandFile, type LandListing } from '@/lib/buy/land-api';
 
 const inputClass = (isDark: boolean) =>
   `w-full rounded-xl border px-4 py-3 ${
@@ -20,7 +20,9 @@ export default function DashboardUploadPage() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
-  const [fileName, setFileName] = useState('');
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +43,7 @@ export default function DashboardUploadPage() {
     setSaving(true);
     setError('');
     try {
+      const payloadFiles = files.length ? await filesToPayload(files, kind === 'LAND' ? 'TITLE' : 'OTHER') : [];
       await landApi('submissions', {
         method: 'POST',
         body: JSON.stringify({
@@ -49,7 +52,9 @@ export default function DashboardUploadPage() {
           location: location.trim(),
           description: description.trim(),
           askingPrice: askingPrice.trim(),
-          fileName: fileName.trim() || undefined,
+          latitude: lat.trim() || undefined,
+          longitude: lng.trim() || undefined,
+          files: payloadFiles,
         }),
       });
       await load();
@@ -57,7 +62,9 @@ export default function DashboardUploadPage() {
       setLocation('');
       setDescription('');
       setAskingPrice('');
-      setFileName('');
+      setLat('');
+      setLng('');
+      setFiles([]);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2500);
     } catch (err) {
@@ -75,9 +82,9 @@ export default function DashboardUploadPage() {
             isDark ? 'border-[#1f2f3f] bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)]' : 'border-[#e5efe7] bg-white'
           }`}
         >
-          <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Upload an asset</h1>
+          <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Onboard an asset</h1>
           <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Submissions go to the admin vetting queue. Nothing is public until it is approved.
+            Files are stored in the database and go to the vetting queue. Nothing is public until an operator publishes it.
           </p>
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             {error && <p className="text-sm text-red-500">{error}</p>}
@@ -96,6 +103,16 @@ export default function DashboardUploadPage() {
               <label className="mb-1 block text-sm font-medium">Location / address</label>
               <input className={inputClass(isDark)} value={location} onChange={(e) => setLocation(e.target.value)} required />
             </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Latitude (optional)</label>
+                <input className={inputClass(isDark)} value={lat} onChange={(e) => setLat(e.target.value)} placeholder="-1.29" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Longitude (optional)</label>
+                <input className={inputClass(isDark)} value={lng} onChange={(e) => setLng(e.target.value)} placeholder="36.82" />
+              </div>
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Description</label>
               <textarea
@@ -109,15 +126,18 @@ export default function DashboardUploadPage() {
               <input className={inputClass(isDark)} value={askingPrice} onChange={(e) => setAskingPrice(e.target.value)} placeholder="USD 50,000" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Supporting file (optional)</label>
+              <label className="mb-1 block text-sm font-medium">Supporting files (up to 5, 5MB each)</label>
               <input
                 type="file"
+                multiple
                 className={`w-full text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-                onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
+                onChange={(e) => setFiles(Array.from(e.target.files || []))}
               />
-              <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                File name is stored with the submission. Document custody stays with admin review.
-              </p>
+              {files.length > 0 && (
+                <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {files.map((f) => f.name).join(', ')}
+                </p>
+              )}
             </div>
             <button
               type="submit"
@@ -150,7 +170,23 @@ export default function DashboardUploadPage() {
                   <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.fullAddress}</p>
                   <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                     {item.kind || 'LAND'} · {new Date(item.createdAt).toLocaleString()}
+                    {item.files?.length ? ` · ${item.files.length} file${item.files.length === 1 ? '' : 's'}` : ''}
                   </p>
+                  {item.files?.length ? (
+                    <ul className="mt-2 space-y-1">
+                      {item.files.map((file) => (
+                        <li key={file.id}>
+                          <button
+                            type="button"
+                            onClick={() => openLandFile(file.id).catch((err) => setError(err.message))}
+                            className="text-xs text-emerald-500 hover:underline"
+                          >
+                            {file.filename}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {item.status === 'REJECTED' && item.rejectionReason && (
                     <p className="mt-2 text-xs text-red-500">{item.rejectionReason}</p>
                   )}
