@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -22,15 +22,15 @@ import {
 import AuthWrapper from '@/components/auth-wrapper';
 import GlowBackground from '@/components/ui/GlowBackground';
 import AnimatedGrid from '@/components/ui/AnimatedGrid';
+import { fetchLandAdminAccess } from '@/lib/buy/land-admin';
 
-const NAV = [
+const CLIENT_NAV = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/deals', label: 'My deals', icon: Handshake },
   { href: '/dashboard/catalog', label: 'Catalog', icon: Map },
   { href: '/dashboard/upload', label: 'Upload asset', icon: Upload },
   { href: '/dashboard/profile', label: 'Profile', icon: User },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-  { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -51,11 +51,26 @@ export function BuyDashboardLayout({
   const { data: session } = useSession();
   const { resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [isLandAdmin, setIsLandAdmin] = useState(false);
   const isDark = resolvedTheme === 'dark';
   const label =
     session?.user?.name?.trim() ||
     session?.user?.email?.trim() ||
     'SizWallet';
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLandAdminAccess().then((ok) => {
+      if (!cancelled) setIsLandAdmin(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user]);
+
+  const NAV = isLandAdmin
+    ? [...CLIENT_NAV, { href: '/admin', label: 'Admin', icon: Shield }]
+    : CLIENT_NAV;
 
   const navClass = (href: string) =>
     `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${

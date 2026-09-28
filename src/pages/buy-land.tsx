@@ -20,10 +20,6 @@ const STEPS: { key: Step; label: string }[] = [
 
 const OPEN_FORM_KEY = 'sizland_buy_open_form';
 
-function hasCompletedIntake(req: { contactName?: string | null; contactEmail?: string | null; purpose?: string | null } | null | undefined) {
-  return !!(req?.contactName && req?.contactEmail && req?.purpose);
-}
-
 const PURPOSE_OPTIONS = ['Farming', 'Speculation', 'Residential', 'Commercial', 'Investment', 'Other'];
 
 
@@ -52,11 +48,31 @@ export default function BuyLandPage() {
   }, []);
 
   useEffect(() => {
-    if (status !== 'authenticated' || showForm || intakeComplete) return;
+    if (status !== 'authenticated' || showForm || intakeComplete || !router.isReady) return;
     let cancelled = false;
     (async () => {
       const admin = await fetchLandAdminAccess();
-      if (!cancelled) router.replace(admin ? '/admin' : '/dashboard');
+      if (cancelled) return;
+      if (admin) {
+        router.replace('/admin');
+        return;
+      }
+      const intakeQ = router.query.intake;
+      let wantsIntake = intakeQ === '1' || (Array.isArray(intakeQ) && intakeQ[0] === '1');
+      try {
+        if (sessionStorage.getItem(OPEN_FORM_KEY) === '1') {
+          wantsIntake = true;
+          sessionStorage.removeItem(OPEN_FORM_KEY);
+        }
+      } catch {
+        // ignore
+      }
+      if (wantsIntake) {
+        await fetchProgress();
+        if (!cancelled) setShowForm(true);
+        return;
+      }
+      router.replace('/dashboard');
     })();
     return () => {
       cancelled = true;
@@ -134,8 +150,12 @@ export default function BuyLandPage() {
 
   useEffect(() => {
     if (!intakeComplete) return;
+    const next =
+      typeof router.query.next === 'string' && router.query.next.startsWith('/')
+        ? router.query.next
+        : '/dashboard';
     const t = window.setTimeout(() => {
-      router.push('/dashboard');
+      router.push(next);
     }, 1600);
     return () => window.clearTimeout(t);
   }, [intakeComplete, router]);
@@ -309,13 +329,17 @@ export default function BuyLandPage() {
       }
       const callback =
         typeof window !== 'undefined'
-          ? `${window.location.origin}/dashboard`
-          : 'https://buy.siz.land/dashboard';
+          ? `${window.location.origin}/buy-land?intake=1`
+          : 'https://buy.siz.land/buy-land?intake=1';
       router.push(`/auth-choice?callbackUrl=${encodeURIComponent(callback)}`);
       return;
     }
     void fetchLandAdminAccess().then((admin) => {
-      router.push(admin ? '/admin' : '/dashboard');
+      if (admin) {
+        router.push('/admin');
+        return;
+      }
+      void fetchProgress().then(() => setShowForm(true));
     });
   };
 
@@ -364,7 +388,7 @@ export default function BuyLandPage() {
                 onClick={handleStartLandRequest}
                 className="px-8 py-4 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
               >
-                {status === 'authenticated' ? 'Go to dashboard' : 'Start a Land Request'}
+                {status === 'authenticated' ? 'Continue land request' : 'Start a Land Request'}
               </button>
               <button
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
