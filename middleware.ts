@@ -102,6 +102,7 @@ function isAllowedOnSolutionsHost(pathname: string): boolean {
   if (pathname === '/') return true
   if (pathMatchesPrefix(pathname, '/solutions')) return true
   if (pathMatchesPrefix(pathname, '/ratecard')) return true
+  if (pathMatchesPrefix(pathname, '/api/solutions')) return true
   for (const p of SHARED_AUTH_PREFIXES) {
     if (pathMatchesPrefix(pathname, p)) return true
   }
@@ -143,6 +144,7 @@ const publicApiRoutes = [
   '/api/mytab/alias/register',
   '/api/mytab/phone/verify',
   '/api/mytab/phone/register-hash',
+  '/api/solutions',
 ]
 
 export function middleware(request: NextRequest) {
