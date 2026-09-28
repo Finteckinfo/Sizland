@@ -169,6 +169,18 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
     setSelectErr(null);
     setSelecting(true);
     try {
+      const progressRes = await fetch('/api/land/progress', { credentials: 'include' });
+      const progress = progressRes.ok ? await progressRes.json().catch(() => null) : null;
+      const req = progress?.request as { contactName?: string; contactEmail?: string; purpose?: string } | undefined;
+      if (!req?.contactName || !req?.contactEmail || !req?.purpose) {
+        try {
+          sessionStorage.setItem('sizland_buy_open_form', '1');
+        } catch {
+          // ignore
+        }
+        router.push(`/buy-land?intake=1&next=${encodeURIComponent(next)}`);
+        return;
+      }
       const res = await fetch('/api/land/select-listing', {
         method: 'POST',
         credentials: 'include',

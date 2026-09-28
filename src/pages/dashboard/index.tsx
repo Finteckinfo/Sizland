@@ -97,6 +97,11 @@ export default function BuyDashboardHome() {
           <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Select a catalog asset to start a deal. Uploads go to admin vetting before they publish.
           </p>
+          {(Array.isArray(query.error) ? query.error[0] : query.error) === 'land_admin_required' && (
+            <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+              That admin page is only for land operators. You are on the client dashboard.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
