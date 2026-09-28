@@ -33,7 +33,7 @@ const BlogPage: NextPage = () => {
       
       <div className="min-h-screen w-full">
         {/* Hero Section */}
-        <section className="relative pt-12 sm:pt-16 md:pt-24 pb-24 w-full">
+        <section className="relative pt-4 sm:pt-6 md:pt-8 pb-24 w-full">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-8 text-center">
               {/* Title */}

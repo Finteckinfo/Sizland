@@ -12,23 +12,20 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
   selected,
   onSelect,
 }) => (
-  <div className="flex flex-col gap-4">
-    <label className="font-label text-[12px] leading-[16px] tracking-[0.05em] font-bold uppercase text-mt-on-surface-variant">
-      Choose your wallet track
-    </label>
-
+  <div className="flex flex-col gap-3 sm:gap-4 min-w-0">
     {/* Track 1 — External Wallet */}
     <button
+      type="button"
       onClick={() => onSelect("external")}
-      className={`relative w-full text-left p-6 rounded-3xl border transition-all duration-300 group ${
+      className={`relative w-full min-w-0 text-left p-4 sm:p-6 rounded-3xl border transition-all duration-300 group ${
         selected === "external"
           ? "border-mt-primary bg-mt-primary/10 shadow-[0_0_20px_rgba(66,238,147,0.15)]"
           : "border-mt-glass-border bg-mt-pure-black/20 hover:border-mt-primary/40 hover:bg-mt-pure-black/30"
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4 min-w-0">
         <div
-          className={`p-3 rounded-2xl border ${
+          className={`shrink-0 p-2.5 sm:p-3 rounded-2xl border ${
             selected === "external"
               ? "bg-mt-primary/20 border-mt-primary/30"
               : "bg-mt-surface-container-highest/50 border-mt-glass-border"
@@ -38,14 +35,14 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
             account_balance_wallet
           </span>
         </div>
-        <div className="flex-1">
-          <h3 className="font-headline text-lg text-mt-ledger-white font-bold mb-1 normal-case tracking-normal">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-headline text-base sm:text-lg text-mt-ledger-white font-bold mb-1 normal-case tracking-normal">
             Connect Existing Wallet
           </h3>
           <p className="font-body text-sm text-mt-on-surface-variant leading-relaxed">
             Use MetaMask, Coinbase Wallet, or any WalletConnect-compatible wallet. You manage your own keys and pay gas fees.
           </p>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <span className="bg-mt-surface-container-high/80 border border-mt-glass-border text-mt-on-surface-variant px-2.5 py-1 rounded-full font-label text-[10px] tracking-wider uppercase">
               Self-custody
             </span>
@@ -54,7 +51,7 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
             </span>
           </div>
         </div>
-        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-1 flex items-center justify-center transition-all ${
+        <div className={`w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center overflow-hidden transition-all ${
           selected === "external"
             ? "border-mt-primary bg-mt-primary"
             : "border-mt-outline"
@@ -68,16 +65,17 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
 
     {/* Track 2 — Smart Account */}
     <button
+      type="button"
       onClick={() => onSelect("smart_account")}
-      className={`relative w-full text-left p-6 rounded-3xl border transition-all duration-300 group ${
+      className={`relative w-full min-w-0 text-left p-4 sm:p-6 rounded-3xl border transition-all duration-300 group ${
         selected === "smart_account"
           ? "border-mt-primary bg-mt-primary/10 shadow-[0_0_20px_rgba(66,238,147,0.15)]"
           : "border-mt-glass-border bg-mt-pure-black/20 hover:border-mt-primary/40 hover:bg-mt-pure-black/30"
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4 min-w-0">
         <div
-          className={`p-3 rounded-2xl border ${
+          className={`shrink-0 p-2.5 sm:p-3 rounded-2xl border ${
             selected === "smart_account"
               ? "bg-mt-primary/20 border-mt-primary/30"
               : "bg-mt-surface-container-highest/50 border-mt-glass-border"
@@ -87,15 +85,15 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
             auto_awesome
           </span>
         </div>
-        <div className="flex-1">
-          <h3 className="font-headline text-lg text-mt-ledger-white font-bold mb-1 normal-case tracking-normal">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-headline text-base sm:text-lg text-mt-ledger-white font-bold mb-1 normal-case tracking-normal">
             Create Smart Account
           </h3>
           <p className="font-body text-sm text-mt-on-surface-variant leading-relaxed">
             We generate a secure wallet for you. No browser extensions needed.
             Gas fees are sponsored — completely free to start.
           </p>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <span className="bg-mt-primary/10 border border-mt-primary/20 text-mt-primary px-2.5 py-1 rounded-full font-label text-[10px] tracking-wider uppercase">
               Recommended
             </span>
@@ -107,7 +105,7 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
             </span>
           </div>
         </div>
-        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-1 flex items-center justify-center transition-all ${
+        <div className={`w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center overflow-hidden transition-all ${
           selected === "smart_account"
             ? "border-mt-primary bg-mt-primary"
             : "border-mt-outline"

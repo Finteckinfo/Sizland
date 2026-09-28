@@ -160,7 +160,8 @@ export default function LandsPage() {
             Verified plots sourced by Sizland. Select one to proceed.
           </p>
 
-          {/* Filters / Settings */}
+          {/* Filters — hidden during sourcing (no plots) */}
+          {plots.length > 0 && (
           <div className={`rounded-xl border p-4 mb-8 ${isDark ? 'bg-[#0f2d29]/50 border-[#1f2f3f]' : 'bg-gray-50 border-gray-200'}`}>
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -226,6 +227,7 @@ export default function LandsPage() {
               </div>
             )}
           </div>
+          )}
 
           {/* Content */}
           {loading ? (
@@ -234,24 +236,27 @@ export default function LandsPage() {
             </div>
           ) : plots.length === 0 ? (
             <div
-              className={`py-20 rounded-2xl border text-center ${
+              className={`py-20 rounded-2xl border text-center px-6 ${
                 isDark
                   ? 'bg-[linear-gradient(180deg,#0f2d29_0%,#141f2d_100%)] border-[#1f2f3f]'
                   : 'bg-[linear-gradient(180deg,#f3fff7_0%,#ffffff_100%)] border-[#e5efe7]'
               }`}
             >
-              <MapPin className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
-              <p className={`text-xl font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                No lands at the moment
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+              </div>
+              <p className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Request Received & Expert Sourcing Initiated
               </p>
-              <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Plots matching your criteria will appear here once our team sources them.
+              <p className={`mt-3 max-w-lg mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Our property experts have received your criteria. We are currently manually vetting viable plots that
+                match your budget and purpose. You will receive an update with curated options in less than 48 hours.
               </p>
               <button
                 onClick={() => router.push('/buy-land')}
                 className="mt-6 px-6 py-3 rounded-full font-semibold text-emerald-500 border-2 border-emerald-500 hover:bg-emerald-500/10"
               >
-                Back to Buy Land
+                Return to Dashboard
               </button>
             </div>
           ) : (

@@ -35,7 +35,7 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative flex flex-col items-center justify-center px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto overflow-hidden pt-8 pb-10 md:pt-20 md:pb-24"
+      className="relative flex flex-col items-center justify-center px-4 sm:px-6 md:px-margin-desktop max-w-container-max mx-auto overflow-hidden pt-2 pb-10 md:pt-6 md:pb-20"
     >
       <motion.div
         className="relative z-10 text-center w-full max-w-4xl mx-auto flex flex-col items-center gap-6 md:gap-8"

@@ -126,13 +126,13 @@ export default function OnboardingPage() {
       <div className="mytab-app flex min-h-screen relative text-mt-on-background selection:bg-mt-primary/30 selection:text-mt-primary">
         <MyTabAmbientBg />
 
-        <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10">
-          <div className="w-full max-w-md mb-12">
-            <div className="flex items-center justify-between mb-2">
+        <main className="flex-1 flex flex-col items-center justify-center w-full max-w-full px-4 py-12 relative z-10">
+          <div className="w-full max-w-md min-w-0 mb-8 sm:mb-12">
+            <div className="flex items-center justify-between gap-1 mb-2">
               {STEPS.map((s, i) => (
                 <React.Fragment key={s}>
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 overflow-hidden rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                       i <= currentIndex
                         ? "bg-mt-primary text-mt-pure-black shadow-[0_0_12px_rgba(66,238,147,0.4)]"
                         : "bg-mt-surface-container-highest/50 text-mt-on-surface-variant border border-mt-glass-border"
@@ -148,7 +148,7 @@ export default function OnboardingPage() {
                   </div>
                   {i < STEPS.length - 1 && (
                     <div
-                      className={`flex-1 h-0.5 mx-1 rounded transition-all duration-500 ${
+                      className={`flex-1 min-w-0 h-0.5 mx-0.5 sm:mx-1 rounded transition-all duration-500 ${
                         i < currentIndex ? "bg-mt-primary" : "bg-mt-glass-border"
                       }`}
                     />
@@ -158,17 +158,17 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="w-full max-w-md bg-mt-surface-container-lowest/40 backdrop-blur-xl border border-mt-glass-border rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-md min-w-0 bg-mt-surface-container-lowest/40 backdrop-blur-xl border border-mt-glass-border rounded-[2rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-mt-primary/5 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="bg-mt-primary/20 p-3 rounded-2xl border border-mt-primary/20">
+            <div className="flex items-start gap-3 sm:gap-4 mb-6 sm:mb-8 relative z-10 min-w-0">
+              <div className="shrink-0 bg-mt-primary/20 p-2.5 sm:p-3 rounded-2xl border border-mt-primary/20">
                 <span className="material-symbols-outlined text-mt-primary text-2xl">
                   {meta.icon}
                 </span>
               </div>
-              <div>
-                <h2 className="font-headline text-xl text-mt-ledger-white font-bold normal-case tracking-normal">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-headline text-lg sm:text-xl text-mt-ledger-white font-bold normal-case tracking-normal break-words">
                   {meta.title}
                 </h2>
                 <p className="font-body text-sm text-mt-on-surface-variant mt-0.5">
@@ -177,13 +177,13 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 min-w-0">
               {step === "alias" && (
                 <AliasPicker onAliasConfirmed={handleAliasConfirmed} />
               )}
 
               {step === "track" && (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 min-w-0">
                   <TrackSelector
                     selected={track}
                     onSelect={setTrack}
@@ -192,7 +192,7 @@ export default function OnboardingPage() {
                     type="button"
                     disabled={!track}
                     onClick={handleTrackContinue}
-                    className="w-full bg-mt-primary text-mt-pure-black font-body text-base font-bold rounded-full py-4 hover:bg-mt-primary-fixed hover:shadow-[0_0_24px_rgba(66,238,147,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex justify-center items-center gap-2"
+                    className="w-full min-w-0 bg-mt-primary text-mt-pure-black font-body text-base font-bold rounded-full py-4 hover:bg-mt-primary-fixed hover:shadow-[0_0_24px_rgba(66,238,147,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex justify-center items-center gap-2"
                   >
                     <span className="material-symbols-outlined">arrow_forward</span>
                     Continue
