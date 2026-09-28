@@ -30,6 +30,7 @@ type CatalogItem = {
   tags?: string[];
   media?: { url: string }[];
   score?: number | null;
+  satelliteStatus?: string | null;
 };
 
 type KindFilter = 'ALL' | 'LAND' | 'COMMODITY';
@@ -85,7 +86,8 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
             const badges = Array.isArray(L.badges) && L.badges.length
               ? L.badges
               : [
-                  ...(L.latitude != null && L.longitude != null ? ['Satellite-Verified'] : []),
+                  ...(L.satelliteStatus && L.satelliteStatus !== 'UNVERIFIED' ? ['Satellite-Verified'] : []),
+                  ...(L.latitude != null && L.longitude != null ? ['Mapped'] : []),
                   ...(L.status === 'PUBLISHED' ? ['Listed'] : []),
                 ];
             return {
@@ -103,6 +105,7 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
               tags: [],
               media,
               score: null,
+              satelliteStatus: L.satelliteStatus || null,
             };
           });
           setItems(landItems);
@@ -129,7 +132,11 @@ export function CatalogExplorer({ embedded = false }: { embedded?: boolean }) {
     if (kindFilter !== 'ALL') list = list.filter((i) => i.kind === kindFilter);
     if (region) list = list.filter((i) => (i.region || '').toLowerCase() === region.toLowerCase());
     if (satelliteOnly) {
-      list = list.filter((i) => i.kind === 'LAND' && i.latitude != null && i.longitude != null);
+      list = list.filter(
+        (i) =>
+          i.kind === 'LAND' &&
+          (i.satelliteStatus ? i.satelliteStatus !== 'UNVERIFIED' : i.latitude != null && i.longitude != null)
+      );
     }
     if (sort === 'price-asc') {
       list.sort((a, b) => (a.listPrice ?? Number.POSITIVE_INFINITY) - (b.listPrice ?? Number.POSITIVE_INFINITY));

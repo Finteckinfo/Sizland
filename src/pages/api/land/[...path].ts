@@ -4,6 +4,14 @@ import { authOptions } from '../auth/[...nextauth]';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '12mb',
+    },
+  },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!BACKEND_URL) {
     return res.status(500).json({ error: 'Backend URL not configured' });

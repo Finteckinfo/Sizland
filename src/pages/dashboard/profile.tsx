@@ -20,6 +20,10 @@ export default function DashboardProfilePage() {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [purpose, setPurpose] = useState('');
+  const [legalFullName, setLegalFullName] = useState('');
+  const [legalIdType, setLegalIdType] = useState('');
+  const [legalIdNumber, setLegalIdNumber] = useState('');
+  const [nationality, setNationality] = useState('');
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -39,6 +43,10 @@ export default function DashboardProfilePage() {
         if (req?.contactName) setContactName(req.contactName);
         if (req?.contactEmail) setContactEmail(req.contactEmail);
         if (req?.purpose) setPurpose(req.purpose);
+        if (req?.legalFullName) setLegalFullName(req.legalFullName);
+        if (req?.legalIdType) setLegalIdType(req.legalIdType);
+        if (req?.legalIdNumber) setLegalIdNumber(req.legalIdNumber);
+        if (req?.nationality) setNationality(req.nationality);
       } catch {
         // ignore
       }
@@ -58,6 +66,10 @@ export default function DashboardProfilePage() {
           contactName: contactName.trim(),
           contactEmail: contactEmail.trim(),
           purpose: purpose || 'Other',
+          legalFullName: legalFullName.trim() || undefined,
+          legalIdType: legalIdType.trim() || undefined,
+          legalIdNumber: legalIdNumber.trim() || undefined,
+          nationality: nationality.trim() || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -76,7 +88,7 @@ export default function DashboardProfilePage() {
       <div className="mx-auto max-w-xl">
         <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Profile</h1>
         <p className={`mt-2 mb-6 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Contact details for follow-up. SizWallet login stays separate — we do not take addresses from OIDC.
+          Contact and legal identity for this land desk. SizWallet login stays separate — we do not take a DID from OIDC.
         </p>
         <form
           onSubmit={onSubmit}
@@ -109,6 +121,29 @@ export default function DashboardProfilePage() {
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Legal full name</label>
+            <input className={inputClass(isDark)} value={legalFullName} onChange={(e) => setLegalFullName(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium">ID type</label>
+              <select className={inputClass(isDark)} value={legalIdType} onChange={(e) => setLegalIdType(e.target.value)}>
+                <option value="">Select</option>
+                <option value="NATIONAL_ID">National ID</option>
+                <option value="PASSPORT">Passport</option>
+                <option value="COMPANY_REG">Company registration</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">ID number</label>
+              <input className={inputClass(isDark)} value={legalIdNumber} onChange={(e) => setLegalIdNumber(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Nationality</label>
+            <input className={inputClass(isDark)} value={nationality} onChange={(e) => setNationality(e.target.value)} />
           </div>
           <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             Signed in as {session?.user?.authType === 'sizwallet' ? 'SizWallet' : session?.user?.email || 'your account'}.
