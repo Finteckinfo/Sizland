@@ -60,7 +60,9 @@ const Hero = () => {
           variants={item}
           className="font-body text-sm sm:text-base md:text-lg text-on-surface-variant max-w-3xl mx-auto leading-relaxed"
         >
-          Sizland is the invisible, censorship-resistant infrastructure layer for the global remote workforce. We don&apos;t just process payments; we provide the decentralized tools—starting with revolutionary, user-side Digital Identity (DiD)—that empower workers to own their reputation, unify their chains, and secure their financial future without leaving a digital trace.
+          Sizland is infrastructure for sovereign remote work. Create a DID in SizWallet
+          (keys stay on your device), list or acquire land on buy.siz.land, and run teams
+          on Sizland ERP. This site is not a SIZ token shop.
         </motion.p>
 
         <motion.div

@@ -14,9 +14,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
-  description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
-  keywords: ['blockchain', 'remote workers', 'decentralized', 'digital identity', 'DiD', 'web3', 'freelancers', 'sovereign reputation', 'multi-chain'],
+  title: 'Sizland — identity, land, and remote-work infrastructure',
+  description: 'Sizland is infrastructure for sovereign remote work. SizWallet at wallet.siz.land is a DID identity wallet on Base — not a SIZ token sale. buy.siz.land is the land marketplace.',
+  keywords: ['Sizland', 'SizWallet', 'wallet.siz.land', 'DID wallet', 'Base', 'decentralized identity', 'remote workers', 'land marketplace', 'buy.siz.land'],
   authors: [{ name: 'Sizland Dev Argwings' }],
   creator: 'Sizland',
   publisher: 'Sizland',
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://www.siz.land',
     siteName: 'Sizland',
-    title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
-    description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
+    title: 'Sizland — identity, land, and remote-work infrastructure',
+    description: 'Sizland is infrastructure for sovereign remote work. SizWallet at wallet.siz.land is a DID identity wallet on Base — not a SIZ token sale.',
     images: [
       {
         url: '/metaimage.png',
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sizland | The Decentralized Operating System for Sovereign Remote Workers',
-    description: 'Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.',
+    title: 'Sizland — identity, land, and remote-work infrastructure',
+    description: 'Sizland is infrastructure for sovereign remote work. SizWallet at wallet.siz.land is a DID identity wallet on Base — not a SIZ token sale.',
     images: ['/metaimage.png'],
     creator: '@sizlandofficial',
     site: '@sizlandofficial',

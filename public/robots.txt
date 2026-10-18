@@ -1,10 +1,30 @@
 User-agent: *
 Allow: /
-
-# LLM / GEO
 Allow: /llms.txt
 Allow: /llms-full.txt
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /mytab/
 
-# Sitemaps
-Sitemap: https://siz.land/sitemap.xml
-Sitemap: https://solutions.siz.land/sitemap.xml
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+
+Sitemap: https://www.siz.land/sitemap.xml
