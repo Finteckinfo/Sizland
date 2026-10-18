@@ -8,43 +8,14 @@ import Features from "@/components/features";
 import About from "@/components/about";
 import InfoHub from "@/components/infoHub";
 import Roadmap from "@/components/roadmap";
+import { siteJsonLdGraph } from "@/components/seo/site-json-ld";
+import { siteConfig, siteFaqs, siteKeywordsCsv } from "@/lib/site";
 
-const SITE_NAME = "Sizland";
-const SITE_URL = "https://www.siz.land/";
-const SITE_TITLE = "Sizland | The Decentralized Operating System for Sovereign Remote Workers";
-const SITE_DESCRIPTION =
-  "Invisible, censorship-resistant infrastructure for the global remote workforce — client-side DiD, multi-chain unified wallets, and sovereign reputation.";
-const SITE_IMAGE = "https://www.siz.land/metaimage.png";
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}#organization`,
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: SITE_IMAGE,
-      sameAs: ["https://twitter.com/sizlandofficial"],
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}#website`,
-      name: SITE_NAME,
-      url: SITE_URL,
-      publisher: { "@id": `${SITE_URL}#organization` },
-    },
-    {
-      "@type": "SoftwareApplication",
-      name: SITE_NAME,
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      url: SITE_URL,
-      description: SITE_DESCRIPTION,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    },
-  ],
-};
+const SITE_URL = `${siteConfig.url}/`;
+const SITE_TITLE = siteConfig.title;
+const SITE_DESCRIPTION = siteConfig.description;
+const SITE_IMAGE = siteConfig.ogImage;
+const jsonLd = siteJsonLdGraph();
 
 const HomePage: NextPage = () => {
   return (
@@ -52,6 +23,7 @@ const HomePage: NextPage = () => {
       <Head>
         <title>{SITE_TITLE}</title>
         <meta name="description" content={SITE_DESCRIPTION} />
+        <meta name="keywords" content={siteKeywordsCsv} />
         <link rel="canonical" href={SITE_URL} />
 
         <meta property="og:type" content="website" />
@@ -62,7 +34,7 @@ const HomePage: NextPage = () => {
         <meta property="og:image:alt" content={SITE_TITLE} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:site_name" content={siteConfig.name} />
         <meta property="og:locale" content="en_US" />
 
         <meta name="twitter:card" content="summary_large_image" />
@@ -92,6 +64,26 @@ const HomePage: NextPage = () => {
       </PageLayout>
 
       <IdentityPivot />
+
+      <section id="what-sizland-is" className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <h2 className="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
+          What Sizland is
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-on-surface-variant sm:text-base">
+          {siteConfig.disambiguation}
+        </p>
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {siteFaqs.map((item) => (
+            <article
+              key={item.question}
+              className="rounded-2xl border border-border-subtle bg-white/5 p-5"
+            >
+              <h3 className="font-semibold text-on-surface">{item.question}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <Features />
 

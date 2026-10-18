@@ -2,7 +2,8 @@
 
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { originForHost, siteConfig } from "@/lib/site";
 
 interface HeadComponentProps {
   title: string;
@@ -16,8 +17,8 @@ interface HeadComponentProps {
 export const HeadComponent: React.FC<HeadComponentProps> = ({
   title,
   description,
-  image = "https://www.siz.land/metaimage.png",
-  twitterHandle = "@sizlandofficial",
+  image = siteConfig.ogImage,
+  twitterHandle = siteConfig.twitterHandle,
   url,
   setSocialMetadata = true, // Default to true - set metadata for all pages
 }) => {
@@ -35,7 +36,9 @@ export const HeadComponent: React.FC<HeadComponentProps> = ({
           : '';
     const path = raw.split('#')[0];
 
-    return `https://www.siz.land${path || '/'}`;
+    const origin =
+      typeof window !== "undefined" ? originForHost(window.location.hostname) : siteConfig.url;
+    return `${origin}${path || "/"}`;
   };
   
   const currentUrl = getCurrentUrl();
@@ -45,8 +48,8 @@ export const HeadComponent: React.FC<HeadComponentProps> = ({
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="canonical" href={currentUrl} />
       <link rel="icon" href="/favicon.ico" />
-      <link rel="preconnect" href="https://verify.walletconnect.org/" />
       
       {setSocialMetadata && (
         <>
